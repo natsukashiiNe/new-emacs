@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: elisp-file-header
+# key: header
+# --
+;;; ${1:`(file-name-nondirectory (buffer-file-name))`} --- ${2:Short description} -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; $3
+
+;;; Code:
+
+$0
+
+(provide '${4:`(file-name-base (buffer-file-name))`})
+;;; ${1:`(file-name-nondirectory (buffer-file-name))`} ends here
