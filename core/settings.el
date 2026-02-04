@@ -45,8 +45,6 @@
 (show-paren-mode 1)                  ;; Highlight matching
 (fset 'yes-or-no-p 'y-or-n-p)        ;; Make `y` and `n` confirm instead of `yes` and `no`
 
-
-
 (setq display-line-numbers-type 'visual)
 (setq display-line-numbers-current-absolute nil)  ;; Show '0' for current line
 (setq display-line-numbers-width 2)               ;; TODO: Fixed minimal width
@@ -71,6 +69,11 @@
   :config
   (setq which-key-idle-delay 0.01)
   (which-key-mode 1))
+
+(use-package rg
+  :ensure t
+  :config
+  (rg-enable-menu))
 
 (use-package autorevert
   :ensure nil

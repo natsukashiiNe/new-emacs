@@ -220,7 +220,10 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
    "C-M-h" 'shrink-window-horizontally
    "C-M-l" 'enlarge-window-horizontally
    "C-M-j" 'enlarge-window
-   "C-M-k" 'shrink-window)
+   "C-M-k" 'shrink-window
+
+   "M-t" 'elastic-vterm-toggle)
+
   (general-define-key
    :states  '(normal motion)
    :keymaps 'override

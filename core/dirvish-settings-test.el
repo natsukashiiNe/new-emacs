@@ -8,7 +8,7 @@
 (use-package dirvish
   :ensure t
   :demand t
-  :after '(nerd-icons evil)
+  :after (nerd-icons evil)
   :init
   (dirvish-override-dired-mode)
   :config
@@ -18,8 +18,18 @@
     (set-fringe-mode 1))  ; Minimal fringe in terminal
 
   (setq dirvish-attributes
-        ;;'(nerd-icons file-info file-size vc-state git-msg)) 
-        '(nerd-icons file-info file-size subtree-state collapse)) 
+        ;;'(nerd-icons file-info file-size vc-state git-msg))
+        '(nerd-icons file-info file-size subtree-state collapse))
+
+  ;; == LAYOUT =========================================================
+  ;; number of parents | max width of parent windows | width of preview
+  (setq dirvish-header-line-height '(24 . 24))
+  (setq dirvish-default-layout '(0 0.0 0.42))
+  (setq dirvish-layout-recipes
+        '((0 0 0.4)
+          (0 0 0.8)
+          (1 0.3 0.35)
+          (1 0.11 0.55)))
 
   ;; == KEYMAPS =========================================================
   (evil-define-key 'normal dired-mode-map
@@ -55,7 +65,7 @@ Otherwise, prompt to select a project first."
   (let* ((current-project (projectile-project-root))
          (project-action (lambda ()
                            (let ((project-root (projectile-project-root)))
-                             (dirvish-fd project-root "")  ; ✅ CORRECT - pass dir and empty pattern
+                             (dirvish-fd project-root "")
                              (dirvish-narrow)))))
     (if current-project
         (funcall project-action)
@@ -65,7 +75,7 @@ Otherwise, prompt to select a project first."
           (quit nil))))))
 
 (with-eval-after-load 'dirvish
-  ;; Bind it to SPC f d
+  ;; TODO Bind it to SPC f d
   (general-define-key
    :states '(normal visual)
    :keymaps 'override
@@ -74,7 +84,7 @@ Otherwise, prompt to select a project first."
 
 ;; Navigation keybindings for dirvish-narrow minibuffer
 (with-eval-after-load 'dirvish-narrow
-  
+
   ;; Navigation helper functions
   (defun my/dirvish-narrow-next-line (&optional n)
     "Move down N lines (default 1) in dirvish buffer during narrow."

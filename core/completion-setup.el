@@ -49,7 +49,9 @@
   (keymap-set evil-normal-state-map "C-s" 'consult-line)
   (keymap-set evil-visual-state-map "C-s" 'consult-line))
 
-;; === VERTICO =========================================================
+(keymap-set global-map "C-c C-s y" #'consult-yank-replace)
+
+;; === Vertico =========================================================
 
 (use-package vertico
   :ensure t
@@ -78,7 +80,7 @@
   (defcustom my/vertico-repeat-whitelist
     '(
       consult-ripgrep consult-grep consult-git-grep
-      consult-imenu consult-outline
+      consult-imenu consult-outline consult-line
       consult-lsp-symbols consult-lsp-diagnostics
       consult-lsp-file-symbols lsp-find-references
       lsp-find-definition lsp-find-implementation xref-find-references)
@@ -127,7 +129,9 @@
 	      ("C-c e" . embark-act)
 	      ("C-c E" . embark-dwim)
 	      ("C-c C-c" . embark-collect)
-	      ("C-c C-e" . embark-export))
+	      ("C-c C-e" . embark-export)
+	      ("C-c C" . embark-become)
+	      )
   :init
   (setq prefix-help-command #'embark-prefix-help-command))
 

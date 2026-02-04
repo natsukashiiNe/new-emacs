@@ -66,5 +66,8 @@
 
 (tab-bar-mode 1)
 
+;; == BARS MAPPINGS ===================================================
+
+
 (provide 'bar-settings)
 ;;; bar-settings.el ends here

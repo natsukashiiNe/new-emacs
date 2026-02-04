@@ -104,6 +104,7 @@ Also reports errors with file and line number."
 (keymap-set global-map "C-c R" #'reload-my-theme)
 
 
+(add-to-list 'load-path (expand-file-name "org" my-config-dir))
 (add-to-list 'load-path (expand-file-name "core" my-config-dir))
 (add-to-list 'load-path (expand-file-name "code" my-config-dir))
 (add-to-list 'load-path (expand-file-name "local" my-config-dir))
@@ -111,6 +112,7 @@ Also reports errors with file and line number."
 (add-to-list 'load-path (expand-file-name "custom/packages" my-config-dir))
 
 (load-config-file "local/get-secrets.el")
+(load-config-file "local/local-env.el")
 
 (load-config-file "core/settings.el")
 (load-config-file "core/bar-settings.el")
@@ -139,6 +141,9 @@ Also reports errors with file and line number."
 (load-config-file "code/flycheck-setup.el")   ;; Diagnostics display (flycheck + flyover).
 (load-config-file "code/snippets-setup.el")   ;; code/snippets stores snippet files.
 (load-config-file "code/treesitter-setup.el")
+
+(load-config-file "org/org-plugins.el")
+(load-config-file "org/org-settings.el")
 
 (load-config-file "custom/elgo.el")
 (load-config-file "custom/custom-compile.el")

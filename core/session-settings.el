@@ -35,5 +35,18 @@
 
   :bind ("C-c i" . persp-switch-last))
 
+;; TODO
+(use-package eyebrowse
+  :ensure t
+  :init
+  (eyebrowse-mode t)
+  :config
+  (setq eyebrowse-new-workspace t)  ;; Always create new empty workspaces
+  (setq eyebrowse-wrap-around t)    ;; Cycle when reaching the end
+  (setq eyebrowse-mode-line-separator " | ")
+  (setq eyebrowse-mode-line-style 'always)
+  (setq eyebrowse-keymap-prefix (kbd "C-c w")))
+
+
 (provide 'session-settings)
 ;;; session-settings ends here

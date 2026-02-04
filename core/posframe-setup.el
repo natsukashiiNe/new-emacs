@@ -44,6 +44,7 @@
       consult-org-heading
       consult-lsp-symbols
       consult-lsp-file-symbols
+      consult-yank-replace
 
       evil-collection-consult-mark
       evil-collection-consult-jump-list
@@ -53,6 +54,7 @@
     "Commands for which vertico-posframe should be disabled")
   :after (vertico posframe)
   :custom
+
   ;; Position handler
   (vertico-posframe-poshandler 'posframe-poshandler-frame-center)
   (vertico-posframe-border-width 10)
@@ -62,21 +64,23 @@
      (right-fringe . 8)
      ))
   :config
+  (setq vertico-count my-vertico-posframe/floating-count)
+
   (defun my/disable-vertico-posframe ()
     "Disable vertico-posframe for certain commands."
     (when (memq this-command my-vertico-posframe/disable-commands)
       (vertico-posframe-mode -1)
       (setq vertico-count my-vertico-posframe/normal-count)))
-  
+
   (defun my/enable-vertico-posframe ()
     "Re-enable vertico-posframe after minibuffer exits."
     (unless vertico-posframe-mode
       (vertico-posframe-mode 1)
       (setq vertico-count my-vertico-posframe/floating-count)))
-  
+
   (add-hook 'minibuffer-setup-hook #'my/disable-vertico-posframe)
   (add-hook 'minibuffer-exit-hook #'my/enable-vertico-posframe)
-  
+
   (vertico-posframe-mode 1))
 
 
