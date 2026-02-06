@@ -9,8 +9,6 @@
   :ensure t
   :demand t
   :after (nerd-icons evil)
-  :init
-  (dirvish-override-dired-mode)
   :config
   (dirvish-override-dired-mode)
   ;; Ensure minimal fringe for terminal
@@ -52,9 +50,6 @@
   ;;       '(image gif video audio epub archive pdf))
   ;; (setq dirvish-default-layout '(0 0.4 0.6))  ; (window-min-height left-width right-width)
   )
-
-(dirvish-override-dired-mode)
-
 
 
 (defun my/dirvish-fd-narrow ()

@@ -96,14 +96,6 @@ Also reports errors with file and line number."
 ;; Load Config Files
 ;; ==================================
 (add-to-list 'custom-theme-load-path (expand-file-name "themes" my-config-dir))
-(load-theme 'my-modus-mono-dark t)
-(defun reload-my-theme()
-  (interactive)
-  (add-to-list 'custom-theme-load-path (expand-file-name "themes" my-config-dir))
-  (load-theme 'my-modus-mono-dark t))
-(keymap-set global-map "C-c R" #'reload-my-theme)
-
-
 (add-to-list 'load-path (expand-file-name "org" my-config-dir))
 (add-to-list 'load-path (expand-file-name "core" my-config-dir))
 (add-to-list 'load-path (expand-file-name "code" my-config-dir))
@@ -111,14 +103,24 @@ Also reports errors with file and line number."
 (add-to-list 'load-path (expand-file-name "custom" my-config-dir))
 (add-to-list 'load-path (expand-file-name "custom/packages" my-config-dir))
 
+(load-config-file "core/evil-settings.el")
+(load-config-file "core/settings.el")
+(elpaca-wait)
+
+;; TODO: move to frame-settings
+(load-theme 'my-modus-mono-dark t)
+(defun reload-my-theme()
+  (interactive)
+  (add-to-list 'custom-theme-load-path (expand-file-name "themes" my-config-dir))
+  (load-theme 'my-modus-mono-dark t))
+(keymap-set global-map "C-c R" #'reload-my-theme)
+
 (load-config-file "local/get-secrets.el")
 (load-config-file "local/local-env.el")
 
-(load-config-file "core/settings.el")
 (load-config-file "core/bar-settings.el")
 ;; TODO: remove test to an actual file
 (load-config-file "core/dirvish-settings-test.el") 
-(load-config-file "core/evil-settings.el")
 (load-config-file "core/posframe-setup.el")
 (load-config-file "core/completion-setup.el")
 (load-config-file "core/session-settings.el")
@@ -130,8 +132,6 @@ Also reports errors with file and line number."
 (load-config-file "core/floating-layout.el")
 
 (load-config-file "core/treemacs-settings.el")
-;; TODO: fm: dirvish vs ranger
-(load-config-file "core/dirvish-settings-test.el")
 
 (load-config-file "code/lsp-setup.el")        ;; Core lsp-mode + lsp-ui + formatting.
 ;; (load-config-file "code/docs-setup.el")    ;; Core lsp-mode + lsp-ui + formatting.
@@ -159,41 +159,40 @@ Also reports errors with file and line number."
 (keymap-set global-map "C-x F"   'consult-ls-git)
 
 ;; Note: M-j and M-k are defined in code/flycheck-setup.el
-(use-package transient
-  :ensure t
-  :config
-  (transient-define-prefix my/layout-menu ()
-    "Window layout and resizing menu"
-    ["Resize (stay in menu)"
-     [("h" "enlarge right" enlarge-window-horizontally :transient t)
-      ("H" "shrink right" shrink-window-horizontally :transient t)
-      ("l" "enlarge left" shrink-window-horizontally :transient t)
-      ("L" "shrink left" enlarge-window-horizontally :transient t)]
-     [("j" "enlarge down" enlarge-window :transient t)
-      ("J" "shrink down" shrink-window :transient t)
-      ("k" "enlarge up" shrink-window :transient t)
-      ("K" "shrink up" enlarge-window :transient t)]]
-    ["Actions (exit menu)"
-     ("m" "messages 30% of window" my/show-messages-below-window)
-     ("M" "messages 30% of frame" my/show-messages-below-frame)
-     ("q" "quit" transient-quit-one)])
+(elpaca-wait)
 
-  (defun my/show-messages-below-window ()
-    "Split current window and show messages in 30% below"
-    (interactive)
-    (let ((height (floor (* 0.3 (window-height)))))
-      (split-window-below (- height))
-      (other-window 1)
-      (switch-to-buffer "*Messages*")))
+(transient-define-prefix my/layout-menu ()
+  "Window layout and resizing menu"
+  ["Resize (stay in menu)"
+   [("h" "enlarge right" enlarge-window-horizontally :transient t)
+    ("H" "shrink right" shrink-window-horizontally :transient t)
+    ("l" "enlarge left" shrink-window-horizontally :transient t)
+    ("L" "shrink left" enlarge-window-horizontally :transient t)]
+   [("j" "enlarge down" enlarge-window :transient t)
+    ("J" "shrink down" shrink-window :transient t)
+    ("k" "enlarge up" shrink-window :transient t)
+    ("K" "shrink up" enlarge-window :transient t)]]
+  ["Actions (exit menu)"
+   ("m" "messages 30% of window" my/show-messages-below-window)
+   ("M" "messages 30% of frame" my/show-messages-below-frame)
+   ("q" "quit" transient-quit-one)])
 
-  (defun my/show-messages-below-frame ()
-    "Split from frame bottom and show messages in 30%"
-    (interactive)
-    (let ((height (floor (* 0.3 (frame-height)))))
-      (select-window (split-root-window-below (- height)))
-      (switch-to-buffer "*Messages*")))
+(defun my/show-messages-below-window ()
+  "Split current window and show messages in 30% below"
+  (interactive)
+  (let ((height (floor (* 0.3 (window-height)))))
+    (split-window-below (- height))
+    (other-window 1)
+    (switch-to-buffer "*Messages*")))
 
-  (global-set-key (kbd "C-x l") 'my/layout-menu))
+(defun my/show-messages-below-frame ()
+  "Split from frame bottom and show messages in 30%"
+  (interactive)
+  (let ((height (floor (* 0.3 (frame-height)))))
+    (select-window (split-root-window-below (- height)))
+    (switch-to-buffer "*Messages*")))
+
+(global-set-key (kbd "C-x l") 'my/layout-menu)
 
 (provide 'init)
 ;;; init.el ends here

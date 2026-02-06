@@ -33,10 +33,12 @@
 
 
 ;; == COMPILE MAP =====================================================
-(defvar-keymap my-compile-map
-  :doc "My compile keymap"
-  "g" #'first-error)
-(keymap-set global-map "C-c C-c"  my-compile-map)
+
+(with-eval-after-load 'evil
+  (defvar-keymap my-compile-map
+    :doc "My compile keymap"
+    "g" #'first-error)
+  (keymap-set global-map "C-c C-c"  my-compile-map))
 
 (defun define-my-compile-map ()
   "Defines keymaps for the MY-COMPILE-MAP."
@@ -136,16 +138,14 @@
   (evil-define-key 'normal org-mode-map
     (kbd "C-f C-w") #'consult-flyspell))
 
-(evil-define-key 'normal org-mode-map
-  (kbd "C-f i") #'consult-org-heading)
+(with-eval-after-load 'evil
+  (evil-define-key 'normal org-mode-map
+    (kbd "C-f i") #'consult-org-heading))
 
 (with-eval-after-load 'devdocs
   (evil-define-key 'normal devdocs-mode-map
     (kbd "n") #'devdocs-go-forward
-    (kbd "p") #'devdocs-go-back
-    ))
-
-
+    (kbd "p") #'devdocs-go-back))
 
 (provide 'mode-keymaps)
 ;;; mode-keymaps.el ends here

@@ -72,7 +72,9 @@
 (use-package vterm
   :ensure t
   :hook
-  (vterm-mode . (lambda () (display-line-numbers-mode -1))))
+  (vterm-mode . (lambda () (display-line-numbers-mode -1)))
+  (vterm-mode . (lambda () (hl-line-mode -1))))
+
 
 (use-package multi-vterm
   :ensure t

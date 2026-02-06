@@ -11,6 +11,19 @@
   :init
   (setq evil-undo-system 'undo-tree)
   (setq evil-want-keybinding nil)
+  ;; adds "-" and "_" to treat as part of the word.
+  (defun my/modify-word-syntax-with (symbol)
+    "Treat SYMBOL as word constituent in current buffer's syntax table."
+    (modify-syntax-entry symbol "w"))
+  (defun my/modify-word-syntax-for-underscore ()
+    "Treat underscore as word constituent."
+    (modify-syntax-entry ?_ "w"))
+  ;; todo: not used now
+  (defun my/emacs-lisp-word-syntax ()
+    "Treat underscore and hyphen as word constituents in Emacs Lisp."
+    (modify-syntax-entry ?_ "w")
+    (modify-syntax-entry ?- "w"))
+
   :config
   (evil-mode 1)
   ;; KEYMAPS
@@ -31,7 +44,9 @@
   
   (add-hook 'evil-insert-state-entry-hook
             (lambda ()
-              (send-string-to-terminal "\033]12;#FF7F9F\007"))))
+              (send-string-to-terminal "\033]12;#FF7F9F\007")))
+
+  (add-hook 'prog-mode-hook #'my/modify-word-syntax-for-underscore))
 
 
 ;; Evil-escape

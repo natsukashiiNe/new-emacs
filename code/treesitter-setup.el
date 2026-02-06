@@ -7,9 +7,8 @@
 (add-hook 'prog-mode-hook #'electric-pair-mode)
 (use-package treesit
   :ensure nil  ; built-in
-  :config
+  :custom
   (treesit-font-lock-level 4))  ; maximum highlighting
-(setq treesit-font-lock-level 4)
 
 (use-package treesit-auto
   :ensure (:host github :repo "renzmann/treesit-auto")
