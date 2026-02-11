@@ -1,7 +1,7 @@
 ;;; slot-layout.el --- Slot-based tiling window manager -*- lexical-binding: t; -*-
 
 ;; Author: natsukashii
-;; Version: 1.0.0
+;; Version: 2.0.0
 ;; Package-Requires: ((emacs "30.1"))
 ;; Keywords: convenience, frames, windows
 
@@ -54,6 +54,25 @@
                  (const :tag "Loose (use nearest ancestor)" loose))
   :group 'slot-layout)
 
+(defcustom sll-ignore-buffer-names
+  '("^ "                      ; Internal buffers (space prefix)
+    "\\*which-key\\*"
+    "\\*transient\\*"
+    "\\*Completions\\*"
+    "\\*Quail"
+    "\\*LV\\*"                ; Hydra
+    "\\*company"
+    "\\*corfu"
+    "\\*eldoc"
+    "\\*Embark Actions\\*"    ; Embark actions popup only
+    "\\*vertico-posframe"
+    "\\*Minibuf")
+  "Buffer name regexps that SLL should never route.
+These patterns are checked as a fallback when ALIST parameters
+don't indicate a popup/side window."
+  :type '(repeat regexp)
+  :group 'slot-layout)
+
 ;;; ============================================================================
 ;;; State Variables (Public - inspectable via describe-variable)
 ;;; ============================================================================
@@ -94,6 +113,13 @@
 
 (defvar sll--routing-installed nil
   "Non-nil when routing hooks are installed.")
+
+(defvar sll--active-p t
+  "Non-nil when SLL routing is active.
+Bind to nil to bypass SLL routing temporarily.")
+
+(defvar sll--sync-in-progress nil
+  "Non-nil when window state sync is running, prevents recursion.")
 
 ;;; ============================================================================
 ;;; Tree Node Constructors
@@ -243,6 +269,32 @@
   "Return the empty buffer name for SLOT-NAME."
   (format "*%s-empty*" slot-name))
 
+(defun sll--get-project-root ()
+  "Return project root directory, falling back to `default-directory'."
+  (or (and (fboundp 'projectile-project-root)
+           (ignore-errors (projectile-project-root)))
+      (and (fboundp 'project-root)
+           (when-let* ((proj (project-current)))
+             (project-root proj)))
+      default-directory))
+
+(defun sll--child-frame-window-p (window)
+  "Return non-nil if WINDOW belongs to a child frame."
+  (when window
+    (let ((frame (window-frame window)))
+      (frame-parent frame))))
+
+;;; ============================================================================
+;;; Bypass Macro
+;;; ============================================================================
+
+(defmacro without-sll-routing (&rest body)
+  "Execute BODY with SLL routing disabled.
+Use this to display buffers without SLL intercepting them."
+  (declare (indent 0) (debug t))
+  `(let ((sll--active-p nil))
+     ,@body))
+
 ;;; ============================================================================
 ;;; Window Tracking
 ;;; ============================================================================
@@ -314,6 +366,39 @@
               (sll--create-windows-from-tree second-child second-window))))))
 
 ;;; ============================================================================
+;;; Buffer Routing Filter
+;;; ============================================================================
+
+(defun sll--should-route-buffer-p (buffer alist)
+  "Return non-nil if BUFFER should be routed by SLL.
+ALIST is the display-buffer action alist.
+Returns nil for popup buffers, side windows, child frames, etc."
+  (and
+   ;; SLL must be active (not bypassed)
+   sll--active-p
+   ;; Must have active layout
+   sll-current-layout-name
+   ;; Must be a live buffer
+   buffer
+   (buffer-live-p buffer)
+   ;; Skip minibuffer
+   (not (minibufferp buffer))
+   ;; Skip if current window is in a child frame (posframe, etc.)
+   (not (sll--child-frame-window-p (selected-window)))
+   ;; Allow explicit opt-out via ALIST (like window-purpose's inhibit-purpose)
+   (not (alist-get 'inhibit-sll alist))
+   ;; Skip if ALIST requests side window (which-key, transient use this)
+   (not (alist-get 'side alist))
+   ;; Skip if ALIST requests dedicated window
+   (not (alist-get 'dedicated alist))
+   ;; Skip if ALIST has window-parameters (special windows)
+   (not (alist-get 'window-parameters alist))
+   ;; Skip if in buffer name ignore list
+   (let ((buf-name (buffer-name buffer)))
+     (not (cl-some (lambda (re) (string-match-p re buf-name))
+                   sll-ignore-buffer-names)))))
+
+;;; ============================================================================
 ;;; Buffer Routing Engine
 ;;; ============================================================================
 
@@ -351,9 +436,9 @@
 
 (defun sll--display-buffer-function (buffer alist)
   "SLL display function for `display-buffer-alist'.
-ALIST is ignored."
-  (ignore alist)
-  (when sll-current-layout-name
+ALIST is checked for side/dedicated/inhibit-sll parameters.
+Returns nil if BUFFER should not be routed by SLL."
+  (when (sll--should-route-buffer-p buffer alist)
     (let* ((slot (if sll-next-slot
                      (prog1 sll-next-slot
                        (setq sll-next-slot nil))
@@ -361,30 +446,73 @@ ALIST is ignored."
       (sll--display-in-slot buffer slot))))
 
 (defun sll--switch-to-buffer-advice (orig-fn buffer-or-name &rest args)
-  "Advice to route `switch-to-buffer' through SLL routing."
-  (if (and sll-current-layout-name
-           (not (minibufferp))
-           (not (string-prefix-p " " (if (bufferp buffer-or-name)
-                                         (buffer-name buffer-or-name)
-                                       (or buffer-or-name "")))))
-      (let* ((buffer (if (bufferp buffer-or-name)
-                         buffer-or-name
-                       (get-buffer-create buffer-or-name)))
-             (target-slot (if sll-next-slot
-                              (prog1 sll-next-slot
-                                (setq sll-next-slot nil))
-                            (sll--match-buffer-to-slot buffer)))
-             (current-slot (window-parameter (selected-window) 'sll-slot)))
-        (if (eq target-slot current-slot)
-            ;; Same slot - use original behavior
-            (apply orig-fn buffer-or-name args)
-          ;; Different slot - route through our system
-          (let ((window (sll--display-in-slot buffer target-slot)))
-            (when window
-              (select-window window))
-            buffer)))
-    ;; No layout active or special buffer - use original
-    (apply orig-fn buffer-or-name args)))
+  "Advice to route `switch-to-buffer' through SLL routing.
+Uses `sll--should-route-buffer-p' to decide whether to intercept."
+  (let* ((buffer (if (bufferp buffer-or-name)
+                     buffer-or-name
+                   (get-buffer buffer-or-name))))  ; Don't create yet
+    (if (and buffer (sll--should-route-buffer-p buffer nil))
+        (let* ((target-slot (if sll-next-slot
+                                (prog1 sll-next-slot
+                                  (setq sll-next-slot nil))
+                              (sll--match-buffer-to-slot buffer)))
+               (current-slot (window-parameter (selected-window) 'sll-slot)))
+          (if (eq target-slot current-slot)
+              ;; Same slot - use original behavior
+              (apply orig-fn buffer-or-name args)
+            ;; Different slot - route through our system
+            (let ((window (sll--display-in-slot buffer target-slot)))
+              (when window
+                (select-window window))
+              buffer)))
+      ;; Buffer doesn't exist, shouldn't be routed, or SLL inactive - use original
+      (apply orig-fn buffer-or-name args))))
+
+(defun sll--sync-window-state ()
+  "Synchronize SLL state with actual window state.
+Detects windows deleted externally and marks their slots as hidden."
+  (when (and sll-current-layout-name
+             (not sll--sync-in-progress))
+    (let ((sll--sync-in-progress t)
+          (slots-to-mark-hidden nil))
+      ;; Check each tracked slot
+      (maphash
+       (lambda (slot window)
+         (unless (and (window-live-p window)
+                      (eq (window-parameter window 'sll-slot) slot))
+           (push slot slots-to-mark-hidden)))
+       sll--slot-windows)
+      ;; Process dead slots (except MAIN)
+      (dolist (slot slots-to-mark-hidden)
+        (unless (or (eq slot 'MAIN)
+                    (memq slot sll-current-hidden-slots))
+          ;; Try to save buffer state from the dead window reference
+          (let ((old-window (gethash slot sll--slot-windows)))
+            (when old-window
+              ;; Window is dead, but we might still have buffer info
+              ;; Try to find the buffer that was displayed
+              (let ((buf (ignore-errors (window-buffer old-window))))
+                (when (and buf (buffer-live-p buf))
+                  (puthash slot
+                           (list :buffer buf :point 1 :start 1)
+                           sll--hidden-slot-state)))))
+          ;; Mark as hidden
+          (cl-pushnew slot sll-current-hidden-slots)
+          (remhash slot sll--slot-windows)
+          (message "SLL: Slot '%s' was closed externally" slot))))))
+
+(defun sll--protect-main-window (orig-fn &optional window)
+  "Advice for `delete-window' to protect MAIN slot.
+ORIG-FN is the original `delete-window' function.
+WINDOW is the window to delete."
+  (let* ((win (or window (selected-window)))
+         (slot (window-parameter win 'sll-slot)))
+    (if (and sll-current-layout-name
+             (eq slot 'MAIN)
+             ;; Allow if it's the only window (frame closing)
+             (not (one-window-p t)))
+        (user-error "Cannot delete MAIN window. Use `sll-unload-layout' to remove layout")
+      (funcall orig-fn window))))
 
 (defun sll--install-routing ()
   "Install SLL routing hooks."
@@ -393,6 +521,10 @@ ALIST is ignored."
     (push '("." sll--display-buffer-function) display-buffer-alist)
     ;; Advise switch-to-buffer
     (advice-add 'switch-to-buffer :around #'sll--switch-to-buffer-advice)
+    ;; Advise delete-window to protect MAIN
+    (advice-add 'delete-window :around #'sll--protect-main-window)
+    ;; Add hook to detect external window deletion
+    (add-hook 'window-configuration-change-hook #'sll--sync-window-state)
     (setq sll--routing-installed t)))
 
 (defun sll--uninstall-routing ()
@@ -404,6 +536,8 @@ ALIST is ignored."
                                (eq (cadr entry) 'sll--display-buffer-function)))
                         display-buffer-alist))
     (advice-remove 'switch-to-buffer #'sll--switch-to-buffer-advice)
+    (advice-remove 'delete-window #'sll--protect-main-window)
+    (remove-hook 'window-configuration-change-hook #'sll--sync-window-state)
     (setq sll--routing-installed nil)))
 
 ;;; ============================================================================
@@ -613,7 +747,8 @@ SLOT is auto-shown if hidden."
 
 ;;;###autoload
 (defun sll-load-layout (layout-name)
-  "Load LAYOUT-NAME with all slots visible."
+  "Load LAYOUT-NAME with all slots visible.
+Uses project root (via projectile or project.el) for `default-directory'."
   (interactive (list (sll--read-layout "Load layout: ")))
   (let ((layout (gethash layout-name sll--layouts)))
     (unless layout
@@ -638,24 +773,25 @@ SLOT is auto-shown if hidden."
     (let ((tree (plist-get layout :tree)))
       (sll--create-windows-from-tree tree (selected-window)))
     
-    ;; Run default commands for each slot
-    (dolist (slot-name (cons 'MAIN (plist-get layout :slots-order)))
-      (let* ((slot-plist (when (not (eq slot-name 'MAIN))
-                           (gethash slot-name sll-current-slots)))
-             (command (when slot-plist (plist-get slot-plist :default-command)))
-             (window (sll--get-slot-window slot-name)))
-        (when window
-          (select-window window)
-          (if command
-              (condition-case err
-                  (sll-execute-in-slot slot-name command)
-                (error
-                 (message "Error in default-command for '%s': %s"
-                          slot-name (error-message-string err))
-                 (switch-to-buffer (get-buffer-create
-                                    (sll--empty-buffer-name slot-name)))))
-            (switch-to-buffer (get-buffer-create
-                               (sll--empty-buffer-name slot-name)))))))
+    ;; Run default commands for each slot with project-aware directory
+    (let ((default-directory (sll--get-project-root)))
+      (dolist (slot-name (cons 'MAIN (plist-get layout :slots-order)))
+        (let* ((slot-plist (when (not (eq slot-name 'MAIN))
+                             (gethash slot-name sll-current-slots)))
+               (command (when slot-plist (plist-get slot-plist :default-command)))
+               (window (sll--get-slot-window slot-name)))
+          (when window
+            (select-window window)
+            (if command
+                (condition-case err
+                    (sll-execute-in-slot slot-name command)
+                  (error
+                   (message "Error in default-command for '%s': %s"
+                            slot-name (error-message-string err))
+                   (switch-to-buffer (get-buffer-create
+                                      (sll--empty-buffer-name slot-name)))))
+              (switch-to-buffer (get-buffer-create
+                                 (sll--empty-buffer-name slot-name))))))))
     
     ;; Set sublayout to 'full
     (setq sll-current-sublayout-name 'full)

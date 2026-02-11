@@ -74,8 +74,15 @@
 
 (use-package vterm
   :ensure t
+  :config
+
+  ;; keymaps
+  (with-eval-after-load 'evil
+    (evil-define-key 'insert vterm-mode-map (kbd "C-h") #'vterm-send-backspace))
   :hook
-  (vterm-mode . (lambda () (display-line-numbers-mode -1))))
+  (vterm-mode . (lambda () (display-line-numbers-mode -1)))
+  (vterm-mode . (lambda () (hl-line-mode -1)))
+  )
 
 (use-package multi-vterm
   :ensure t

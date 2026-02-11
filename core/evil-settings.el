@@ -56,7 +56,10 @@
   :config
   (evil-escape-mode 1)
   (setq-default evil-escape-key-sequence "fj")
-  (setq-default evil-escape-delay 0.15))
+  (setq-default evil-escape-delay 0.15)
+
+  ;; keymap-set
+  (evil-define-key '(insert visual) global-map (kbd "C-g") #'evil-escape))
 
 (use-package evil-collection
   :ensure t

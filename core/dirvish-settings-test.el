@@ -30,13 +30,17 @@
           (1 0.11 0.55)))
 
   ;; == KEYMAPS =========================================================
-  (evil-define-key 'normal dired-mode-map
-    (kbd "H") #'dired-up-directory
-    (kbd "L") #'dirvish-history-go-backward
+  (with-eval-after-load 'evil
+    (evil-set-initial-state 'dirvish-mode 'normal)
+    (evil-define-key 'normal dirvish-mode-map
+      (kbd "h") #'dired-up-directory
+      (kbd "l") #'dirvish-history-go-backward
 
-    (kbd "o") nil
-    (kbd "o r") #'revert-buffer
+      (kbd "TAB") #'dirvish-subtree-toggle
+      (kbd "C-g") #'dirvish-quit
+      (kbd "S") #'dirvish-quicksort)
     )
+
 
   (keymap-set dired-mode-map "C-c C-c" 'dirvish-narrow)
 

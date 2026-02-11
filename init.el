@@ -105,15 +105,8 @@ Also reports errors with file and line number."
 
 (load-config-file "core/evil-settings.el")
 (load-config-file "core/settings.el")
+(load-config-file "core/gui-settings.el")
 (elpaca-wait)
-
-;; TODO: move to frame-settings
-(load-theme 'my-modus-mono-dark t)
-(defun reload-my-theme()
-  (interactive)
-  (add-to-list 'custom-theme-load-path (expand-file-name "themes" my-config-dir))
-  (load-theme 'my-modus-mono-dark t))
-(keymap-set global-map "C-c R" #'reload-my-theme)
 
 (load-config-file "local/get-secrets.el")
 (load-config-file "local/local-env.el")
@@ -147,6 +140,8 @@ Also reports errors with file and line number."
 
 (load-config-file "custom/elgo.el")
 (load-config-file "custom/custom-compile.el")
+;;(load-config-file "custom/packages/elastic.el")
+(load-config-file "custom/packages/old-elastic.el")
 
 ;; TODO: fix:
 (load-config-file "refactor/general-keymaps.el")

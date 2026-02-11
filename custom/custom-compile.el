@@ -63,7 +63,7 @@
                my/project-custom-comint
                my/project-custom))
   (put var 'risky-local-variable nil)
-  (put var 'safe-local-variable #'stringp))
+  (put var 'safe-local-variable (lambda (_) t)))  ; Accept anything
 
 (provide 'custom-compile)
 ;;; custom-compile.el ends here

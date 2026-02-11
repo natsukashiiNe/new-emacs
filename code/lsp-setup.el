@@ -85,22 +85,22 @@
   :ensure t
   :hook (lsp-mode . eldoc-box-hover-at-point-mode)
   :init
-  (defun my/eldoc-box-position-below-cursor (width height)
-    "Position eldoc-box below the cursor with spacing."
-    (let* ((point-pos (posn-at-point))
-           (point-x (car (posn-x-y point-pos)))
-           (point-y (cdr (posn-x-y point-pos)))
-           (line-height (frame-char-height))
-           ;; Position 3 lines below cursor to avoid overlap
-           (spacing (* 3 line-height)))
-      (cons point-x (+ point-y spacing))))
+  ;; (defun my/eldoc-box-position-below-cursor (width height)
+  ;;   "Position eldoc-box below the cursor with spacing."
+  ;;   (let* ((point-pos (posn-at-point))
+  ;;          (point-x (car (posn-x-y point-pos)))
+  ;;          (point-y (cdr (posn-x-y point-pos)))
+  ;;          (line-height (frame-char-height))
+  ;;          ;; Position 3 lines below cursor to avoid overlap
+  ;;          (spacing (* 3 line-height)))
+  ;;     (cons point-x (+ point-y spacing))))
 
   :custom
   (eldoc-box-max-pixel-width 800)
   (eldoc-box-max-pixel-height 600)
   (eldoc-box-clear-with-C-g t)
 
-  (eldoc-box-position-function #'my/eldoc-box-position-below-cursor)
+  ;; (eldoc-box-position-function #'my/eldoc-box-position-below-cursor)
 
   ;; (setq eldoc-box-frame-parameters
   ;;       '((left-fringe . 8)

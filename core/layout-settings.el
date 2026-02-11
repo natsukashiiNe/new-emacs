@@ -7,6 +7,7 @@
 ;;; Code:
 
 (require 'slot-layout)
+(require 'sll-persp)
 
 ;;; ============================================================================
 ;;; Layout Definitions
@@ -23,8 +24,8 @@
     :modes (vterm-mode comint-mode eshell-mode compilation-mode
 		       shell-mode flycheck-error-list-mode)
     :names ("*Messages*" "*Warnings*" "*compilation*"
-            "*Backtrace*" "*Embark Actions*" "*Embark Export*")
-    :regexps ("^\\*vterm" "^\\*eshell")
+            "*Backtrace*" "*Embark Export*")
+    :regexps ("^\\*vterm" "^\\*eshell" "^\\*Embark Collect")
     :default-command vterm)
 
   ;; Sublayouts
@@ -42,8 +43,8 @@
     :modes (vterm-mode comint-mode eshell-mode compilation-mode
 		       comint-mode shell-mode flycheck-error-list-mode)
     :names ("*Messages*" "*Warnings*" "*compilation*"
-            "*Backtrace*" "*Embark Actions*" "*Embark Export*")
-    :regexps ("^\\*vterm" "^\\*eshell")
+            "*Backtrace*" "*Embark Export*")
+    :regexps ("^\\*vterm" "^\\*eshell" "^\\*Embark Collect")
     :default-command vterm)
 
   (sll-slot sidebar
@@ -76,9 +77,10 @@
     :split (MAIN 'down 0.27)
     :modes (vterm-mode comint-mode eshell-mode compilation-mode
 		       comint-mode shell-mode flycheck-error-list-mode)
-    :names ("*Messages*" "*Warnings*" "*compilation*"
-            "*Backtrace*" "*Embark Actions*" "*Embark Export*")
-    :regexps ("^\\*vterm" "^\\*eshell")
+    :names ("*Messages*" "*Warnings*" "*Backtrace*"
+            "*compilation*"
+	    "*Embark Actions*" "*Embark Export*" )
+    :regexps ("^\\*vterm" "^\\*eshell" "^\\*Embark Collect" )
     :default-command vterm)
 
   (sll-slot sidebar
@@ -196,6 +198,17 @@
 
 (keymap-set global-map "C-c l 1" #'my-sll/sublayout-code-only)
 (keymap-set global-map "C-c l 0" #'my-sll/sublayout-full)
+
+;;; ============================================================================
+;;; Perspective Integration
+;;; ============================================================================
+
+;; Enable perspective-local layouts
+;; Each perspective maintains its own SLL layout state
+(if (bound-and-true-p persp-mode)
+    (sll-persp-mode 1)
+  (with-eval-after-load 'perspective
+    (sll-persp-mode 1)))
 
 ;;; ============================================================================
 ;;; Optional: Auto-load layout on startup
