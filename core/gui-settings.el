@@ -29,7 +29,9 @@
 (defun my/setup-gui-frame (&optional frame)
   "Apply settings for GUI frames."
   (with-selected-frame (or frame (selected-frame))
-    (when (not (display-graphic-p frame))
+    (when (display-graphic-p frame)
+      (set-face-attribute 'default frame :font "GoMono Nerd Font-21")
+      (set-face-attribute 'variable-pitch frame :font "GoMono Nerd Font-20")
       (set-frame-parameter frame 'alpha-background 92))))
 
 (defun my/setup-frame (&optional frame)

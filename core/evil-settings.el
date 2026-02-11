@@ -40,11 +40,12 @@
   ;; hooks
   (add-hook 'evil-insert-state-exit-hook
             (lambda ()
-              (send-string-to-terminal "\033]12;#FF8020\007")))
-  
+              (when (not (display-graphic-p))
+		(send-string-to-terminal "\033]12;#FF8020\007"))))
   (add-hook 'evil-insert-state-entry-hook
             (lambda ()
-              (send-string-to-terminal "\033]12;#FF7F9F\007")))
+              (when (not (display-graphic-p))
+		(send-string-to-terminal "\033]12;#FF7F9F\007"))))
 
   (add-hook 'prog-mode-hook #'my/modify-word-syntax-for-underscore))
 

@@ -9,6 +9,7 @@
 (use-package doom-modeline
   :ensure t
   :demand t
+  :after evil
   :hook (after-init . doom-modeline-mode)
   :custom
   (doom-modeline-height 30)
