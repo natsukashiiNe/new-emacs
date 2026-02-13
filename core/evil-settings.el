@@ -47,7 +47,20 @@
               (when (not (display-graphic-p))
 		(send-string-to-terminal "\033]12;#FF7F9F\007"))))
 
-  (add-hook 'prog-mode-hook #'my/modify-word-syntax-for-underscore))
+  (add-hook 'prog-mode-hook #'my/modify-word-syntax-for-underscore)
+
+  ;; Make evil motions work with visual lines
+  (define-key evil-motion-state-map "j" 'evil-next-visual-line)
+  (define-key evil-motion-state-map "k" 'evil-previous-visual-line)
+  (define-key evil-motion-state-map "0" 'evil-beginning-of-visual-line)
+  (define-key evil-motion-state-map "$" 'evil-end-of-visual-line)
+  (define-key evil-motion-state-map "^" 'evil-first-non-blank-of-visual-line)
+  (define-key evil-motion-state-map "_" 'evil-first-non-blank-of-visual-line)
+  
+  ;; For visual state as well
+  (define-key evil-visual-state-map "j" 'evil-next-visual-line)
+  (define-key evil-visual-state-map "k" 'evil-previous-visual-line)
+  )
 
 
 ;; Evil-escape
