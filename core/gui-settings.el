@@ -41,7 +41,10 @@
     (my/setup-tty-frame frame)))
 
 (my/setup-frame)
+
+(add-hook 'elpaca-after-init-hook #'my/setup-frame)
 (add-hook 'after-make-frame-functions 'my/setup-frame)
+
 
 
 ;; == TAB BAR ========================================================

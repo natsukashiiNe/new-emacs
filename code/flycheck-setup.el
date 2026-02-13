@@ -55,7 +55,7 @@
 (use-package flycheck-inline
   :ensure t
   :after flycheck
-  :hook (flycheck-mode . flycheck-inline-mode)
+  ;;:hook (flycheck-mode . flycheck-inline-mode)
   :config
   ;; Configure inline display with quick-peek
   (setq flycheck-inline-display-function

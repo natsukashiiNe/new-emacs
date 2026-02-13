@@ -17,16 +17,14 @@
 
 (setq package-enable-at-startup nil)
 
-;; Set elpaca to use ~/.emacs.d (like straight.el did)
 (defvar elpaca-installer-version 0.11)
-(defvar elpaca-directory (expand-file-name "elpaca/" "~/.emacs.d/"))
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
                               :ref nil :depth 1 :inherit ignore
                               :files (:defaults "elpaca-test.el" (:exclude "extensions"))
                               :build (:not elpaca--activate-package)))
-
 (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
        (build (expand-file-name "elpaca/" elpaca-builds-directory))
        (order (cdr elpaca-order))
@@ -49,8 +47,8 @@
                   ((require 'elpaca))
                   ((elpaca-generate-autoloads "elpaca" repo)))
             (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-
-	  (error) (warn "%s" err) (delete-directory repo 'recursive))))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
   (unless (require 'elpaca-autoloads nil t)
     (require 'elpaca)
     (elpaca-generate-autoloads "elpaca" repo)
@@ -63,7 +61,7 @@
 (elpaca elpaca-use-package
   (elpaca-use-package-mode))
 
-;; CRITICAL: Block until elpaca and use-package are ready
+;; Block until elpaca and use-package are ready
 (elpaca-wait)
 
 ;; ==================================
@@ -107,6 +105,7 @@ Also reports errors with file and line number."
 (load-config-file "core/settings.el")
 (load-config-file "core/gui-settings.el")
 (elpaca-wait)
+(load-config-file "keymaps/mode-keymaps.el")
 
 (load-config-file "local/get-secrets.el")
 (load-config-file "local/local-env.el")
@@ -138,14 +137,18 @@ Also reports errors with file and line number."
 (load-config-file "org/org-plugins.el")
 (load-config-file "org/org-settings.el")
 
+;; CUSTOM
 (load-config-file "custom/elgo.el")
 (load-config-file "custom/custom-compile.el")
 ;;(load-config-file "custom/packages/elastic.el")
 (load-config-file "custom/packages/old-elastic.el")
 
+;; APPS
+(load-config-file "apps/telega-setup.el")
+(load-config-file "apps/agent-shell-setup.el")
+
 ;; TODO: fix:
 (load-config-file "refactor/general-keymaps.el")
-(load-config-file "keymaps/mode-keymaps.el")
 
 (message "🎉 Emacs startup complete!")
 
@@ -190,4 +193,4 @@ Also reports errors with file and line number."
 (global-set-key (kbd "C-x l") 'my/layout-menu)
 
 (provide 'init)
-;;; init.el ends here
+;; init.el ends here

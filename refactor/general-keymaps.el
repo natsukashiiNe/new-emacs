@@ -207,8 +207,8 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
   (general-define-key
    :states '(normal visual insert)
    :keymaps 'override
-   "M-l" 'tab-bar-switch-to-next-tab
-   "M-h" 'tab-bar-switch-to-prev-tab
+   "C-M-l" 'tab-bar-switch-to-next-tab
+   "C-M-h" 'tab-bar-switch-to-prev-tab
    "M-i" 'evil-switch-to-windows-last-buffer
    "M-e" 'eyebrowse-last-window-config
 
@@ -371,6 +371,8 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
     "h g" '(:ignore t :which-key "[+] ma[g]it")
     "h g d" '((lambda () (interactive) (my/exec-with-prefix "vdiff-magit- "))
               :which-key "v[d]iff")
+    "h o" '((lambda () (interactive) (my/exec-with-prefix "agent-shell - "))
+            :which-key "ai-agent commands")
 
     ;; “SPC j” for LSP multi-file navigation
     "j"   '(:ignore t :which-key "[+] lsp")

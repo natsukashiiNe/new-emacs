@@ -4,8 +4,23 @@
 ;; Contains keymaps that are active only in specific modes.
 
 ;;; Code:
+;; MAPS
+(defvar-keymap my-utility-normal-map
+  :doc "Utility map for evil normal state (agent-shell).")
+(keymap-set evil-normal-state-map "M-l" my-utility-normal-map)
+
+(defvar-keymap my-utility-insert-map
+  :doc "Utility map for evil insert state (agent-shell).")
+(keymap-set evil-insert-state-map "M-l" my-utility-insert-map)
+
+
+(defvar-keymap my-build-normal-map
+  :doc "Build map for evil normal state.")
+(keymap-set evil-normal-state-map "C-c C-b" my-build-normal-map)
+
 ;; == Emacs-native keymaps ============================================
 
+(keymap-set global-map "C-x C-b" 'projectile-ibuffer)
 (keymap-set global-map "C-x C-x" 'previous-buffer)
 (keymap-set global-map "C-x X"   'next-buffer)
 (keymap-set global-map "C-x l"   'eval-expression)
@@ -30,6 +45,9 @@
               (interactive)
               (my/set-vertico-count
                (max 1 (- vertico-count 10)))))
+
+
+;; == PROJECTILE ======================================================
 
 
 ;; == COMPILE MAP =====================================================
@@ -146,6 +164,28 @@
   (evil-define-key 'normal devdocs-mode-map
     (kbd "n") #'devdocs-go-forward
     (kbd "p") #'devdocs-go-back))
+
+;; ==== AGENT SHELL KEYMAPS =====================================================
+(defun my-keymaps-set-agent-shell-mode ()
+  (evil-define-key '(normal visual) agent-shell-mode-map
+    (kbd "C-<return>") #'agent-shell-submit
+    (kbd "C-k") #'agent-shell-previous-item
+    (kbd "C-j") #'agent-shell-next-item
+    (kbd "M-p") #'agent-shell-previous-input
+    (kbd "M-n") #'agent-shell-next-input)
+  (evil-define-key 'insert agent-shell-mode-map
+    (kbd "RET") #'newline))
+
+
+(defun my-keymaps-set-agent-shell-global-keymaps ()
+  (keymap-set my-utility-normal-map "L"   #'agent-shell-anthropic-start-claude-code)
+  (keymap-set my-utility-normal-map "M-l" #'agent-shell-toggle)
+
+  (keymap-set my-utility-normal-map "r" #'agent-shell-send-region)
+  (keymap-set my-utility-normal-map "f" #'agent-shell-send-file)
+  (keymap-set my-utility-normal-map "S" #'agent-shell-send-screenshot))
+
+(my-keymaps-set-agent-shell-global-keymaps)
 
 (provide 'mode-keymaps)
 ;;; mode-keymaps.el ends here

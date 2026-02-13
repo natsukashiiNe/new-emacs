@@ -56,7 +56,7 @@
   (lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
 
   ;; docs
-  (lsp-eldoc-render-all t)
+  (lsp-eldoc-render-all nil)
   (lsp-eldoc-enable-hover t)
   (lsp-signature-render-documentation t)
 
@@ -83,7 +83,7 @@
 
 (use-package eldoc-box
   :ensure t
-  :hook (lsp-mode . eldoc-box-hover-at-point-mode)
+  ;; :hook (lsp-mode . eldoc-box-hover-at-point-mode)
   :init
   ;; (defun my/eldoc-box-position-below-cursor (width height)
   ;;   "Position eldoc-box below the cursor with spacing."
@@ -148,7 +148,12 @@
   :config
   ;; Keybindings for lsp-ui-peek
   (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
-  (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references))
+  (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
+
+  ;; keymap
+
+  (evil-define-key 'normal lsp-ui-mode-map (kbd "M-d") #'lsp-ui-doc-toggle)
+  )
 
 ;; =============================================================================
 ;; APHELEIA - Code Formatting

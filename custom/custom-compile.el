@@ -58,12 +58,21 @@
     ;; 't' as the mode argument to enable comint-mode
     (compilation-start command t)))
 
+
+
 (dolist (var '(compile-command
                projectile-project-run-cmd
                my/project-custom-comint
                my/project-custom))
   (put var 'risky-local-variable nil)
   (put var 'safe-local-variable (lambda (_) t)))  ; Accept anything
+
+(defun safe-concat (&rest strings)
+  "Safely concatenate strings for use in dir-locals."
+  (apply #'concat strings))
+
+;; Mark it as safe
+(put 'safe-concat 'safe-local-eval-function t)
 
 (provide 'custom-compile)
 ;;; custom-compile.el ends here

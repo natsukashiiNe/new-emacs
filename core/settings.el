@@ -10,7 +10,7 @@
 ;; ----------------------------
 (menu-bar-mode 0)       ;; Disable the menu bar
 (tool-bar-mode 0)       ;; Disable the toolbar
-(scroll-bar-mode 1)     ;; Enables visible scrollbar
+(scroll-bar-mode 0)     ;; Enables visible scrollbar
 (tooltip-mode 0)        ;; Disable tooltips
 (blink-cursor-mode 0)   ;; Disables cursor blinking
 (set-fringe-mode 16)    ;; Fringe width
@@ -101,11 +101,15 @@
   (add-to-list 'savehist-additional-variables 'kill-ring)
   (savehist-mode 1))
 
-
-
 (use-package transient
   :ensure t
   :demand t)
+
+(use-package company
+  :ensure t
+  :defer t
+  :config
+  (global-company-mode -1)) 
 
 ;; ----------------------------
 ;; QOL packages
@@ -125,9 +129,14 @@
   :hook (visual-line-mode . adaptive-wrap-prefix-mode))
 
 (use-package hide-mode-line
+  :ensure t)
+
+(use-package reverse-im
   :ensure t
-  ;;:hook (vdiff-mode . hide-mode-line-mode)
-  )
+  :custom
+  (reverse-im-input-methods '("russian-computer"))
+  :config
+  (reverse-im-mode t))
 
 ;; No-littering - keeps .emacs.d clean
 (use-package no-littering
@@ -174,6 +183,9 @@
   :after evil
   :bind (:map evil-normal-state-map ("M-f" . er/expand-region)))
 
+(use-package grid
+  :ensure (:host github :repo "ichernyshovvv/grid.el")
+  :demand t)
 
 (provide 'settings)
 ;;; settings.el ends here

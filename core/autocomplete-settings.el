@@ -30,7 +30,7 @@
   (corfu-max-width 80)
   (corfu-min-width 40)
 
-  (corfu-popupinfo-delay '(0.5 . 0.2))  ; Show docs after 0.5s
+  (corfu-popupinfo-delay '(0.2 . 0.2))  ; Show docs after 0.5s
 
   :init
   (global-corfu-mode)

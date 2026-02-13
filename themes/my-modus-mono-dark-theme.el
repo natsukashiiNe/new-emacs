@@ -151,6 +151,7 @@
  `(font-lock-negation-char-face ((t  (:inherit font-lock-escape-face))))
  `(font-lock-comment-face       ((t  (:foreground ,exu-comment :slant ,exu-italic :weight normal))))
  `(font-lock-doc-face           ((t  (:foreground ,exu-viol :slant ,exu-italic :weight normal))))
+ `(font-lock-doc-markup-face    ((t  (:foreground ,exu-main-sup1 :slant normal :weight normal))))
  `(font-lock-constant-face      ((t  (:foreground ,exu-main-sup2 :slant normal :weight normal))))
  `(font-lock-number-face        ((t  (:foreground ,exu-main-sup2 :slant ,exu-italic :weight normal))))
 
@@ -240,6 +241,10 @@
  `(dirvish-hl-line             ((t (:foreground ,exu-black :background ,exu-accent :weight normal))))
  `(dired-directory             ((t (:foreground ,exu-accent-weak :weight normal))))
  `(dirvish-file-size           ((t (:foreground ,exu-grey2 :weight normal))))
+
+ ;; --- Compilaton -----------------------------------------------------------
+
+ `(comint-highlight-prompt     ((t (:foreground ,exu-black :background ,exu-accent-alt  :inherit nil))))
 
 
 
