@@ -10,7 +10,6 @@
   :ensure t
   :demand t
   :after evil
-  :hook (after-init . doom-modeline-mode)
   :custom
   (doom-modeline-height 30)
   (doom-modeline-enable-word-count t)
@@ -69,6 +68,26 @@
 
 ;; == BARS MAPPINGS ===================================================
 
+
+;; == STARTUP SCREEN ===================================================
+
+(use-package enlight
+  :ensure t
+  :demand t
+  :hook (emacs-startup-hook . enlight-open)
+  :custom
+  (enlight-content
+   (concat
+    (propertize "MENU" 'face 'highlight)
+    "\n"
+    (enlight-menu
+     '(("Org Mode"
+	("Org-Agenda (current day)" (org-agenda nil "a") "a"))
+       ("Downloads"
+	("Transmission" transmission "t")
+	("Downloads folder" (dired "~/Downloads") "a"))
+       ("Other"
+	("Projects" project-switch-project "p")))))))
 
 (provide 'bar-settings)
 ;;; bar-settings.el ends here
