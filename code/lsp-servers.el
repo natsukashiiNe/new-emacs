@@ -92,6 +92,7 @@ Returns plist with :venv-path, :python-path, :pyright-path."
 (add-hook 'python-ts-mode-hook #'lsp-deferred)
 (add-hook 'python-mode-hook #'lsp-deferred)
 
+
 ;; =============================================================================
 ;; C/C++ - clangd
 ;; =============================================================================
@@ -108,63 +109,98 @@ Relative to project root, searched in order."
   :type 'string
   :group 'my-lsp)
 
-(defcustom my/clangd-executable "/usr/sbin/clangd"
+(defcustom my/clangd-executable "/usr/bin/clangd"
   "Path to clangd executable."
   :type 'string
   :group 'my-lsp)
 
-;; --- Resolution Functions ---
-(defun my/clangd--resolve-compile-commands (project-root)
-  "Resolve compile_commands.json directory for PROJECT-ROOT.
-Returns absolute path to directory containing compile_commands.json.
+(defcustom my/clangd-default-args
+  '("--background-index"
+    "--clang-tidy"
+    "--completion-style=detailed"
+    "--header-insertion=iwyu"
+    "--pch-storage=memory"
+    "--log=error")
+  "Default clangd arguments for regular C++ projects."
+  :type '(repeat string)
+  :group 'my-lsp)
 
-Resolution order:
-1. Project-specific config (future: my/project-config-get)
-2. Common patterns in PROJECT-ROOT (my/clangd-compile-commands-patterns)
-3. Global fallback (my/clangd-fallback-build-dir)"
-  
-  ;; Phase 1: Check project-specific config (future hook)
-  ;; (when-let ((compile-dir (my/project-config-get project-root 'cpp 'compile-commands-dir)))
-  ;;   (return (expand-file-name compile-dir project-root)))
-  
-  ;; Phase 2: Search common patterns
+;; (defcustom my/clangd-ue-args
+;;   '("--background-index"
+;;     "--completion-style=detailed"
+;;     "--header-insertion=never"
+;;     "--pch-storage=memory"
+;;     "--log=error")
+;;   "clangd arguments for Unreal Engine projects."
+;;   :type '(repeat string)
+;;   :group 'my-lsp)
+
+(defcustom my/clangd-ue-args
+  '("--background-index"
+    "--clang-tidy"
+    "--completion-style=detailed"
+    "--header-insertion=iwyu"
+    "--pch-storage=memory"
+    "--log=error")
+  "Default clangd arguments for regular C++ projects."
+  :type '(repeat string)
+  :group 'my-lsp)
+
+(defcustom my/ue-project-roots '("/storage/gacha/projects/simulation")
+  "List of Unreal Engine project roots that need special clangd args."
+  :type '(repeat string)
+  :group 'my-lsp)
+
+;; --- Resolution Functions ---
+(defun my/clangd--ue-project-p (project-root)
+  "Return t if PROJECT-ROOT is an Unreal Engine project."
+  (seq-some (lambda (ue-root)
+              (string-prefix-p ue-root project-root))
+            my/ue-project-roots))
+
+(defun my/clangd--resolve-compile-commands (project-root)
+  "Resolve compile_commands.json directory for PROJECT-ROOT."
   (if-let* ((found-dir (my/clangd--find-compile-commands-in-patterns project-root)))
       (expand-file-name found-dir project-root)
-    
-    ;; Phase 3: Use fallback
     (expand-file-name my/clangd-fallback-build-dir project-root)))
 
 (defun my/clangd--find-compile-commands-in-patterns (project-root)
-  "Search for compile_commands.json in PROJECT-ROOT using configured patterns.
-Returns directory name if found, nil otherwise."
+  "Search for compile_commands.json in PROJECT-ROOT using configured patterns."
   (seq-find
    (lambda (dir-name)
      (let ((full-path (expand-file-name dir-name project-root)))
        (file-readable-p (expand-file-name "compile_commands.json" full-path))))
    my/clangd-compile-commands-patterns))
 
-;; --- LSP Server Configuration ---
-(with-eval-after-load 'lsp-mode
-  ;; Configure clangd
-  (setq lsp-clients-clangd-args
-        '("--background-index"
-          "--clang-tidy"
-          "--completion-style=detailed"
-          "--header-insertion=iwyu"
-          "--pch-storage=memory"
-          "--log=error"))
-  
-  ;; Add compile-commands-dir argument dynamically
-  (defun my/clangd--add-compile-commands-arg ()
-    "Add --compile-commands-dir argument based on project root."
-    (when-let* ((root (lsp-workspace-root)))
-      (let ((compile-dir (my/clangd--resolve-compile-commands root)))
-        (setq-local lsp-clients-clangd-args
-                    (append lsp-clients-clangd-args
-                            (list (concat "--compile-commands-dir=" compile-dir)))))))
-  
-  (add-hook 'c-ts-mode-hook #'my/clangd--add-compile-commands-arg)
-  (add-hook 'c++-ts-mode-hook #'my/clangd--add-compile-commands-arg))
+;; --- LSP Client Registration ---
+(with-eval-after-load 'lsp-clangd
+
+  (defun my/clangd--get-args ()
+    "Return clangd args based on current project type."
+    (let* ((root (lsp-workspace-root))
+           (base-args (if (and root (my/clangd--ue-project-p root))
+                          my/clangd-ue-args
+                        my/clangd-default-args))
+           (compile-dir (when root
+                          (my/clangd--resolve-compile-commands root))))
+      (append base-args
+              (when compile-dir
+                (list (concat "--compile-commands-dir=" compile-dir))))))
+
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection
+                     (lambda ()
+                       (cons (or lsp-clients-clangd-executable
+				 lsp-clients--clangd-default-executable
+				 "clangd")
+                             (my/clangd--get-args))))
+    :activation-fn (lsp-activate-on "c" "cpp" "objective-c")
+    :priority -1
+    :server-id 'clangd
+    :library-folders-fn (lambda (_workspace) lsp-clients-clangd-library-directories)
+    :async-request-handlers
+    (ht ("textDocument/ast" #'lsp-clangd--ast-handler)))))
 
 ;; Hook setup
 (add-hook 'c-ts-mode-hook #'lsp-deferred)
@@ -274,8 +310,8 @@ Useful for Neovim plugin development or Awesome WM configuration."
   ;; Configure Java settings
   (setq lsp-java-configuration-runtimes
         `[(:name "JavaSE-23"
-           :path ,my/java-runtime-path
-           :default t)])
+		 :path ,my/java-runtime-path
+		 :default t)])
   
   (setq lsp-java-format-settings-url
         (expand-file-name my/java-format-settings-path))
@@ -356,6 +392,30 @@ Useful for Neovim plugin development or Awesome WM configuration."
 (use-package cmake-ts-mode
   :ensure nil  ; built-in
   :mode ("CMakeLists\\.txt\\'" "\\.cmake\\'"))
+
+;; .kdl mode
+(use-package kdl-mode
+  :ensure t
+  :mode "\\.kdl\\'"
+  :hook (kdl-mode . (lambda ()
+                      ;; Enable tree-sitter if available
+                      (when (treesit-available-p)
+                        (treesit-parser-create 'kdl))))
+  :config
+  ;; Configure lsp-mode for KDL
+  (with-eval-after-load 'lsp-mode
+    (add-to-list 'lsp-language-id-configuration
+                 '(kdl-mode . "kdl"))
+    
+    (lsp-register-client
+     (make-lsp-client
+      :new-connection (lsp-stdio-connection "kdl-lsp")
+      :activation-fn (lsp-activate-on "kdl")
+      :server-id 'kdl-lsp)))
+  
+  ;; Auto-start lsp-mode when opening KDL files (optional)
+  ;; (add-hook 'kdl-mode-hook 'lsp-deferred)
+  )
 
 (provide 'lsp-servers)
 ;;; lsp-servers.el ends here
