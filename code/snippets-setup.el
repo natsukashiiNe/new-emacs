@@ -30,11 +30,5 @@
 ;; (with-eval-after-load '(yasnippet yasnippet-snippets consult)
 ;;   (keymap-set yas-minor-mode-map "C-c f F" 'yas-insert-snippet))
 
-(defvar-keymap my-snippet-map
-  :doc "Map with snippets."
-  "C-s" #'yas-insert-snippet)
-(keymap-set global-map "C-c C-s" my-snippet-map)
-
-
 (provide 'snippets-setup)
 ;;; snippets-setup.el ends here

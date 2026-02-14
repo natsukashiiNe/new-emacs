@@ -66,27 +66,27 @@
 
 (use-package vdiff
   :ensure t
-  :init
-  (setq vterm-always-compile-module t)
-  :config
-  (keymap-set global-map "C-c t" 'vterm))
-  
+  )
+
 
 (use-package vterm
   :ensure t
-  :config
-
-  ;; keymaps
-  (with-eval-after-load 'evil
-    (evil-define-key 'insert vterm-mode-map (kbd "C-h") #'vterm-send-backspace))
+  :init
+  (setq vterm-always-compile-module t)
   :hook
   (vterm-mode . (lambda () (display-line-numbers-mode -1)))
   (vterm-mode . (lambda () (hl-line-mode -1)))
-  )
+  :config
+  ;; keymaps
+  (with-eval-after-load 'evil
+    (evil-define-key 'insert vterm-mode-map (kbd "C-h") #'vterm-send-backspace)))
 
 (use-package multi-vterm
   :ensure t
-  :after vterm)
+  :after vterm
+  :config
+  ;; TODO: use-last (toggle / tab / float) vs create new.
+  (keymap-set global-map "C-c t" 'multi-vterm))
 
 ;; =============================================================================
 ;; COMPILATION

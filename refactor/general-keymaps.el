@@ -217,10 +217,11 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
    "C-S-K" 'evil-window-up
    "C-S-L" 'evil-window-right
 
-   "C-M-h" 'shrink-window-horizontally
-   "C-M-l" 'enlarge-window-horizontally
-   "C-M-j" 'enlarge-window
-   "C-M-k" 'shrink-window
+   ;; TODO: move to special mode - that would replace modeline to indicate
+   ;; "C-M-h" 'shrink-window-horizontally
+   ;; "C-M-l" 'enlarge-window-horizontally
+   ;; "C-M-j" 'enlarge-window
+   ;; "C-M-k" 'shrink-window
 
    ;;"M-t" 'elastic-perspective-toggle)
    "M-t" 'elastic-vterm-toggle)

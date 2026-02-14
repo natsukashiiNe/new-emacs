@@ -13,17 +13,25 @@
   :doc "Utility map for evil insert state (agent-shell).")
 (keymap-set evil-insert-state-map "M-l" my-utility-insert-map)
 
-
 (defvar-keymap my-build-normal-map
   :doc "Build map for evil normal state.")
 (keymap-set evil-normal-state-map "C-c C-b" my-build-normal-map)
 
-;; == Emacs-native keymaps ============================================
+(defvar-keymap my-quick-insert-map
+  :doc "Map with to quickly insert often used text.")
+(keymap-set global-map "C-c C-s" my-quick-insert-map)
+
+;; ==== Emacs-(almost)-build-in keymaps ============================================
 
 (keymap-set global-map "C-x C-b" 'projectile-ibuffer)
+(keymap-set global-map "C-x B"   'ibuffer)
 (keymap-set global-map "C-x C-x" 'previous-buffer)
 (keymap-set global-map "C-x X"   'next-buffer)
 (keymap-set global-map "C-x l"   'eval-expression)
+
+(with-eval-after-load 'consult
+  (keymap-set evil-normal-state-map "C-s" 'consult-line)
+  (keymap-set evil-visual-state-map "C-s" 'consult-line))
 
 (defvar-keymap my-interface-map
   :doc "My interface keymap"
@@ -65,7 +73,14 @@
 (define-my-compile-map)
 
 
-;; == COMPILE MAP =====================================================
+;; == QUICK INSERT MAP ================================================
+(defun my-quick-insert-map-setup ()
+  (with-eval-after-load 'consult
+    (keymap-set my-quick-insert-map "y" #'consult-yank-replace))
+  (with-eval-after-load 'yasnippet
+    (keymap-set my-quick-insert-map "C-s" #'yas-insert-snippet)))
+
+(my-quick-insert-map-setup)
 
 ;; == ORG MODE ========================================================
 (with-eval-after-load 'org

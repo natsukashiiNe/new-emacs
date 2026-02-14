@@ -43,14 +43,6 @@
               ("C-c l d" . consult-lsp-diagnostics)    ; All diagnostics
               ("C-c l f" . consult-lsp-file-symbols))) ; File symbols
 
-
-;; TODO move to keymap file
-(with-eval-after-load 'evil
-  (keymap-set evil-normal-state-map "C-s" 'consult-line)
-  (keymap-set evil-visual-state-map "C-s" 'consult-line))
-
-(keymap-set global-map "C-c C-s y" #'consult-yank-replace)
-
 ;; === Vertico =========================================================
 
 (use-package vertico
