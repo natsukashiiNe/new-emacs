@@ -30,7 +30,8 @@
   :commands (lsp lsp-deferred)
   :custom
   ;; Completion
-  (lsp-completion-provider :capf)  ; Integrate with Corfu
+  ;; prevents lsp from force-enabling company (CAPF still works).
+  (lsp-completion-provider :none)  
 
   ;; Session management
   (lsp-session-file (expand-file-name "lsp-session-v1" "~/.local/emacs/"))

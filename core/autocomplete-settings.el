@@ -8,6 +8,14 @@
 
 ;; Enable native compilation if available
 
+;; Define a corfu-specific orderless style with flex matching.
+;; This keeps minibuffer (M-x, C-s, etc.) unaffected.
+(with-eval-after-load 'orderless
+  (orderless-define-completion-style my/orderless-corfu
+    (orderless-matching-styles '(orderless-literal
+                                 orderless-flex
+                                 orderless-initialism))))
+
 (use-package corfu
   :ensure t
   :bind (:map corfu-map
@@ -30,13 +38,23 @@
   (corfu-max-width 80)
   (corfu-min-width 40)
 
-  (corfu-popupinfo-delay '(0.2 . 0.2))  ; Show docs after 0.5s
+  (corfu-popupinfo-delay '(0.2 . 0.2))
 
   :init
   (global-corfu-mode)
   (corfu-popupinfo-mode)
   (corfu-history-mode)
-  
+
+  :config
+  ;; Use fuzzy orderless matching only in corfu completion buffers.
+  ;; Also override lsp-capf category to use orderless instead of lsp-passthrough,
+  ;; so corfu actually filters candidates from the LSP server.
+  (add-hook 'corfu-mode-hook
+            (lambda ()
+              (setq-local completion-styles '(my/orderless-corfu basic))
+              (setq-local completion-category-overrides
+                          '((lsp-capf (styles my/orderless-corfu))))))
+
   :hook (lsp-bridge-mode . (lambda ()
                              (corfu-mode -1))))
 
@@ -54,14 +72,6 @@
               (when (bound-and-true-p corfu-terminal-mode)
                 (corfu-terminal-mode -1)))))
 
-(use-package corfu-prescient
-  :ensure t
-  :after corfu
-  :config
-  (corfu-prescient-mode 1)
-  (prescient-persist-mode 1))  ; Save frequency/recency data
-
-
 (use-package kind-icon
   :ensure t
   :after corfu
@@ -69,6 +79,7 @@
   (kind-icon-default-face 'corfu-default)
   (kind-icon-blend-background nil)
   (kind-icon-blend-frac 0.08)
+  (kind-icon-use-icons nil)
   :config
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
