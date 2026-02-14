@@ -22,9 +22,10 @@
 
 (defun my/setup-tty-frame (&optional frame)
   "Apply settings for TTY frames."
-  (with-selected-frame (or frame (selected-frame))
-    (when (not (display-graphic-p frame))
-      (set-face-background 'default "unspecified" ))))
+  (let ((f (or frame (selected-frame))))
+    (with-selected-frame f
+      (when (not (display-graphic-p f))
+        (set-face-attribute 'default f :background "unspecified-bg")))))
 
 (defun my/setup-gui-frame (&optional frame)
   "Apply settings for GUI frames."
@@ -40,10 +41,12 @@
       (my/setup-gui-frame frame)
     (my/setup-tty-frame frame)))
 
-(my/setup-frame)
+(unless (daemonp)
+  (my/setup-frame))
 
-(add-hook 'elpaca-after-init-hook #'my/setup-frame)
-(add-hook 'after-make-frame-functions 'my/setup-frame)
+(add-hook 'elpaca-after-init-hook
+          (lambda () (unless (daemonp) (my/setup-frame))))
+(add-hook 'after-make-frame-functions #'my/setup-frame)
 
 
 
