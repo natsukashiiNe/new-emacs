@@ -240,7 +240,7 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
     :prefix "C-f")
   (my-jump-leader
     ;; projects
-    "C-e"     '(persp-switch-last :which-key "persp last")
+    "C-e"     '(my-persp/switch-to-last-visited :which-key "persp last")
     "j"       '(eyebrowse-switch-to-window-config :which-key "eye switch")
     "O"       '(projectile-switch-project :which-key "project [o]pen")
     "C-w"     '(persp-switch      :which-key "persp switch")
