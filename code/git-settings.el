@@ -28,9 +28,54 @@
   :ensure t
   :after magit)
 
-(use-package vdiff-magit
+;; FIXME -> Currently does not work with magit
+;; (use-package vdiff-magit
+;;   :ensure t
+;;   :after (magit vdiff))
+
+(use-package difftastic
+  :ensure (:url "https://github.com/pkryger/difftastic.el.git"
+		:rev :newest)
+  :after magit
+  :config
+  (difftastic-bindings-mode))
+
+;; ==================================
+;; diff-hl indicator config
+;; ==================================
+
+
+(use-package diff-hl
   :ensure t
-  :after (magit vdiff))
+  :demand t
+  :init
+  (defvar my-diff-hl-margin-symbols
+    '((insert . "")
+      (delete . "")
+      (change . "")
+      (unknown . "")
+      (ignored . ""))
+    "Margin symbols for diff-hl matching neovim gitsigns.")
+  :hook
+  (prog-mode . diff-hl-mode)
+  (dired-mode . diff-hl-dired-mode)
+  :config
+  ;; Use margin mode everywhere (nerd font chars instead of fringe bitmaps)
+  (setq diff-hl-margin-symbols-alist my-diff-hl-margin-symbols)
+  (diff-hl-margin-mode)
+  ;; Magit integration
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+
+  ;; TODO: Navigate hunks: C-x v [ and C-x v ]
+  ;; (define-key diff-hl-mode-map (kbd "M-[") 'diff-hl-previous-hunk)
+  ;; (define-key diff-hl-mode-map (kbd "M-]") 'diff-hl-next-hunk)
+
+  ;; Show diff popup for current hunk
+  (define-key diff-hl-mode-map (kbd "C-x v p") 'diff-hl-show-hunk)
+
+  ;; To make flycheck appear on top of diff-hl:
+  (setq-default diff-hl-side 'left))
+
 
 (provide 'git-settings)
 ;;; git-settings.el ends here
