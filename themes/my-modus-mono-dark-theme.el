@@ -159,20 +159,25 @@
  ;; LSP faces
  ;; Errors, warnings, etc. can be minimal or softly highlighted
  `(lsp-face-highlight-textual ((t
-				(:background unspecified
+				(:background ,exu-fg2
 					     :foreground unspecified
-					     :box (:line-width 1 :color ,exu-accent :style released-button)))))
+					     :weight bold
+					     ;; :box (:line-width 1 :color ,exu-accent :style released-button)
+					     ))))
 
  `(lsp-face-highlight-read ((t
-			     (:background unspecified
+			     (:background ,exu-fg2
 					  :foreground unspecified
-					  :box (:line-width 1 :color ,exu-accent :style released-button)))))
+					  :weight bold
+					  ;; :box (:line-width 1 :color ,exu-accent :style released-button)
+					  ))))
 
  `(lsp-face-highlight-write ((t
-			      (:background unspecified
+			      (:background ,exu-fg2
 					   :foreground unspecified
 					   :weight bold
-					   :box (:line-width 1 :color ,exu-accent :style released-button)))))
+					   ;; :box (:line-width 1 :color ,exu-accent :style released-button)
+					   ))))
 
  `(lsp-face-error       ((t  (:background ,exu-bg-cyan :underline nil ))))
  `(lsp-face-warning     ((t  (:background ,exu-bg-magenta :underline nil :weight ,exu-bold))))

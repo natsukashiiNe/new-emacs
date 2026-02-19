@@ -124,7 +124,7 @@ Also reports errors with file and line number."
 (load-config-file "core/layout-settings.el")
 (load-config-file "core/floating-layout.el")
 
-(load-config-file "core/treemacs-settings.el")
+;; (load-config-file "core/treemacs-settings.el")
 
 (load-config-file "code/lsp-setup.el")        ;; Core lsp-mode + lsp-ui + formatting.
 ;; (load-config-file "code/docs-setup.el")    ;; Core lsp-mode + lsp-ui + formatting.

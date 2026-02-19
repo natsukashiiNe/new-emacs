@@ -25,7 +25,7 @@
 ;; TODO: redo in evil-normal / general
 (defvar-keymap my-goto-map
   :doc "Map to quickly navigate files (globally).")
-(keymap-set global-map "C-c h" my-goto-map)
+(keymap-set global-map "C-c g" my-goto-map)
 
 ;; ==== Emacs-(almost)-build-in keymaps ============================================
 (keymap-set global-map "C-x C-b" #'projectile-ibuffer)
@@ -66,7 +66,12 @@
 ;; == GOTO ============================================================
 
 (defun my-keymaps-set-activities-global-keymaps ()
-  (keymap-set my-goto-map "c" #'activities-new)
+  (keymap-set my-goto-map "g" #'persp-switch)
+  (keymap-set my-goto-map "i" #'my-persp/switch-to-last-visited)
+  (keymap-set my-goto-map "n" #'persp-add-new)
+  (keymap-set my-goto-map "s" #'persp-save-state-to-file)
+  (keymap-set my-goto-map "l" #'persp-load-state-from-file)
+
   (keymap-set my-goto-map "C" #'activities-define)
   (keymap-set my-goto-map "o" #'activities-switch)
   (keymap-set my-goto-map "O" #'activities-resume)
