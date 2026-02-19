@@ -10,8 +10,8 @@
 ;; PERFORMANCE OPTIMIZATIONS
 ;; =============================================================================
 
-;; Increase read process output max for LSP servers
-(setq read-process-output-max (* 1024 1024))  ; 1MB
+;; Increase read process output max for LSP servers (3MB for large UE responses)
+(setq read-process-output-max (* 3 1024 1024))
 
 ;; Faster garbage collection during LSP operations
 (setq gc-cons-threshold (* 100 1024 1024))  ; 100MB

@@ -1,96 +1,26 @@
 ;;; lsp-servers.el --- Language-specific LSP server configurations -*- lexical-binding: t; -*-
 
 ;;; Commentary:
-;; Language-specific LSP server configurations with dynamic resolution.
-;; Each language has:
-;; - Configuration variables (user-customizable paths and patterns)
-;; - Resolution functions (check project config, search patterns, fallback)
-;; - Server setup (hooks and lsp-mode integration)
-;;
+;; Language-specific LSP server configurations.
 ;; Requires lsp-setup.el to be loaded first.
 
 ;;; Code:
 
 ;; =============================================================================
-;; PYTHON - pyright
+;; PYTHON - pyright + ruff (add-on)
 ;; =============================================================================
 
-;; --- Configuration Variables ---
-(defcustom my/python-venv-search-patterns '(".venv" "venv" ".env")
-  "Directory names to search for Python virtual environments.
-Searched in order within project root."
-  :type '(repeat string)
-  :group 'my-lsp)
-
-(defcustom my/python-global-python-path "/usr/bin/python3"
-  "Global fallback Python interpreter path.
-Used when no project-specific virtual environment is found."
-  :type 'string
-  :group 'my-lsp)
-
-;; --- Resolution Functions ---
-(defun my/python--resolve-venv (project-root)
-  "Resolve Python virtual environment for PROJECT-ROOT.
-Returns plist with :venv-path, :python-path, :pyright-path.
-
-Resolution order:
-1. Project-specific config (future: my/project-config-get)
-2. Common patterns in PROJECT-ROOT (my/python-venv-search-patterns)
-3. Global fallback (my/python-global-python-path)"
-  
-  ;; Phase 1: Check project-specific config (future hook)
-  ;; (when-let ((venv-config (my/project-config-get project-root 'python 'venv)))
-  ;;   (return (my/python--build-venv-plist venv-config)))
-  
-  ;; Phase 2: Search common patterns in project
-  (if-let* ((venv-dir (my/python--find-venv-in-patterns project-root)))
-      (my/python--build-venv-plist (expand-file-name venv-dir project-root))
-    
-    ;; Phase 3: Use global fallback (system Python + system pyright)
-    (list :venv-path nil
-          :python-path my/python-global-python-path
-          :pyright-path "pyright-langserver"))) ; System pyright from pipx
-
-(defun my/python--find-venv-in-patterns (project-root)
-  "Search for virtual environment in PROJECT-ROOT using configured patterns.
-Returns directory name if found, nil otherwise."
-  (seq-find 
-   (lambda (dir-name)
-     (let ((venv-path (expand-file-name dir-name project-root)))
-       (file-executable-p 
-        (expand-file-name "bin/python" venv-path))))
-   my/python-venv-search-patterns))
-
-(defun my/python--build-venv-plist (venv-path)
-  "Build virtual environment plist for VENV-PATH.
-Returns plist with :venv-path, :python-path, :pyright-path."
-  (list :venv-path venv-path
-        :python-path (expand-file-name "bin/python" venv-path)
-        :pyright-path (let ((pyright (expand-file-name "bin/pyright-langserver" venv-path)))
-                        (if (file-executable-p pyright)
-                            pyright
-                          "pyright-langserver")))) ; Fallback to system
-
-(defun my/python--get-python-path ()
-  "Get Python path for current buffer's project."
-  (when-let* ((root (lsp-workspace-root)))
-    (plist-get (my/python--resolve-venv root) :python-path)))
-
-;; --- LSP Server Configuration ---
-(with-eval-after-load 'lsp-mode
-  ;; Register Python path provider
-  (lsp-register-custom-settings
-   '(("python.pythonPath" my/python--get-python-path)))
-  
-  ;; Configure pyright settings
-  (setq lsp-pyright-use-library-code-for-types t
-        lsp-pyright-auto-search-paths t
-        lsp-pyright-diagnostic-mode "workspace"
-        lsp-pyright-type-checking-mode "basic")) ; Industry standard
-
-;; Hook setup
-(add-hook 'python-ts-mode-hook #'lsp-deferred)
-(add-hook 'python-mode-hook #'lsp-deferred)
+;; lsp-pyright auto-detects .venv/venv in project root.
+;; Pyright installed globally via pipx; only runtime deps needed in project .venv.
+(use-package lsp-pyright
+  :ensure t
+  :custom
+  (lsp-pyright-use-library-code-for-types t)
+  (lsp-pyright-auto-search-paths t)
+  (lsp-pyright-diagnostic-mode "workspace")
+  (lsp-pyright-type-checking-mode "basic")
+  :hook ((python-ts-mode . lsp-deferred)
+         (python-mode . lsp-deferred)))
 
 
 ;; =============================================================================
@@ -137,12 +67,14 @@ Relative to project root, searched in order."
 
 (defcustom my/clangd-ue-args
   '("--background-index"
-    "--clang-tidy"
     "--completion-style=detailed"
-    "--header-insertion=iwyu"
-    "--pch-storage=memory"
+    "--header-insertion=never"
+    "--pch-storage=disk"
     "--log=error")
-  "Default clangd arguments for regular C++ projects."
+  "clangd arguments for Unreal Engine projects.
+Disables clang-tidy (noisy on UE macros), uses disk PCH storage
+for persistence across restarts, and disables header insertion
+since UE has its own include conventions."
   :type '(repeat string)
   :group 'my-lsp)
 
