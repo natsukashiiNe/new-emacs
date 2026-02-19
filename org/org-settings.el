@@ -75,8 +75,9 @@
 
 ;; For inline previews: use dvipng with standard latex (faster, works reliably)
 (setq org-preview-latex-default-process 'dvipng)
-(setq org-format-latex-options
-      (plist-put org-format-latex-options :scale 2.0))
+(with-eval-after-load 'org
+  (setq org-format-latex-options
+        (plist-put org-format-latex-options :scale 2.0)))
 
 ;; Auto-preview on file open
 (setq org-startup-with-latex-preview t)
@@ -99,21 +100,24 @@
         (:exports . "results")))
 
 ;; BABEL CONFIGURATION
-(add-to-list 'org-src-lang-modes '("cmake" . cmake-ts))
+(setq org-src-fontify-natively t)
 
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((python . t)
-   (shell . t)
-   (lisp . t)
-   (emacs-lisp . t)
-   (latex . t)
-   (plantuml . t)))
+(with-eval-after-load 'org
+  (add-to-list 'org-src-lang-modes '("plantuml" . plantuml))
+  (add-to-list 'org-src-lang-modes '("cmake" . cmake-ts))
 
-(setq org-babel-lisp-eval-fn 'sly-eval)  ; Use SLY to evaluate
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)
+     (shell . t)
+     (lisp . t)
+     (emacs-lisp . t)
+     (latex . t)
+     (plantuml . t)))
+
+  (setq org-babel-lisp-eval-fn 'sly-eval))  ; Use SLY to evaluate
+
 (setq org-confirm-babel-evaluate nil)
-
-;; (setq org-confirm-babel-evaluate nil)  ; Or use the selective function above
 (setq org-babel-python-command "python3")
 (setq org-babel-default-header-args:python
       '((:results . "output")))
