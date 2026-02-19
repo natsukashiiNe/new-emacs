@@ -48,8 +48,6 @@
           (lambda () (unless (daemonp) (my/setup-frame))))
 (add-hook 'after-make-frame-functions #'my/setup-frame)
 
-
-
 ;; == TAB BAR ========================================================
 
 ;; == MODE LINE ======================================================
