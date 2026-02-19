@@ -17,7 +17,16 @@
 
   (setq dirvish-attributes
         ;;'(nerd-icons file-info file-size vc-state git-msg))
-        '(nerd-icons file-info file-size subtree-state collapse))
+        '(nerd-icons file-time file-size subtree-state))
+
+  ;; Main listing: --all keeps . and .. visible
+  ;; --group-directories-first puts directories on top
+  (setq dired-listing-switches
+        "-l --all --human-readable --group-directories-first --no-group")
+
+  ;; Subtrees: --almost-all hides . and .. but keeps other dotfiles
+  (setq dirvish-subtree-listing-switches
+        "-l --almost-all --human-readable --group-directories-first --no-group")
 
   ;; == LAYOUT =========================================================
   ;; number of parents | max width of parent windows | width of preview
@@ -34,18 +43,38 @@
     (evil-set-initial-state 'dirvish-mode 'normal)
     (evil-define-key 'normal dirvish-mode-map
       (kbd "h") #'dired-up-directory
-      (kbd "l") #'dirvish-history-go-backward
+      (kbd "l") #'dired-find-file
 
       (kbd "TAB") #'dirvish-subtree-toggle
       (kbd "C-g") #'dirvish-quit
-      (kbd "S") #'dirvish-quicksort)
+      (kbd "q") #'dirvish-quit
+      (kbd "S") #'dirvish-quicksort
+
+      (kbd "C-j") #'dired-next-dirline
+      (kbd "C-k") #'dired-prev-dirline)
     )
 
 
   (keymap-set dired-mode-map "C-c C-c" 'dirvish-narrow)
 
   ;; Preview
-  ;; (setq dirvish-mode-line-format
+
+  (add-hook 'dirvish-special-preview-mode-hook (lambda () (display-line-numbers-mode -1)))
+
+  ;;(dirvish-define-preview directory-custom (file ext preview-window)
+  ;;   "Minimal directory preview with name, size, and date."
+  ;;   :require nil
+  ;;   (when (file-directory-p file)
+  ;;     `(shell . ("bash" "-c"
+  ;; 		 ,(concat
+  ;;                  "ls -AhpS --group-directories-first "
+  ;;                  "--time-style='+%Y-%m-%d %H:%M' "
+  ;;                  (shell-quote-argument file)
+  ;;                  " | awk '{print $6, $7, $5, $NF}'")))))
+
+  ;; (setq dirvish-preview-dispatchers
+  ;; 	'(directory-custom video image gif audio epub archive font pdf))
+  ;; ;; (setq dirvish-mode-line-format
   ;;       '(:left (sort file-time " " file-size symlink) :right (omit yank index)))
   ;; (setq dirvish-preview-side 'right)  ; or 'left
   ;; (setq dirvish-preview-size 0.5)     ; preview is 50% of frame width
