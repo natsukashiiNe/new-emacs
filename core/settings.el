@@ -111,6 +111,16 @@
   :config
   (global-company-mode -1)) 
 
+(use-package visual-regexp
+  :ensure t
+  :defer t)
+
+(use-package visual-regexp-steroids
+  :ensure t
+  :defer t
+  :after visual-regexp)
+
+
 ;; ----------------------------
 ;; QOL packages
 ;; ----------------------------
