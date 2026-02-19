@@ -98,7 +98,7 @@
  'my-modus-mono-dark
 
  `(cursor  ((t  (:background ,exu-orange-accent))))
- `(hl-line ((t  (:background "#00005f" :extend t))))
+ `(hl-line ((t  (:background "#222244" :extend t))))
  `(line-number-current-line ((t (:foreground "#FFFFFF" :background "#870000" :slant normal :weight normal))))
  `(show-paren-match ((t  (:foreground ,exu-black :background ,exu-yellow :extend t))))
 
@@ -117,7 +117,10 @@
  `(avy-lead-face-2       ((t  (:foreground ,exu-black :background ,exu-cyan-accent :weight normal))))
 
  
- `(help-key-binding          ((t  (:foreground ,exu-black  :background ,exu-cyan-accent :weight normal ))))
+ `(help-key-binding   ((t  (:foreground ,exu-black  :background ,exu-main-sup1 :weight normal ))))
+ `(help-argument-name ((t  (:foreground ,exu-accent :weight bold ))))
+
+ `(button            ((t  (:foreground ,exu-accent-alt :slant italic :weight normal :underline (:color ,exu-accent-alt)))))
  `(minibuffer-prompt ((t  (:foreground ,exu-black  :background ,exu-strong :box nil ))))
  `(border            ((t  (:foreground ,exu-strong :background ,exu-black :box nil ))))
  `(vertico-current   ((t  (:background "#444444" :weight normal :slant normal))))
@@ -126,12 +129,9 @@
  `(orderless-match-face-1   ((t  (:foreground ,exu-accent :weight bold :slant normal))))
  `(orderless-match-face-2   ((t  (:foreground ,exu-yellow :weight bold :slant normal))))
  `(orderless-match-face-3   ((t  (:foreground ,exu-accent-alt :weight bold :slant normal))))
-
  
  `(marginalia-documentation ((t  (:foreground ,exu-main-sup3 :slant ,exu-italic :weight normal))))
  `(marginalia-key           ((t  (:foreground ,exu-yellow    :slant ,exu-italic :weight normal))))
-
-
  
  `(tab-bar ((t  (:foreground ,exu-accent :background ,exu-bg3 :box nil ))))
  `(tab-bar-tab ((t  (:foreground ,exu-accent :background ,exu-bg3 :box nil ))))
@@ -201,6 +201,9 @@
 
  
  ;; --- FLYCHECK ----------------------------------------------------------------
+ 
+ `(success     ((t (:background ,exu-black        :foreground ,exu-main-sup3 :weight bold))))
+ 
  `(error     ((t (:foreground ,exu-bg-cyan        :background ,exu-cyan-accent :extend t))))
  `(warning   ((t (:foreground ,exu-magenta-accent :background ,exu-bg-magenta :weight ,exu-bold :extend t))))
  `(info             ((t (:background ,exu-bg-sel     :underline nil ))))
@@ -237,6 +240,11 @@
  `(magit-branch-local          ((t (:foreground ,exu-strong      :weight normal))))
  `(magit-branch-remote         ((t (:foreground ,exu-strong      :weight normal))))
 
+
+ `(diff-hl-insert ((t (:foreground "#88f5b3" :background ,(face-background 'default)))))
+ `(diff-hl-change ((t (:foreground "#a0c4ff" :background ,(face-background 'default)))))
+ `(diff-hl-delete ((t (:foreground "#ff8fa3" :background ,(face-background 'default)))))
+
  ;; --- Dired ----------------------------------------------------------------
  `(dirvish-hl-line             ((t (:foreground ,exu-black :background ,exu-accent :weight normal))))
  `(dired-directory             ((t (:foreground ,exu-accent-weak :weight normal))))
@@ -272,6 +280,11 @@
 
  `(telega-msg-heading ((t (:background ,exu-bg :weight bold))))
  `(telega-msg-inline-forward ((t (:background ,exu-bg :slant italic))))
+
+ ;; --- ORG ---------------------------------------------------------------------
+ `(org-verbatim ((t (:background ,exu-black :foreground ,exu-slate-accent))))
+ ;;`(org-property-value ((t (:background ,exu-black :foreground ,exu-slate-accent))))
+
 
  )
 ;; --- EVIL MODE CURSOR/LINE DYNAMIC COLORS ------------------------------------
