@@ -207,21 +207,22 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
   (general-define-key
    :states '(normal visual insert)
    :keymaps 'override
-   "C-M-l" 'tab-bar-switch-to-next-tab
-   "C-M-h" 'tab-bar-switch-to-prev-tab
+   ;; "C-M-l" 'tab-bar-switch-to-next-tab
+   ;; "C-M-h" 'tab-bar-switch-to-prev-tab
    "M-i" 'evil-switch-to-windows-last-buffer
-   "M-e" 'eyebrowse-last-window-config
+   "M-e" 'tab-bar-switch-to-next-tab
+   "M-E" 'tab-bar-switch-to-prev-tab
 
-   "C-S-H" 'evil-window-left
-   "C-S-J" 'evil-window-down
-   "C-S-K" 'evil-window-up
-   "C-S-L" 'evil-window-right
+   "C-S-h" 'evil-window-left
+   "C-S-j" 'evil-window-down
+   "C-S-k" 'evil-window-up
+   "C-S-l" 'evil-window-right
 
    ;; TODO: move to special mode - that would replace modeline to indicate
-   ;; "C-M-h" 'shrink-window-horizontally
-   ;; "C-M-l" 'enlarge-window-horizontally
-   ;; "C-M-j" 'enlarge-window
-   ;; "C-M-k" 'shrink-window
+   "C-M-h" 'shrink-window-horizontally
+   "C-M-l" 'enlarge-window-horizontally
+   "C-M-j" 'enlarge-window
+   "C-M-k" 'shrink-window
 
    ;;"M-t" 'elastic-perspective-toggle)
    "M-t" 'elastic-vterm-toggle)

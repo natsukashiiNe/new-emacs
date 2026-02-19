@@ -21,13 +21,19 @@
   :doc "Map with to quickly insert often used text.")
 (keymap-set global-map "C-c C-s" my-quick-insert-map)
 
-;; ==== Emacs-(almost)-build-in keymaps ============================================
 
-(keymap-set global-map "C-x C-b" 'projectile-ibuffer)
-(keymap-set global-map "C-x B"   'ibuffer)
-(keymap-set global-map "C-x C-x" 'previous-buffer)
-(keymap-set global-map "C-x X"   'next-buffer)
-(keymap-set global-map "C-x l"   'eval-expression)
+;; TODO: redo in evil-normal / general
+(defvar-keymap my-goto-map
+  :doc "Map to quickly navigate files (globally).")
+(keymap-set global-map "C-c h" my-goto-map)
+
+;; ==== Emacs-(almost)-build-in keymaps ============================================
+(keymap-set global-map "C-x C-b" #'projectile-ibuffer)
+(keymap-set global-map "C-x B"   #'ibuffer)
+(keymap-set global-map "C-x C-x" #'previous-buffer)
+(keymap-set global-map "C-x X"   #'next-buffer)
+(keymap-set global-map "C-x l"   #'eval-expression)
+(keymap-set global-map "C-c E"   #'eplaca-log)
 
 (with-eval-after-load 'consult
   (keymap-set evil-normal-state-map "C-s" 'consult-line)
@@ -57,6 +63,19 @@
 
 ;; == PROJECTILE ======================================================
 
+;; == GOTO ============================================================
+
+(defun my-keymaps-set-activities-global-keymaps ()
+  (keymap-set my-goto-map "c" #'activities-new)
+  (keymap-set my-goto-map "C" #'activities-define)
+  (keymap-set my-goto-map "o" #'activities-switch)
+  (keymap-set my-goto-map "O" #'activities-resume)
+  (keymap-set my-goto-map "s" #'activities-suspend)
+  (keymap-set my-goto-map "k" #'activities-kill)
+  (keymap-set my-goto-map "h" #'activities-switch-buffer)
+  (keymap-set my-goto-map "u" #'activities-revert)
+  (keymap-set my-goto-map "r" #'activities-rename)
+  (keymap-set my-goto-map "l" #'activities-list))
 
 ;; == COMPILE MAP =====================================================
 
@@ -183,13 +202,16 @@
 ;; ==== AGENT SHELL KEYMAPS =====================================================
 (defun my-keymaps-set-agent-shell-mode ()
   (evil-define-key '(normal visual) agent-shell-mode-map
-    (kbd "C-<return>") #'agent-shell-submit
+    (kbd "C-c <return>") #'agent-shell-submit
     (kbd "C-k") #'agent-shell-previous-item
     (kbd "C-j") #'agent-shell-next-item
     (kbd "M-p") #'agent-shell-previous-input
     (kbd "M-n") #'agent-shell-next-input)
   (evil-define-key 'insert agent-shell-mode-map
-    (kbd "RET") #'newline))
+    (kbd "RET") #'newline
+    (kbd "<up>") nil)
+  )
+
 
 
 (defun my-keymaps-set-agent-shell-global-keymaps ()

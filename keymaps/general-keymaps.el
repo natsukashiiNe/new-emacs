@@ -209,10 +209,10 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
       "M-i" 'evil-switch-to-windows-last-buffer
       "M-e" 'eyebrowse-last-window-config
 
-      "C-S-H" 'evil-window-left
-      "C-S-J" 'evil-window-down
-      "C-S-K" 'evil-window-up
-      "C-S-L" 'evil-window-right
+      "C-S-h" 'evil-window-left
+      "C-S-j" 'evil-window-down
+      "C-S-k" 'evil-window-up
+      "C-S-l" 'evil-window-right
 
       "C-M-h" 'shrink-window-horizontally
       "C-M-l" 'enlarge-window-horizontally
