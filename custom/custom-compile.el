@@ -5,10 +5,18 @@
 
 ;;; Code:
 
-(defun my/compile-with-name (name-suffix &optional command)
-  "Run compilation with project-specific buffer named *NAME-SUFFIX:project*."
+(defun my/compile-with-name (name-suffix &optional command directory)
+  "Run compilation with project-specific buffer named *NAME-SUFFIX:project*.
+DIRECTORY, if non-nil, is the working directory for compilation (relative to
+project root or absolute).  This ensures `default-directory' in the
+compilation buffer matches where the build actually runs, so that
+`consult-compile-error' and similar tools can find related buffers."
   (let* ((project (projectile-project-name))
-         (default-directory (projectile-project-root))
+         (project-root (projectile-project-root))
+         (default-directory (if directory
+                                (file-name-as-directory
+                                 (expand-file-name directory project-root))
+                              project-root))
          (compilation-buffer-name-function
           (lambda (_mode) (format "*%s:%s*" name-suffix project)))
          ;; Prevent compile from overwriting buffer-local compile-command
@@ -27,10 +35,11 @@
   (interactive)
   (my/compile-with-name "test" projectile-project-test-cmd))
 
-(defun my/project-custom (name command)
-  "Run arbitrary named compilation."
+(defun my/project-custom (name command &optional directory)
+  "Run arbitrary named compilation.
+DIRECTORY, if non-nil, sets the working directory (relative to project root)."
   (interactive "sBuffer name: \nsCommand: ")
-  (my/compile-with-name name command))
+  (my/compile-with-name name command directory))
 
 ;; FIX: have this be written to the file / .dir-locals.el
 (defun my/reload-dir-locals-on-save ()

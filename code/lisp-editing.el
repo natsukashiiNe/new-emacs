@@ -4,6 +4,16 @@
 ;; Set up packages for Elisp and LISP editing.
 
 ;;; Code:
+(defmacro l (&rest body)
+  `(lambda ()
+     ,@body))
+
+
+(defmacro li (&rest body)
+  `(lambda ()
+     (interactive)
+     ,@body))
+
 (require 'mode-local)
 (setq-mode-local emacs-lisp-mode global-hl-line-mode nil)
 (setq-mode-local lisp-mode global-hl-line-mode nil)
