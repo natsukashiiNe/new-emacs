@@ -74,7 +74,7 @@
 (use-package enlight
   :ensure t
   :demand t
-  :hook (emacs-startup-hook . enlight-open)
+  ;; :hook (emacs-startup-hook . enlight-open)
   :custom
   (enlight-content
    (concat

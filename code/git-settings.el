@@ -29,9 +29,9 @@
   :after magit)
 
 ;; FIXME -> Currently does not work with magit
-;; (use-package vdiff-magit
-;;   :ensure t
-;;   :after (magit vdiff))
+(use-package vdiff-magit
+  :ensure t
+  :after (magit vdiff))
 
 (use-package difftastic
   :ensure (:url "https://github.com/pkryger/difftastic.el.git"

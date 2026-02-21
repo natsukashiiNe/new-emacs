@@ -105,12 +105,16 @@
     (keymap-set my-quick-insert-map "C-s" #'yas-insert-snippet)))
 
 (my-quick-insert-map-setup)
+(with-eval-after-load 'org
+  (keymap-set org-mode-map "C-c C-s" my-quick-insert-map))
 
 ;; == ORG MODE ========================================================
 (with-eval-after-load 'org
   (evil-define-key 'normal org-mode-map
     (kbd "C-j") #'org-next-visible-heading
-    (kbd "C-k") #'org-previous-visible-heading))
+    (kbd "C-k") #'org-previous-visible-heading
+    (kbd "C-i") #'org-cycle
+    ))
 
 ;; !! TO REFACOTR ==
 ;;(keymap-set evil-insert-state-map "C-h" 'evil-delete-backward-char)
