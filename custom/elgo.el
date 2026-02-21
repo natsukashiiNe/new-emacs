@@ -52,29 +52,43 @@ Each entry is a plist with :path (relative to project root) and :keymap (single 
     (when selected
       (find-file selected))))
 
+(defun my/elastic-files--ensure-prefix-keys (keymap full-key-str)
+  "Ensure intermediate keys in FULL-KEY-STR are prefix keys in KEYMAP."
+  (let* ((keys (kbd full-key-str))
+         (len (length keys)))
+    (when (> len 1)
+      (dotimes (i (1- len))
+        (let* ((prefix (substring keys 0 (1+ i)))
+               (binding (lookup-key keymap prefix)))
+          (when (and binding (not (keymapp binding)))
+            (define-key keymap prefix nil)))))))
+
 (defun my/elastic-files-setup-keys ()
   "Setup keybindings for elastic files based on :keymap property."
   (when project-elastic-files
+    ;; Ensure we have a local map to work with
+    (unless (current-local-map)
+      (use-local-map (make-sparse-keymap)))
     (dolist (file-plist project-elastic-files)
       (when-let ((key (plist-get file-plist :keymap))
                  (path (plist-get file-plist :path)))
-        ;; Create a named command for better which-key display
         (let ((cmd-name (intern (format "my/elastic-files-open-%s" key)))
-              (display-path (concat "./" path)))
-          ;; Define the command
+              (display-path (concat "./" path))
+              (full-key (concat "M-g " key)))
           (defalias cmd-name
             `(lambda ()
                (interactive)
                (my/elastic-files-open ',file-plist))
             (format "el-go <%s>" display-path))
-          
-          ;; Bind the key
-          (local-set-key (kbd (concat "M-g " key)) cmd-name)
-          
-          ;; Register with which-key if available
+
+          ;; Clear any non-prefix bindings on intermediate keys
+          (my/elastic-files--ensure-prefix-keys (current-local-map) full-key)
+
+          (local-set-key (kbd full-key) cmd-name)
+
           (when (fboundp 'which-key-add-key-based-replacements)
             (which-key-add-key-based-replacements
-              (concat "M-g " key) (format "elgo <%s>" display-path))))))))
+              full-key (format "elgo <%s>" display-path))))))))
 
 ;; Global binding for consult selector
 (global-set-key (kbd "M-g M-g") 'my/elastic-files-consult)
