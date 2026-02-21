@@ -94,6 +94,7 @@ Also reports errors with file and line number."
 ;; ==================================
 ;; Load Config Files
 ;; ==================================
+
 (add-to-list 'custom-theme-load-path (expand-file-name "themes" my-config-dir))
 (add-to-list 'load-path (expand-file-name "org" my-config-dir))
 (add-to-list 'load-path (expand-file-name "core" my-config-dir))
@@ -110,7 +111,9 @@ Also reports errors with file and line number."
 
 (load-config-file "local/get-secrets.el")
 (load-config-file "local/local-env.el")
+(load-config-file "local/setup-local-variables.el")
 
+(load-config-file "core/ego-setup.el")
 (load-config-file "core/bar-settings.el")
 ;; TODO: remove test to an actual file
 (load-config-file "core/dirvish-settings-test.el") 
