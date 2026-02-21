@@ -7,9 +7,18 @@
 ;;   (require 'ego)
 ;;
 ;;   (setq ego-ql-locations
-;;     '(("d"   . "~/Downloads")
+;;     '(;; Simple cons pairs — desc defaults to "eql <path>":
+;;       ("d"   . "~/Downloads")
 ;;       ("h s" . "~/Pictures/screenshots")
-;;       ("p"   . "~/Projects")))
+;;
+;;       ;; Plist with custom desc — @path expands to the :path value:
+;;       (:key "p" :path "~/Projects" :desc "ego @path")
+;;
+;;       ;; Plist without :desc — defaults to "eql <path>":
+;;       (:key "c" :path "~/.config")
+;;
+;;       ;; Both formats can be mixed freely in the same list.
+;;       ))
 ;;
 ;;   ;; Optionally override defaults:
 ;;   ;; (setq ego-ql-global-prefix "C-c G")
@@ -17,6 +26,22 @@
 ;;   ;; (setq ego-ql-minibuffer-prefix "C-c l")
 ;;
 ;;   (ego-ql-setup)
+;;
+;; Description templates:
+;;   @path  — expands to the :path value
+;;
+;; Examples:
+;;   (:key "d" :path "~/Downloads" :desc "ego @path")
+;;     => which-key shows: "ego ~/Downloads"
+;;
+;;   (:key "s" :path "~/src" :desc "sources")
+;;     => which-key shows: "sources"
+;;
+;;   (:key "n" :path "~/Notes")
+;;     => which-key shows: "eql ~/Notes"
+;;
+;;   ("t" . "/tmp")
+;;     => which-key shows: "eql /tmp"
 
 ;;; Code:
 
@@ -25,8 +50,10 @@
 ;;;; User-facing variables
 
 (defvar ego-ql-locations nil
-  "Alist of (KEY-SEQUENCE . PATH) for quick location access.
-KEY-SEQUENCE is a string like \"d\" or \"h s\" (space-separated keys).")
+  "List of quick-location entries.
+Each entry is either a cons pair (KEY . PATH) or a plist
+\(:key KEY :path PATH [:desc DESC]).  DESC supports @path
+expansion.  Default description is \"eql @path\".")
 
 (defvar ego-ql-global-prefix nil
   "Key sequence string for the global quick-locations prefix (e.g. \"C-c G\").")
@@ -66,12 +93,30 @@ KEY-SEQUENCE is a string like \"d\" or \"h s\" (space-separated keys).")
       (delete-minibuffer-contents)
       (insert expanded-path))))
 
-(defun ego-ql--bind-to-map (keymap key-str make-action-fn)
-  "Bind KEY-STR in KEYMAP using MAKE-ACTION-FN applied to the matching path.
-KEY-STR can be \"d\" or multi-key like \"h s\"."
-  (let* ((path (cdr (assoc key-str ego-ql-locations)))
-         (keys (split-string key-str " "))
-         (cmd (funcall make-action-fn path)))
+(defun ego-ql--normalize-entry (entry)
+  "Normalize ENTRY to (:key KEY :path PATH :desc DESC).
+ENTRY is either (KEY . PATH) or (:key KEY :path PATH [:desc DESC]).
+@path in DESC expands to PATH.  Default desc is \"eql @path\"."
+  (let (key path desc)
+    (if (keywordp (car entry))
+        (setq key  (plist-get entry :key)
+              path (plist-get entry :path)
+              desc (or (plist-get entry :desc) "eql @path"))
+      (setq key  (car entry)
+            path (cdr entry)
+            desc "eql @path"))
+    (setq desc (string-replace "@path" path desc))
+    (list :key key :path path :desc desc)))
+
+(defun ego-ql--normalize-locations ()
+  "Normalize `ego-ql-locations' into a list of canonical plists."
+  (mapcar #'ego-ql--normalize-entry ego-ql-locations))
+
+(defun ego-ql--bind-to-map (keymap key-str path desc make-action-fn)
+  "Bind KEY-STR in KEYMAP to a command created by MAKE-ACTION-FN for PATH.
+DESC is shown in which-key.  KEY-STR can be \"d\" or multi-key like \"h s\"."
+  (let* ((keys (split-string key-str " "))
+         (cmd (cons desc (funcall make-action-fn path))))
     (if (= (length keys) 1)
         (define-key keymap (kbd key-str) cmd)
       (let ((prefix-keys (butlast keys))
@@ -90,10 +135,12 @@ KEY-STR can be \"d\" or multi-key like \"h s\"."
   "Rebuild `ego-ql--map' and `ego-ql--minibuffer-map' from `ego-ql-locations'."
   (setq ego-ql--map (make-sparse-keymap))
   (setq ego-ql--minibuffer-map (make-sparse-keymap))
-  (dolist (entry ego-ql-locations)
-    (let ((key-str (car entry)))
-      (ego-ql--bind-to-map ego-ql--map key-str #'ego-ql--make-dired-action)
-      (ego-ql--bind-to-map ego-ql--minibuffer-map key-str #'ego-ql--make-minibuffer-action))))
+  (dolist (entry (ego-ql--normalize-locations))
+    (let ((key  (plist-get entry :key))
+          (path (plist-get entry :path))
+          (desc (plist-get entry :desc)))
+      (ego-ql--bind-to-map ego-ql--map key path desc #'ego-ql--make-dired-action)
+      (ego-ql--bind-to-map ego-ql--minibuffer-map key path desc #'ego-ql--make-minibuffer-action))))
 
 ;;;; Public setup
 
