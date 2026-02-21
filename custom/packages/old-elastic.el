@@ -140,7 +140,8 @@ This function creates and stores the frame in `elastic-vterm--frame`."
                             ;; REMOVED: (keep-ratio . t)
                             ;; This was causing Emacs to override our geometry!
                             (user-position . t)  ; Respect our position
-                            (user-size . t))))   ; Respect our size
+                            (user-size . t)      ; Respect our size
+                            (persp-ignore-wconf . t)))) ; Don't let persp-mode save/restore wconf
         
         (elastic--debug-log "")
         (elastic--debug-log "--- FRAME PARAMETERS ---")
@@ -153,14 +154,14 @@ This function creates and stores the frame in `elastic-vterm--frame`."
         (elastic--debug-log "--- CREATED FRAME INFO ---")
         (elastic--debug-log "Child frame: %s" elastic-vterm--frame)
         (elastic--debug-log "Actual native dimensions: %dx%d"
-                           (frame-native-width elastic-vterm--frame)
-                           (frame-native-height elastic-vterm--frame))
+                            (frame-native-width elastic-vterm--frame)
+                            (frame-native-height elastic-vterm--frame))
         (elastic--debug-log "Actual pixel dimensions: %dx%d"
-                           (frame-pixel-width elastic-vterm--frame)
-                           (frame-pixel-height elastic-vterm--frame))
+                            (frame-pixel-width elastic-vterm--frame)
+                            (frame-pixel-height elastic-vterm--frame))
         (elastic--debug-log "Actual position: left=%s top=%s"
-                           (frame-parameter elastic-vterm--frame 'left)
-                           (frame-parameter elastic-vterm--frame 'top))
+                            (frame-parameter elastic-vterm--frame 'left)
+                            (frame-parameter elastic-vterm--frame 'top))
         
         ;; Calculate differences
         (let ((actual-width (frame-pixel-width elastic-vterm--frame))
@@ -170,11 +171,11 @@ This function creates and stores the frame in `elastic-vterm--frame`."
           (elastic--debug-log "")
           (elastic--debug-log "--- COMPARISON ---")
           (elastic--debug-log "Width:  expected=%d actual=%d diff=%d (%.1f%%)"
-                             expected-width actual-width (- actual-width expected-width)
-                             (* 100.0 (/ (float (- actual-width expected-width)) expected-width)))
+                              expected-width actual-width (- actual-width expected-width)
+                              (* 100.0 (/ (float (- actual-width expected-width)) expected-width)))
           (elastic--debug-log "Height: expected=%d actual=%d diff=%d (%.1f%%)"
-                             expected-height actual-height (- actual-height expected-height)
-                             (* 100.0 (/ (float (- actual-height expected-height)) expected-height)))
+                              expected-height actual-height (- actual-height expected-height)
+                              (* 100.0 (/ (float (- actual-height expected-height)) expected-height)))
           
           (when (or (> (abs (- actual-width expected-width)) 50)
                     (> (abs (- actual-height expected-height)) 50))

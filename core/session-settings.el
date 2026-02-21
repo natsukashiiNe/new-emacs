@@ -55,14 +55,60 @@ NAME is the target perspective; ignored here."
         (persp-switch last)
       (message "No previous perspective recorded."))))
 
+;; Per-daemon perspective isolation: each named daemon gets its own save
+;; directory so daemons never overwrite each other's perspectives.
+;; (daemonp) returns the daemon name string during init, before server-name is set.
+(when-let* ((dn (and (stringp (daemonp)) (daemonp))))
+  (setq persp-save-dir
+        (expand-file-name (format "persp-confs/%s/" dn)
+                          user-emacs-directory)))
+
 (use-package persp-mode
   :ensure t
   :demand t
   :custom
   (persp-keymap-prefix (kbd "C-c n"))
   :config
+  (make-directory persp-save-dir t)
   (add-hook 'persp-before-switch-functions #'my-persp--save-current-before-switch)
-  (persp-mode))
+  (persp-mode)
+
+  ;; Process buffer save/load handlers for daemon restart (reboot) recovery.
+  ;; While the daemon is alive, all process buffers persist naturally in memory.
+  ;; These handlers save enough metadata to recreate fresh buffers on next launch.
+
+  (persp-def-buffer-save/load
+   :mode 'compilation-mode
+   :tag-symbol 'def-compilation-buffer
+   :save-vars '(default-directory compilation-directory
+				  compilation-environment compilation-arguments))
+
+  (persp-def-buffer-save/load
+   :mode 'shell-mode
+   :tag-symbol 'def-shell-buffer
+   :save-vars '(default-directory)
+   :load-function
+   (lambda (savelist &rest _)
+     (let* ((buf-name (cadr savelist))
+            (vars (caddr savelist))
+            (dir (or (alist-get 'default-directory vars) "~/")))
+       (or (get-buffer buf-name)
+           (let ((default-directory dir))
+             (shell buf-name))))))
+
+  (with-eval-after-load 'vterm
+    (persp-def-buffer-save/load
+     :mode 'vterm-mode
+     :tag-symbol 'def-vterm-buffer
+     :save-vars '(default-directory)
+     :load-function
+     (lambda (savelist &rest _)
+       (let* ((buf-name (cadr savelist))
+              (vars (caddr savelist))
+              (dir (or (alist-get 'default-directory vars) "~/")))
+         (or (get-buffer buf-name)
+             (let ((default-directory dir))
+               (vterm buf-name))))))))
 
 (use-package activities
   :ensure (:host github :repo "alphapapa/activities.el" )
