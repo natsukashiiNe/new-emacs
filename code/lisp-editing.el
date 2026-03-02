@@ -8,7 +8,6 @@
   `(lambda ()
      ,@body))
 
-
 (defmacro li (&rest body)
   `(lambda ()
      (interactive)
@@ -21,11 +20,26 @@
 (add-hook 'emacs-lisp-mode-hook (lambda () (flycheck-mode -1)))
 
 (keymap-set emacs-lisp-mode-map "C-x E" 'eval-defun)
+
+(use-package eros
+  :ensure t
+  :defer t
+  :config
+  (setq eros-mode 1))
+
+;; TODO: make it use numbered arg to move N sexp forwards.
 (defun my/evil-insert-at-end-of-sexp ()
   "Jump to end of current sexp and enter insert mode."
   (interactive)
   (puni-end-of-sexp)
   (forward-char 1)  ; move past the closing paren
+  (newline)
+  (evil-insert-state))
+
+(defun my/evil-insert-before-end-of-sexp ()
+  "Jump to end of current sexp and enter insert mode."
+  (interactive)
+  (puni-end-of-sexp)
   (newline)
   (evil-insert-state))
 
@@ -35,6 +49,7 @@
   :hook
   ;; Enable puni-mode in Lisp modes
   (emacs-lisp-mode . puni-mode)
+  (lisp-mode . puni-mode)
   :config
   (with-eval-after-load 'evil
     (evil-define-key '(normal insert) puni-mode-map
@@ -60,9 +75,9 @@
 (use-package highlight-parentheses
   :ensure t
   :init
-  ;; Define custom faces with default values
+  ;; TODO: Move to the theme
   (defface my/hl-paren-innermost
-    '((t :foreground "#000000" :background "#d0bc00"))
+    '((t :background "#5C4800" :foreground "#D7AF00"))
     "Innermost parenthesis in current scope."
     :group 'highlight-parentheses)
 
@@ -86,6 +101,26 @@
   
   :hook ((emacs-lisp-mode . highlight-parentheses-mode)
          (lisp-mode . highlight-parentheses-mode)))
+
+					; == Common Lisp Editing =======================================================
+(use-package sly
+  :ensure t
+  :custom
+  (inferior-lisp-proram "sbcl"))
+
+(use-package sly-overlay
+  :ensure t
+  :after sly)
+
+;; (defun my/sly-overlay-eval-last-expression ()
+;;   (interactive)
+;;   (sly-eval-async
+;;       `(slynk:eval-and-grab-output
+;; 	,(sly-last-expression))
+;;     (lambda (result)
+;;       (let ((value (cadr result)))
+;; 	(sly-overlay--display-result value (point))))))
+
 
 (provide 'lisp-editing)
 ;;; lisp-editing.el ends here (emacs-lisp-checkdoc)
