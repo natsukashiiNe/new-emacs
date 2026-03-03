@@ -19,9 +19,11 @@
 (defconst exu-bold        'bold)
 
 
-(defconst exu-bg-pink          "#F1D5D0")  ;; soft bg color
+(defconst exu-bg-pink          "#FAD0D0")  ;; soft bg color
 
 ;; DIFFERENT BGS
+(defconst exu-bg-dim1 "#E9E5BB")
+(defconst exu-bg-dim2 "#D4D2B3")
 (defconst exu-bg3 "#efe9dd")
 
 ;; DIFFRENT FGS
@@ -34,6 +36,7 @@
 
 (defconst exu-orange-accent    "#FF8700")
 (defconst exu-orange-light     "#A64700")
+(defconst exu-orange-dimmer    "#A0422E")
 (defconst exu-bg-orange        "#FFD0A0")
 
 (defconst exu-blue-light       "#1565C0") ;; "#1E88E5","#0D47A1"
@@ -45,14 +48,30 @@
 (load-theme 'modus-operandi-tinted t)
 
 ;; Now override syntax and LSP faces:
-(custom-theme-set-faces 'my-modus-mono
-  ;; DEFAULT AND UI
- `(default ((t  (:background ,exu-bg))))
+(custom-theme-set-faces
+ 'my-modus-mono
+ ;; DEFAULT AND UI
+
+ `(cursor  ((t  (:background ,exu-red))))
  `(hl-line ((t  (:background unspecified :extend t))))
+ ;; `(line-number-current-line ((t (:foreground "#FFFFFF" :background "#870000" :slant normal :weight normal))))
+ `(show-paren-match ((t  (:foreground ,exu-green-dimmer :background ,exu-bg-green :extend t))))
+
+ `(default ((t  (:background ,exu-bg))))
+
+ `(vertico-current   ((t  (:background ,exu-bg-pink :weight normal :slant normal))))
+
+ `(orderless-match-face-0   ((t  (:foreground ,exu-blue-light :background ,exu-bg-blue :weight bold :slant normal))))
+ `(orderless-match-face-1   ((t  (:foreground ,exu-green-dimmer :background ,exu-bg-green :weight bold :slant normal))))
+ `(orderless-match-face-2   ((t  (:background "#F0EEFF" :foreground "#8E24AA" :weight bold :slant normal))))
+ `(orderless-match-face-3   ((t  (:foreground ,exu-orange-dimmer :background ,exu-bg-orange :weight bold :slant normal))))
+
+ ;; `(marginalia-documentation ((t  (:foreground ,exu-main-sup3 :slant ,exu-italic :weight normal))))
+ ;; `(marginalia-key           ((t  (:foreground ,exu-yellow    :slant ,exu-italic :weight normal))))
+
  `(tab-bar ((t  (:foreground ,exu-red :background ,exu-bg3 :box nil ))))
  `(tab-bar-tab ((t  (:foreground ,exu-red :background ,exu-bg3 :box nil ))))
  `(tab-bar-inactive ((t  (:foreground ,exu-fg2 :background ,exu-bg3 :box nil ))))
-
 
 
  `(font-lock-function-name-face ((t  (:foreground ,exu-fg :slant ,exu-italic))))
@@ -109,8 +128,8 @@
  `(flycheck-fringe-info    ((t (:foreground ,exu-blue-light    :background ,exu-bg-orange))))
 
  ;; --- TELEGA ------------------------------------------------------------------
-`(telega-msg-heading ((t (:background ,exu-bg :weight bold))))
-`(telega-msg-inline-forward ((t (:background ,exu-bg :slant italic))))
+ `(telega-msg-heading ((t (:background ,exu-bg :weight bold))))
+ `(telega-msg-inline-forward ((t (:background ,exu-bg :slant italic))))
 
  )
 ;; --- CUSTOM FACES ------------------------------------------------------------

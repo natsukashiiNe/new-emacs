@@ -106,9 +106,9 @@
  `(hl-line-insert ((t  (:background ,exu-bg-red :extend t))))
  `(line-number-current-line-insert ((t (:foreground "#000000" :background "#ff8020" :slant normal :weight normal))))
 
- `(default      ((t  (:background unspecified))))
- `(line-number  ((t  (:background unspecified))))
- `(fringe       ((t  (:background unspecified))))
+ `(default      ((t  (:background ,exu-black))))
+ `(line-number  ((t  (:background ,exu-black))))
+ `(fringe       ((t  (:background ,exu-black))))
 
  ;; DEFAULT AND UI
  `(avy-lead-face       ((t  (:foreground ,exu-black :background ,exu-cyan-accent :weight normal))))
@@ -123,6 +123,7 @@
  `(button            ((t  (:foreground ,exu-accent-alt :slant italic :weight normal :underline (:color ,exu-accent-alt)))))
  `(minibuffer-prompt ((t  (:foreground ,exu-black  :background ,exu-strong :box nil ))))
  `(border            ((t  (:foreground ,exu-strong :background ,exu-black :box nil ))))
+ `(internal-border   ((t  (:foreground ,exu-accent))))
  `(vertico-current   ((t  (:background "#444444" :weight normal :slant normal))))
 
  `(orderless-match-face-0   ((t  (:foreground ,exu-strong :weight bold :slant normal))))
@@ -150,7 +151,7 @@
  `(font-lock-string-face        ((t  (:foreground ,exu-main-sup1 :slant normal :weight normal))))
  `(font-lock-negation-char-face ((t  (:inherit font-lock-escape-face))))
  `(font-lock-comment-face       ((t  (:foreground ,exu-comment :slant ,exu-italic :weight normal))))
- `(font-lock-doc-face           ((t  (:foreground ,exu-viol :slant ,exu-italic :weight normal))))
+ `(font-lock-doc-face           ((t  (:foreground ,exu-slate-dimmer :slant ,exu-italic :weight normal))))
  `(font-lock-doc-markup-face    ((t  (:foreground ,exu-main-sup1 :slant normal :weight normal))))
  `(font-lock-constant-face      ((t  (:foreground ,exu-main-sup2 :slant normal :weight normal))))
  `(font-lock-number-face        ((t  (:foreground ,exu-main-sup2 :slant ,exu-italic :weight normal))))
@@ -158,6 +159,8 @@
 
  ;; LSP faces
  ;; Errors, warnings, etc. can be minimal or softly highlighted
+ `(symbol-overlay-default-face ((t :background ,exu-fg2 :foreground unspecified :weight bold)))
+ 
  `(lsp-face-highlight-textual ((t
 				(:background ,exu-fg2
 					     :foreground unspecified
@@ -227,9 +230,9 @@
  `(flycheck-inline-info      ((t (:foreground ,exu-slate-accent   :background ,exu-bg-slate :extend t ))))
 
  ;; icons
- `(flycheck-fringe-error     ((t (:foreground ,exu-bg-cyan    :background ,exu-bg-orange))))
- `(flycheck-fringe-warning   ((t (:foreground ,exu-bg-magenta :background ,exu-bg-orange))))
- `(flycheck-fringe-info      ((t (:foreground ,exu-blue-light     :background ,exu-bg-orange))))
+ `(flycheck-fringe-error     ((t (:foreground ,exu-cyan-accent    :background ,exu-bg-cyan :extend t))))
+ `(flycheck-fringe-warning   ((t (:foreground ,exu-magenta-accent :background ,exu-bg-magenta :weight ,exu-bold :extend t))))
+ `(flycheck-fringe-info      ((t (:foreground ,exu-slate-accent   :background ,exu-bg-slate :extend t ))))
 
  `(flyover-error     ((t (:foreground ,exu-cyan-accent    :background ,exu-bg-cyan :extend t))))
  `(flyover-warning   ((t (:foreground ,exu-magenta-accent :background ,exu-bg-magenta  :extend t))))
@@ -260,6 +263,12 @@
  `(comint-highlight-prompt     ((t (:foreground ,exu-black :background ,exu-accent-alt  :inherit nil))))
 
 
+ ;; --- MODELINE ----------------------------------------------------------------
+ `(doom-modeline-buffer-modified   ((t (:background ,exu-orange-light :foreground ,exu-bg-orange :weight bold))))
+ `(doom-modeline-evil-insert-state ((t (:background ,exu-orange-light :foreground ,exu-bg-orange))))
+ ;; `(doom-modeline-evil-motion-state ((t (:background ,exu-orange-light :foreground ,exu-bg-orange :weight bold))))
+ ;; `(doom-modeline-evil-normal-state ((t (:background ,exu-orange-light :foreground ,exu-bg-orange :weight bold))))
+
 
  
  ;; --- Treemacs ----------------------------------------------------------------
@@ -285,6 +294,10 @@
 
  `(telega-msg-heading ((t (:background ,exu-bg :weight bold))))
  `(telega-msg-inline-forward ((t (:background ,exu-bg :slant italic))))
+
+ ;; --- SHR ---------------------------------------------------------------------
+ `(shr-code ((t (:foreground ,exu-accent-weak))))
+ `(shr-link ((t ( :box nil :underline t))))
 
  ;; --- ORG ---------------------------------------------------------------------
  `(org-verbatim ((t (:background ,exu-black :foreground ,exu-slate-accent))))
