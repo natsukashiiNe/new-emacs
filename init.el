@@ -17,15 +17,15 @@
 
 (setq package-enable-at-startup nil)
 
-(defvar elpaca-installer-version 0.11)
+(defvar elpaca-installer-version 0.12)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-sources-directory (expand-file-name "sources/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
                               :ref nil :depth 1 :inherit ignore
                               :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-                              :build (:not elpaca--activate-package)))
-(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+                              :build (:not elpaca-activate)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-sources-directory))
        (build (expand-file-name "elpaca/" elpaca-builds-directory))
        (order (cdr elpaca-order))
        (default-directory repo))
@@ -53,17 +53,12 @@
     (require 'elpaca)
     (elpaca-generate-autoloads "elpaca" repo)
     (let ((load-source-file-function nil)) (load "./elpaca-autoloads"))))
-
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
-(elpaca-wait)
 
 ;; Install use-package support
 (elpaca elpaca-use-package
   (elpaca-use-package-mode))
-
-(elpaca-wait)
-;; Block until elpaca and use-package are ready
 
 ;; ==================================
 ;; Config Directory Setup
@@ -110,7 +105,6 @@ Also reports errors with file and line number."
 (load-config-file "core/evil-settings.el")
 (load-config-file "core/settings.el")
 (load-config-file "core/gui-settings.el")
-(elpaca-wait)
 (load-config-file "keymaps/mode-keymaps.el")
 
 ;; MOVE to custom/
@@ -166,23 +160,23 @@ Also reports errors with file and line number."
 (keymap-set global-map "C-x F"   'consult-ls-git)
 
 ;; Note: M-j and M-k are defined in code/flycheck-setup.el
-(elpaca-wait)
 
-(transient-define-prefix my/layout-menu ()
-  "Window layout and resizing menu"
-  ["Resize (stay in menu)"
-   [("h" "enlarge right" enlarge-window-horizontally :transient t)
-    ("H" "shrink right" shrink-window-horizontally :transient t)
-    ("l" "enlarge left" shrink-window-horizontally :transient t)
-    ("L" "shrink left" enlarge-window-horizontally :transient t)]
-   [("j" "enlarge down" enlarge-window :transient t)
-    ("J" "shrink down" shrink-window :transient t)
-    ("k" "enlarge up" shrink-window :transient t)
-    ("K" "shrink up" enlarge-window :transient t)]]
-  ["Actions (exit menu)"
-   ("m" "messages 30% of window" my/show-messages-below-window)
-   ("M" "messages 30% of frame" my/show-messages-below-frame)
-   ("q" "quit" transient-quit-one)])
+(with-eval-after-load 'transient
+  (transient-define-prefix my/layout-menu ()
+    "Window layout and resizing menu"
+    ["Resize (stay in menu)"
+     [("h" "enlarge right" enlarge-window-horizontally :transient t)
+      ("H" "shrink right" shrink-window-horizontally :transient t)
+      ("l" "enlarge left" shrink-window-horizontally :transient t)
+      ("L" "shrink left" enlarge-window-horizontally :transient t)]
+     [("j" "enlarge down" enlarge-window :transient t)
+      ("J" "shrink down" shrink-window :transient t)
+      ("k" "enlarge up" shrink-window :transient t)
+      ("K" "shrink up" enlarge-window :transient t)]]
+    ["Actions (exit menu)"
+     ("m" "messages 30% of window" my/show-messages-below-window)
+     ("M" "messages 30% of frame" my/show-messages-below-frame)
+     ("q" "quit" transient-quit-one)]))
 
 (defun my/show-messages-below-window ()
   "Split current window and show messages in 30% below"
