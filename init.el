@@ -103,15 +103,18 @@ Also reports errors with file and line number."
 (add-to-list 'load-path (expand-file-name "custom" my-config-dir))
 (add-to-list 'load-path (expand-file-name "custom/packages" my-config-dir))
 
+(load-config-file "local/custom-macro.el")
+(load-config-file "local/local-env.el")
+(load-config-file "local/setup-local-variables.el")
+
 (load-config-file "core/evil-settings.el")
 (load-config-file "core/settings.el")
 (load-config-file "core/gui-settings.el")
 (elpaca-wait)
 (load-config-file "keymaps/mode-keymaps.el")
 
+;; MOVE to custom/
 (load-config-file "local/get-secrets.el")
-(load-config-file "local/local-env.el")
-(load-config-file "local/setup-local-variables.el")
 
 (load-config-file "core/ego-setup.el")
 (load-config-file "core/bar-settings.el")
@@ -123,8 +126,8 @@ Also reports errors with file and line number."
 (load-config-file "core/autocomplete-settings.el")
 (load-config-file "core/better-built-in-modes.el")
 
-(load-config-file "custom/packages/slot-layout.el")
-(load-config-file "core/layout-settings.el")
+;; (load-config-file "custom/packages/slot-layout.el")
+;; (load-config-file "core/layout-settings.el")
 (load-config-file "core/floating-layout.el")
 
 ;; (load-config-file "core/treemacs-settings.el")
@@ -144,6 +147,8 @@ Also reports errors with file and line number."
 ;; CUSTOM
 (load-config-file "custom/elgo.el")
 (load-config-file "custom/custom-compile.el")
+(load-config-file "custom/custom-editing.el")
+(load-config-file "custom/scripts-org.el")
 ;;(load-config-file "custom/packages/elastic.el")
 (load-config-file "custom/packages/old-elastic.el")
 
