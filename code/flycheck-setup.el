@@ -17,16 +17,49 @@
 (use-package flycheck
   :ensure t
   :init
-  (global-flycheck-mode 1)
+  ;; (global-flycheck-mode 1)
+  :hook
+  (prog-mode . flycheck-mode)
+  :custom
+  (flycheck-indication-mode 'left-fringe)
   :config
   ;; Timing settings
   (setq flycheck-idle-change-delay 0.1
         flycheck-display-errors-delay 0.1
         flycheck-check-syntax-automatically '(save mode-enabled idle-change)
-        flycheck-checker-error-threshold 1000)
+        flycheck-checker-error-threshold nil)
   
   ;; Display settings (will be overridden by flycheck-inline)
-  (setq flycheck-display-errors-function nil))
+  (setq flycheck-display-errors-function nil)
+
+  (define-fringe-bitmap 'my-flycheck-fringe-indicator
+    (vector
+     #b0000011111100000)
+    nil 16 '(top t))
+
+  (flycheck-define-error-level 'error
+    :severity 100
+    :compilation-level 2
+    :overlay-category 'flycheck-error-overlay
+    :fringe-bitmap 'my-flycheck-fringe-indicator
+    :fringe-face 'flycheck-fringe-error
+    :error-list-face 'flycheck-error-list-error)
+
+  (flycheck-define-error-level 'warning
+    :severity 10
+    :compilation-level 1
+    :overlay-category 'flycheck-warning-overlay
+    :fringe-bitmap 'my-flycheck-fringe-indicator
+    :fringe-face 'flycheck-fringe-warning
+    :error-list-face 'flycheck-error-list-warning)
+
+  (flycheck-define-error-level 'info
+    :severity 0
+    :compilation-level 0
+    :overlay-category 'flycheck-info-overlay
+    :fringe-bitmap 'my-flycheck-fringe-indicator
+    :fringe-face 'flycheck-fringe-info
+    :error-list-face 'flycheck-error-list-info))
 
 ;; LSP integration - use flycheck as diagnostics provider
 (with-eval-after-load 'lsp-mode
@@ -55,7 +88,7 @@
 (use-package flycheck-inline
   :ensure t
   :after flycheck
-  ;;:hook (flycheck-mode . flycheck-inline-mode)
+  :hook (flycheck-mode . flycheck-inline-mode)
   :config
   ;; Configure inline display with quick-peek
   (setq flycheck-inline-display-function
@@ -77,30 +110,67 @@
   :after flycheck
   :hook (flycheck-mode . flyover-mode)
   :custom
+  (flyover-checkers '(flycheck))
+  (flyover-levels '(error warning info))
+
+  ;; Appearance
+  (flyover-info-icon " ")
+  (flyover-warning-icon " ")
+  (flyover-error-icon " ")
+
+  (flyover-border-style 'slant)
+  (flyover-border-match-icon t)
+
+  ;; Colors
+  (flyover-use-theme-colors t)
+  ;; Tinting: 'lighter, 'darker, or nil
+  (flyover-text-tint 'lighter)
+  (flyover-icon-tint 'lighter)
+  (flyover-icon-background-tint 'lighter)
+  (flyover-text-tint-percent 0)
+  (flyover-icon-tint-percent 0)
+  (flyover-icon-background-tint-percent 50)
+
   ;; Display settings
-  (flyover-use-theme-colors nil)
-  (flyover-virtual-line-type 'line-no-arrow)
-  (flyover-show-virtual-line nil)
+  (flyover-virtual-line-type nil)
   (flyover-show-at-eol t)
-  (flyover-wrap-messages nil)
+  (flyover-hide-dung-completion t)
+  (flyover-display-mode 'hide-at-exact-position)
+
+  ;; Sources settings
+  (flyover-hide-checker-name t)
+  (flyover-show-virtual-line nil)
+
+  (flyover-line-position-offset 1)
+
+  ;; Message wrapping
+  (flyover-wrap-messages t)
+  (flyover-max-line-length 80)
+
+  ;; Performance
+  (flyover-debounce-interval 0.2)
+  (flyover-cursor-debounce-interval 0.3)
+
+  ;; Completion integration
   
   :config
   ;; Flyover's internal logic sometimes overrides face settings,
-  (defun my/flyover-use-custom-faces (level)
-    "Get colors from flyover-* faces instead of base LEVEL (e/w/i) faces."
-    (let* ((face (pcase level
-                   ((or 'error "error") 'flyover-error)
-                   ((or 'warning "warning") 'flyover-warning)
-                   ((or 'info "info") 'flyover-info)
-                   (_ 'flyover-warning)))
-           (fg (face-attribute face :foreground nil t))
-           (bg (face-attribute face :background nil t))
-           (final-bg (if (eq bg 'unspecified)
-			 (flyover--create-background-from-foreground fg
-								     flyover-background-lightness)
-                       bg)))
-      (cons fg final-bg)))
-  (advice-add 'flyover--get-face-colors :override #'my/flyover-use-custom-faces))
+  ;; (defun my/flyover-use-custom-faces (level)
+  ;;   "Get colors from flyover-* faces instead of base LEVEL (e/w/i) faces."
+  ;;   (let* ((face (pcase level
+  ;;                  ((or 'error "error") 'flyover-error)
+  ;;                  ((or 'warning "warning") 'flyover-warning)
+  ;;                  ((or 'info "info") 'flyover-info)
+  ;;                  (_ 'flyover-warning)))
+  ;;          (fg (face-attribute face :foreground nil t))
+  ;;          (bg (face-attribute face :background nil t))
+  ;;          (final-bg (if (eq bg 'unspecified)
+  ;; 			 (flyover--create-background-from-foreground fg
+  ;; 								     flyover-background-lightness)
+  ;;                      bg)))
+  ;;     (cons fg final-bg)))
+  ;; (advice-add 'flyover--get-face-colors :override #'my/flyover-use-custom-faces)
+  )
 
 ;; =============================================================================
 ;; EVIL INTEGRATION - Disable Inline Diagnostics in Insert State
@@ -133,10 +203,10 @@ Only re-enables if they were previously active."
   (when (bound-and-true-p flycheck-mode)
     ;; Restore previous state
     (when (and my/flycheck-inline-was-active
-               (not (bound-and-true-p flycheck-inline-mode)))
+	       (not (bound-and-true-p flycheck-inline-mode)))
       (flycheck-inline-mode 1))
     (when (and my/flyover-was-active
-               (not (bound-and-true-p flyover-mode)))
+	       (not (bound-and-true-p flyover-mode)))
       (flyover-mode 1))))
 
 ;; Hook into Evil state changes

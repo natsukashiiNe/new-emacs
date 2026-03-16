@@ -15,9 +15,25 @@
   (when (not (display-graphic-p))
     (set-fringe-mode 1))  ; Minimal fringe in terminal
 
+  ;; Disable expensive global modes in dired/dirvish buffers
+  (add-hook 'dired-mode-hook
+            (lambda ()
+              (display-line-numbers-mode -1)
+              (visual-line-mode -1)
+              (hl-line-mode -1)
+              (when (bound-and-true-p undo-tree-mode)
+                (undo-tree-mode -1))))
+
+  ;; (setq dirvish-attributes
+  ;;       ;;'(nerd-icons file-info file-size vc-state git-msg))
+  ;;       '(nerd-icons file-size subtree-state))
+
+  (setq dirvish-use-mode-line nil)
+  (setq dirvish-use-header-line nil)
   (setq dirvish-attributes
         ;;'(nerd-icons file-info file-size vc-state git-msg))
-        '(nerd-icons file-time file-size subtree-state))
+	'(nerd-icons file-info file-size subtree-state))
+
 
   ;; Main listing: --all keeps . and .. visible
   ;; --group-directories-first puts directories on top
@@ -31,12 +47,12 @@
   ;; == LAYOUT =========================================================
   ;; number of parents | max width of parent windows | width of preview
   (setq dirvish-header-line-height '(24 . 24))
-  (setq dirvish-default-layout '(0 0.0 0.42))
+  (setq dirvish-default-layout '(0 0.0 0.5))
   (setq dirvish-layout-recipes
         '((0 0 0.4)
-          (0 0 0.8)
-          (1 0.3 0.35)
-          (1 0.11 0.55)))
+	  (0 0 0.8)
+	  (1 0.3 0.35)
+	  (1 0.11 0.55)))
 
   ;; == KEYMAPS =========================================================
   (with-eval-after-load 'evil
@@ -157,7 +173,7 @@ Otherwise, prompt to select a project first."
                            (current-local-map))))
 
   (advice-add 'dirvish-narrow :around
-              (lambda (orig-fn &rest args)
+	      (lambda (orig-fn &rest args)
                 "Add custom navigation keybindings during dirvish-narrow."
                 (minibuffer-with-setup-hook
                     #'my/dirvish-narrow-activate-custom-keymap

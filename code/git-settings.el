@@ -58,7 +58,7 @@
     "Margin symbols for diff-hl matching neovim gitsigns.")
   :hook
   (prog-mode . diff-hl-mode)
-  (dired-mode . diff-hl-dired-mode)
+  ;; (dired-mode . diff-hl-dired-mode)
   :config
   ;; Use margin mode everywhere (nerd font chars instead of fringe bitmaps)
   (setq diff-hl-margin-symbols-alist my-diff-hl-margin-symbols)

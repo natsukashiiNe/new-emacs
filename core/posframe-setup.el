@@ -83,6 +83,8 @@
 
   (vertico-posframe-mode 1))
 
+;; TODO: make it toggle
+(keymap-set minibuffer-mode-map "C-c C" (li (vertico-posframe-mode 'toggle)))
 
 (provide 'posframe-settings)
 ;;; posframe-settings ends here

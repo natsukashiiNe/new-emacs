@@ -12,11 +12,15 @@
 ;; == FRAME SETTINGS ======================================================
 
 (load-theme 'my-modus-mono-dark t)
+(set-face-attribute 'default nil :font "GoMono Nerd Font-21")
+(set-face-attribute 'variable-pitch nil :font "GoMono Nerd Font-20")
+
+
 
 (defun reload-my-theme()
   (interactive)
   (add-to-list 'custom-theme-load-path (expand-file-name "themes" my-config-dir))
-  (load-theme 'my-modus-mono-dark t))
+  (load-theme (car custom-enabled-themes ) t))
 ;; TODO: move to INTERFACE theme (C-c u) + toggling of terminal, divish, flycheck, resizing etc.
 (keymap-set global-map "C-c R" #'reload-my-theme)
 
@@ -31,9 +35,10 @@
   "Apply settings for GUI frames."
   (with-selected-frame (or frame (selected-frame))
     (when (display-graphic-p frame)
+      (set-fringe-mode 16)    ;; Fringe width
       (set-face-attribute 'default frame :font "GoMono Nerd Font-21")
       (set-face-attribute 'variable-pitch frame :font "GoMono Nerd Font-20")
-      (set-frame-parameter frame 'alpha-background 92))))
+      (set-frame-parameter frame 'alpha '(92 . 92)))))
 
 (defun my/setup-frame (&optional frame)
   "Apply appropriate settings based on frame type."
@@ -47,6 +52,16 @@
 (add-hook 'elpaca-after-init-hook
           (lambda () (unless (daemonp) (my/setup-frame))))
 (add-hook 'after-make-frame-functions #'my/setup-frame)
+
+;; == SHR =======================================================================
+(defun my/shr-buffer-font ()
+  (when (display-graphic-p)
+    (face-remap-add-relative 'default :family "GoMono Nerd Font" :height 210)
+    (face-remap-add-relative 'variable-pitch :family "GoMono Nerd Font")))
+
+(add-hook 'eww-after-render-hook #'my/shr-buffer-font)
+(add-hook 'devdocs-mode-hook #'my/shr-buffer-font)
+
 
 ;; == TAB BAR ========================================================
 
