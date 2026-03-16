@@ -51,7 +51,8 @@
   :bind (:map org-mode-map 
               ("C-c M d" . org-remark-mark-definition)
               ("C-c M f" . my/consult-definitions)
-              ("C-f C-r" . my/consult-definitions)
+	      ;; TODO: move to evil
+              ;; ("C-f C-r" . my/consult-definitions)
               ("C-c M n" . org-remark-next)
               ("C-c M p" . org-remark-prev)
               ("C-c M r" . org-remark-remove))

@@ -17,10 +17,9 @@
   :doc "Build map for evil normal state.")
 (keymap-set evil-normal-state-map "C-c C-b" my-build-normal-map)
 
-(defvar-keymap my-quick-insert-map
+(defvar-keymap my-quick-edit-map
   :doc "Map with to quickly insert often used text.")
-(keymap-set global-map "C-c C-s" my-quick-insert-map)
-
+(keymap-set global-map "C-c C-s" my-quick-edit-map)
 
 ;; TODO: redo in evil-normal / general
 (defvar-keymap my-goto-map
@@ -28,17 +27,32 @@
 (keymap-set global-map "C-c g" my-goto-map)
 
 ;; ==== Emacs-(almost)-build-in keymaps ============================================
+
 (keymap-set global-map "C-x C-b" #'projectile-ibuffer)
 (keymap-set global-map "C-x B"   #'ibuffer)
 (keymap-set global-map "C-x C-x" #'previous-buffer)
 (keymap-set global-map "C-x X"   #'next-buffer)
-(keymap-set global-map "C-x l"   #'eval-expression)
+(keymap-set global-map "C-x L"   #'eval-expression)
+;; TODO: now held by general
+(keymap-set global-map "C-S-l"   #'eval-expression)
 (keymap-set global-map "C-c E"   #'eplaca-log)
+
+;; ==== Isearch
+(keymap-set global-map "M-l"     #'isearch-forward)
+(keymap-set global-map "M-h"     #'isearch-backward)
+
+(keymap-set evil-normal-state-map "n"     #'isearch-repeat-forward)
+(keymap-set evil-normal-state-map "N"     #'isearch-repeat-backward)
+
+(keymap-set isearch-mode-map "C-j" #'isearch-repeat-forward)
+(keymap-set isearch-mode-map "C-k" #'isearch-repeat-backward)
+(keymap-set search-map "h U" #'lazy-highlight-cleanup)
 
 (with-eval-after-load 'consult
   (keymap-set evil-normal-state-map "C-s" 'consult-line)
   (keymap-set evil-visual-state-map "C-s" 'consult-line))
 
+;; ==== Interface
 (defvar-keymap my-interface-map
   :doc "My interface keymap"
   "l" #'display-line-numbers-mode)
@@ -46,12 +60,9 @@
 
 (keymap-set minibuffer-local-map "C-S-v" 'evil-paste-before)
 (keymap-set minibuffer-local-map "<escape>" 'abort-recursive-edit)
-(keymap-set minibuffer-local-map
-            "C-c o"
-            (lambda ()
-              (interactive)
-              (my/set-vertico-count
-               (+ vertico-count 10))))
+(keymap-set minibuffer-local-map "C-c o" (li
+					  (my/set-vertico-count
+					   (+ vertico-count 10))))
 
 (keymap-set minibuffer-local-map
             "C-c w"
@@ -61,7 +72,69 @@
                (max 1 (- vertico-count 10)))))
 
 
+;; == Evil-Normal =====================================================
+(with-eval-after-load 'evil
+  (keymap-set evil-normal-state-map "J" #'next-error)
+  (keymap-set evil-normal-state-map "K" #'previous-error)
+  (keymap-set evil-normal-state-map "s" #'vr/isearch-backward)
+  ;;(keymap-set evil-normal-state-map "M-f" #'vr/isearch-backward)
+  )
+
+(keymap-set isearch-mode-map "C-c" (li (isearch-exit) (message "hello!" ) (avy-isearch)))
+
+(evil-define-key '(normal visual motion) prog-mode-map
+  (kbd "g c") #'comment-line)
+
+(with-eval-after-load 'symbol-overlay
+  (evil-define-key 'normal symbol-overlay-mode-map
+    (kbd "M-n") (li (symbol-overlay-jump-next) (recenter-top-bottom))
+    (kbd "M-p") (li (symbol-overlay-jump-prev) (recenter-top-bottom))))
+
+;; == Lisp Editing ==============================================================
+(defvar-keymap my-lisp-edit-map
+  :doc "Map to edit lisp expressions")
+(keymap-set global-map "C-c i" my-lisp-edit-map)
+
+(defvar-keymap my-lsp-map
+  :doc "Map to edit lisp expressions")
+(keymap-set global-map "C-c i" my-lsp-map)
+
+(with-eval-after-load 'puni
+  (keymap-set my-lisp-edit-map "o" #'my/lisp-edit-append-end-of-sexp)
+  (keymap-set my-lisp-edit-map "i" #'my/lisp-edit-insert-end-of-sexp))
+
+(defun my/keymaps-set-sly-mode()
+  (evil-define-key 'insert sly-mode-map
+    (kbd "RET") #'newline
+    (kbd "RET") #'newline
+    )
+  (evil-define-key 'normal sly-mode-map
+    (kbd "RET") #'sly-mrepl-return))
+
+(my/keymaps-set-sly-mode)
+
 ;; == PROJECTILE ======================================================
+
+;; == DIRVVISH ========================================================
+(defun my-keymaps-set-dired-mode ()
+  (evil-define-key 'normal dired-mode-map
+    (kbd "T") #'dired-create-empty-file
+    (kbd "o") (li (other-window-prefix)
+		  (find-file (dirvish-prop :index))) ;; open in a different window
+    (kbd "TAB")  #'dirvish-toggle-preview     ; Toggle preview on/off
+    (kbd "SPC")  #'dirvish-show-history
+    (kbd "b"  )  #'dirvish-goto-bookmark
+    (kbd "z"  )  #'dirvish-history-jump
+    (kbd "f"  )  #'dirvish-fd-jump            ; Use fd to jump to file
+    (kbd "s"  )  #'dirvish-quicksort
+    (kbd "y"  )  #'dirvish-yank
+    (kbd "h"  )  #'dired-up-directory
+    (kbd "l"  )  #'dired-find-file
+    (kbd "a"  )  #'dirvish-quick-access
+    (kbd "q"  )  #'dirvish-quit
+    (kbd "C-g")  #'dirvish-quit))
+
+(my-keymaps-set-dired-mode)
 
 ;; == GOTO ============================================================
 
@@ -82,31 +155,52 @@
   (keymap-set my-goto-map "r" #'activities-rename)
   (keymap-set my-goto-map "l" #'activities-list))
 
+;; == LSP-mode =====================================================
+(defun my-keymaps-set-lsp-global-keymaps ()
+  (with-eval-after-load 'evil
+    (evil-define-key '(normal visual)
+      (kbd "K") nil
+      (kbd "J") nil)
+    ))
+
 ;; == COMPILE MAP =====================================================
 
-(with-eval-after-load 'evil
-  (defvar-keymap my-compile-map
-    :doc "My compile keymap"
-    "g" #'first-error)
-  (keymap-set global-map "C-c C-c"  my-compile-map))
+(defvar-keymap my-compile-map
+  :doc "My compile keymap")
+(keymap-set global-map "C-c C-c"  my-compile-map)
 
 (defun define-my-compile-map ()
   "Defines keymaps for the MY-COMPILE-MAP."
-  (keymap-set evil-normal-state-map "C-c C" 'my/project-custom-comint))
+  (keymap-set my-compile-map "C" #'my/project-custom-comint)
+  (keymap-set my-compile-map "r" #'recompile)
+  (keymap-set my-compile-map "o" #'compile)
+  (keymap-set my-compile-map "g" #'first-error))
 
 (define-my-compile-map)
 
 
 ;; == QUICK INSERT MAP ================================================
-(defun my-quick-insert-map-setup ()
+(defun my-quick-edit-map-setup ()
+  (keymap-set my-quick-edit-map "t" (li (transpose-words)))
+  (keymap-set my-quick-edit-map "T" (li (transpose-words -1)))
   (with-eval-after-load 'consult
-    (keymap-set my-quick-insert-map "y" #'consult-yank-replace))
+    (keymap-set my-quick-edit-map "y" #'consult-yank-replace))
   (with-eval-after-load 'yasnippet
-    (keymap-set my-quick-insert-map "C-s" #'yas-insert-snippet)))
+    (keymap-set my-quick-edit-map "C-s" #'yas-insert-snippet))
+  ;; Comment line insertion
+  (with-eval-after-load 'custom-editing
+    (keymap-set my-quick-edit-map "c"   #'my/edit-insert-comment-default)
+    (keymap-set my-quick-edit-map "C-t" #'my/edit-insert-comment-default--top)
+    (keymap-set my-quick-edit-map "C-b" #'my/edit-insert-comment-default--bottom)
+    (keymap-set my-quick-edit-map "C"   #'my/edit-insert-comment)
+    (keymap-set my-quick-edit-map "M-c" #'my/edit-insert-centered-comment-default)
+    (keymap-set my-quick-edit-map "M-t" #'my/edit-insert-centered-comment-default--top)
+    (keymap-set my-quick-edit-map "M-b" #'my/edit-insert-centered-comment-default--bottom)
+    (keymap-set my-quick-edit-map "M-C" #'my/edit-insert-centered-comment)))
 
-(my-quick-insert-map-setup)
+(my-quick-edit-map-setup)
 (with-eval-after-load 'org
-  (keymap-set org-mode-map "C-c C-s" my-quick-insert-map))
+  (keymap-set org-mode-map "C-c C-s" my-quick-edit-map))
 
 ;; == ORG MODE ========================================================
 (with-eval-after-load 'org
@@ -218,8 +312,7 @@
     (kbd "M-n") #'agent-shell-next-input)
   (evil-define-key 'insert agent-shell-mode-map
     (kbd "RET") #'newline
-    (kbd "<up>") nil)
-  )
+    (kbd "<up>") nil))
 
 
 

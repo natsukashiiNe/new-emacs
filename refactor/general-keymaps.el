@@ -207,8 +207,8 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
   (general-define-key
    :states '(normal visual insert)
    :keymaps 'override
-   ;; "C-M-l" 'tab-bar-switch-to-next-tab
-   ;; "C-M-h" 'tab-bar-switch-to-prev-tab
+   "C-M-l" 'tab-bar-switch-to-next-tab
+   "C-M-h" 'tab-bar-switch-to-prev-tab
    "M-i" 'evil-switch-to-windows-last-buffer
    "M-e" 'tab-bar-switch-to-next-tab
    "M-E" 'tab-bar-switch-to-prev-tab
@@ -241,7 +241,7 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
   (my-jump-leader
     ;; projects
     "C-e"     '(my-persp/switch-to-last-visited :which-key "persp last")
-    "j"       '(eyebrowse-switch-to-window-config :which-key "eye switch")
+    ;; "j"       '(eyebrowse-switch-to-window-config :which-key "eye switch")
     "O"       '(projectile-switch-project :which-key "project [o]pen")
     "C-w"     '(persp-switch      :which-key "persp switch")
     ;; Specific projectiles:
@@ -270,6 +270,7 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
     "o f x"     '(my/open-xorg-conf :which-key "[x]org.conf")
 
     ;; consult multi-files
+    "j"       '(tab-switch   :which-key "[t]ab switch")
     "F"       '(my-consult-projectile-find-file   :which-key "[f]ind file")
     "C-f"     '(consult-project-buffer :which-key "buffers")
     "G"       '(consult-ripgrep        :which-key "r[g]")
@@ -394,6 +395,10 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
     ;; “SPC S” for system ops
     "S"   '(:ignore t :which-key "system")
     "S f" '(list-faces-display :which-key "list faces")
+
+    "S p" '(:ignore t :which-key "profiler")
+    "S p s" '(profiler-start 'cpu+mem :which-key "profiler start")
+    "S p S" (list (lambda () (interactive) (profiler-stop) (profiler-report)) :which-key "profiler stop+report")
 
     ;; interface
     "u e" '(treemacs-select-window :which-key "treemacs")

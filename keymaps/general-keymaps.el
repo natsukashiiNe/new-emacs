@@ -261,6 +261,7 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
        "o f x"     '(my/open-xorg-conf :which-key "[x]org.conf")
 
        ;; consult multi-files
+       "j"       '(tab-switch   :which-key "[t]ab switch")
        "F"       '(my-consult-projectile-find-file   :which-key "[f]ind file")
        "C-f"     '(consult-project-buffer :which-key "buffers")
        "G"       '(consult-ripgrep        :which-key "r[g]")
@@ -381,6 +382,10 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
        ;; “SPC S” for system ops
        "S"   '(:ignore t :which-key "system")
        "S f" '(list-faces-display :which-key "list faces")
+
+       "S p" '(:ignore t :which-key "profiler")
+       "S p s" '(profiler-start 'cpu+mem )
+       "S p S" '(lambda () (profiler-stop) (profiler-report))
 
        ;; interface
        "u e" '(treemacs-select-window :which-key "treemacs")

@@ -12,9 +12,8 @@
   (dirvish-override-dired-mode)
   :config
   (add-hook 'dirvish-mode-hook
-	    (lambda ()
-	      (display-line-numbers-mode -1)
-	      (visual-line-mode -1)))
+	    (l (display-line-numbers-mode -1)
+	       (visual-line-mode -1)))
 
   ;; Enable preview on the side
   (setq dirvish-mode-line-format
@@ -31,22 +30,7 @@
         '(nerd-icons file-info file-size vc-state git-msg)) 
 
   (setq dirvish-default-layout '(0 0.4 0.6))  ; (window-min-height left-width right-width)
-
-  :bind
-  (:map dirvish-mode-map
-	("TAB" . dirvish-toggle-preview)     ; Toggle preview on/off
-	("SPC" . dirvish-show-history)
-	("b"   . dirvish-goto-bookmark)
-	("z"   . dirvish-history-jump)
-	("f"   . dirvish-fd-jump)            ; Use fd to jump to file
-	("s"   . dirvish-quicksort)
-	("y"   . dirvish-yank)
-	("h"   . dired-up-directory)
-	("l"   . dired-find-file)
-	("a"   . dirvish-quick-access)
-	("q"   . dirvish-quit)
-	("C-g" . dirvish-quit)
-	))
+  )
 
 
 
