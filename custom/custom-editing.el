@@ -9,6 +9,7 @@
 
 (require 'evil)
 (require 'avy)
+(require 'cl-lib)
 
 ;; ----------------------------
 ;; Copy Previous Word Functions
@@ -134,6 +135,128 @@ Searches forward from cursor first, then backward from cursor.
 Negative numbers become more negative (e.g., -5 becomes -6)."
   (interactive)
   (my/change-number-on-line -1))
+
+;; ------------------------------------
+;; Comment Line Insertion
+;; ------------------------------------
+
+(defvar my/edit--comm-symbols-completion '("=" "-" "*" "#")
+  "Symbols available for comment line fill.")
+
+(cl-defun my/edit--insert-comment (&key (symbol "=") (num-before 2) (length 80) dir text)
+  "Insert a formatted comment separator line.
+SYMBOL is the fill character (single char string).
+NUM-BEFORE is how many symbols to place before TEXT.
+LENGTH is the target line width (last column to contain a symbol).
+DIR is \\='top, \\='bottom, or \\='in-place.
+TEXT is the label to embed in the comment line.
+
+Example output (C++ with 4-space indent):
+    // == SECTION HEADER ======================================================="
+  (let* ((indent (current-indentation))
+         (comment (string-trim-right (or comment-start "#")))
+         (indent-str (make-string indent ?\s))
+         (sym-char (if (> (string-width symbol) 0) (aref symbol 0) ?=))
+         (has-text (and text (not (string-empty-p text))))
+         ;; Build prefix: indent + comment + space + num-before symbols
+         (before-syms (make-string num-before sym-char))
+         (prefix (if has-text
+                     (concat indent-str comment " " before-syms " ")
+                   (concat indent-str comment " ")))
+         ;; Build text part with trailing space
+         (text-part (if has-text (concat text " ") ""))
+         ;; Calculate fill
+         (used (+ (string-width prefix) (string-width text-part)))
+         (fill-count (max 0 (- length used)))
+         (fill-str (make-string fill-count sym-char))
+         (line (concat prefix text-part fill-str)))
+    ;; Position cursor based on DIR
+    (pcase dir
+      ('top
+       (beginning-of-line)
+       (open-line 1)
+       (delete-region (line-beginning-position) (line-end-position)))
+      ('bottom
+       (end-of-line)
+       (newline))
+      ('in-place
+       (beginning-of-line)
+       (delete-region (line-beginning-position) (line-end-position))))
+    (insert line)))
+
+(cl-defun my/edit--insert-centered-comment (&key (symbol "=") (length 80) dir text)
+  "Insert a centered comment separator line.
+Calculates NUM-BEFORE to center TEXT within the line.
+SYMBOL, LENGTH, DIR, TEXT as in `my/edit--insert-comment'."
+  (let* ((indent (current-indentation))
+         (comment (string-trim-right (or comment-start "#")))
+         ;; Available space for symbols: length - indent - comment - spaces
+         ;; Layout: indent + comment + " " + syms + " " + TEXT + " " + syms
+         (has-text (and text (not (string-empty-p text))))
+         (fixed-width (+ indent (string-width comment) 1)) ; indent + comment + space
+         (text-width (if has-text (+ (string-width text) 2) 0)) ; spaces around text
+         (available (max 0 (- length fixed-width text-width)))
+         (num-before (/ available 2)))
+    (my/edit--insert-comment
+     :symbol symbol :num-before num-before :length length :dir dir :text text)))
+
+(defmacro my/edit--def-comment-fn (base-name docstring &rest body)
+  "Generate three defuns from BASE-NAME: in-place, --top, --bottom.
+DOCSTRING is the base documentation. BODY should reference `dir'
+and call `my/edit--insert-comment' or `my/edit--insert-centered-comment'."
+  (let ((fn-inplace (intern (symbol-name base-name)))
+        (fn-top     (intern (concat (symbol-name base-name) "--top")))
+        (fn-bottom  (intern (concat (symbol-name base-name) "--bottom"))))
+    `(progn
+       (defun ,fn-inplace ()
+         ,(concat docstring "\nInserts in-place on the current line.")
+         (interactive)
+         (let ((dir 'in-place)) ,@body))
+       (defun ,fn-top ()
+         ,(concat docstring "\nInserts on a new line above.")
+         (interactive)
+         (let ((dir 'top)) ,@body))
+       (defun ,fn-bottom ()
+         ,(concat docstring "\nInserts on a new line below.")
+         (interactive)
+         (let ((dir 'bottom)) ,@body)))))
+
+;; -- Full-options comment (prompts for all params) --
+
+(my/edit--def-comment-fn my/edit-insert-comment
+			 "Insert a comment separator line, prompting for all options."
+			 (let ((symbol (completing-read "Symbol: " my/edit--comm-symbols-completion nil nil "="))
+			       (num-before (read-number "Num symbols before text: " 2))
+			       (length (read-number "Line length: " 80))
+			       (text (read-string "Text: ")))
+			   (my/edit--insert-comment
+			    :symbol symbol :num-before num-before :length length :dir dir :text text)))
+
+;; -- Default comment (prompts only for text) --
+
+(my/edit--def-comment-fn my/edit-insert-comment-default
+			 "Insert a comment separator line with default settings."
+			 (let ((text (read-string "Text: ")))
+			   (my/edit--insert-comment
+			    :symbol "=" :num-before 2 :length 80 :dir dir :text text)))
+
+;; -- Centered comment (prompts for symbol, length, text) --
+
+(my/edit--def-comment-fn my/edit-insert-centered-comment
+			 "Insert a centered comment separator line, prompting for options."
+			 (let ((symbol (completing-read "Symbol: " my/edit--comm-symbols-completion nil nil "="))
+			       (length (read-number "Line length: " 80))
+			       (text (read-string "Text: ")))
+			   (my/edit--insert-centered-comment
+			    :symbol symbol :length length :dir dir :text text)))
+
+;; -- Centered default comment (prompts only for text) --
+
+(my/edit--def-comment-fn my/edit-insert-centered-comment-default
+			 "Insert a centered comment separator line with default settings."
+			 (let ((text (read-string "Text: ")))
+			   (my/edit--insert-centered-comment
+			    :symbol "=" :length 80 :dir dir :text text)))
 
 (provide 'custom-editing)
 ;;; custom-editing.el ends here
