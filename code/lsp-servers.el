@@ -6,6 +6,15 @@
 
 ;;; Code:
 
+
+
+
+;; =============================================================================
+;; YUCK 
+;; =============================================================================
+(use-package yuck-mode
+  :ensure t)
+
 ;; =============================================================================
 ;; PYTHON - pyright + ruff (add-on)
 ;; =============================================================================
@@ -17,7 +26,7 @@
   :custom
   (lsp-pyright-use-library-code-for-types t)
   (lsp-pyright-auto-search-paths t)
-  (lsp-pyright-diagnostic-mode "workspace")
+  (lsp-pyright-diagnostic-mode "openFiles")
   (lsp-pyright-type-checking-mode "basic")
   :hook ((python-ts-mode . lsp-deferred)
          (python-mode . lsp-deferred)))
@@ -301,9 +310,24 @@ Useful for Neovim plugin development or Awesome WM configuration."
          ("bashrc\\'" . bash-ts-mode)
          ("bash_profile\\'" . bash-ts-mode)))
 
+
+
 (use-package lua-mode
   :ensure t
   :mode "\\.lua\\'")
+
+
+;; =============================================================================
+;; C# - OmniSharp
+;; =============================================================================
+
+;; Hook setup (omnisharp client is built into lsp-mode)
+(add-hook 'csharp-ts-mode-hook #'lsp-deferred)
+(add-hook 'csharp-mode-hook #'lsp-deferred)
+
+(use-package csharp-ts-mode
+  :ensure nil
+  :mode "\\.cs\\'")
 
 (use-package json-ts-mode
   :ensure nil  ; built-in

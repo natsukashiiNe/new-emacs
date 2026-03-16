@@ -53,7 +53,8 @@
             (lambda ()
               (setq-local completion-styles '(my/orderless-corfu basic))
               (setq-local completion-category-overrides
-                          '((lsp-capf (styles my/orderless-corfu))))))
+                          '((lsp-capf (styles my/orderless-corfu))
+                            (sly-completion (styles my/orderless-corfu))))))
 
   :hook (lsp-bridge-mode . (lambda ()
                              (corfu-mode -1))))
@@ -91,5 +92,5 @@
   (add-to-list 'completion-at-point-functions #'cape-dabbrev)   ; Dynamic words
   (add-to-list 'completion-at-point-functions #'cape-keyword))  ; Programming keywords
 
-(provide 'autocomplete-settings.el)
+(provide 'autocomplete-settings)
 ;;; autocomplete-settings ends here

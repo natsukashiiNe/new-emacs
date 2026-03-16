@@ -40,6 +40,8 @@
   (lsp-keymap-prefix "C-c j")
 
   ;; General settings
+
+  (lsp-modeline-diagnostics-enable nil)
   (lsp-auto-configure t)
   (lsp-enable-snippet nil)  ; Snippets handled by yasnippet
   (lsp-prefer-flymake nil)  ; Use flycheck instead
@@ -120,19 +122,6 @@
   (lsp-ui-sideline-show-diagnostics nil)
   (lsp-ui-sideline-show-code-actions nil)
 
-  ;; Doc frame (enable for better hover documentation)
-  (lsp-ui-doc-enable nil)
-  (lsp-ui-doc-header t)
-  (lsp-ui-doc-include-signature t)
-  (lsp-ui-doc-use-childframe t)
-  (lsp-ui-doc-position 'at-point)
-  ;; (lsp-ui-doc-alignment 'frame)       ; 'frame or 'window
-  (lsp-ui-doc-side 'right)               ; 'right or 'left
-  (lsp-ui-doc-delay 0.5)
-  (lsp-ui-doc-show-with-cursor t)
-  (lsp-ui-doc-show-with-mouse t)
-  (lsp-ui-doc-max-width 80)
-  (lsp-ui-doc-max-height 30)
 
   ;; Peek (enable for modal definition/reference viewing)
   (lsp-ui-peek-enable t)
@@ -147,6 +136,32 @@
   (lsp-ui-doc-enhanced-markdown t)
 
   :config
+  ;; == Doc frame =======================================
+  (setq lsp-ui-doc-text-scale-level 2)    ; +2 scale steps above base font
+
+  (setq lsp-ui-doc-enable nil)
+  (setq lsp-ui-doc-header t)
+  (setq lsp-ui-doc-include-signature t)
+  (setq lsp-ui-doc-use-childframe t)
+  (setq lsp-ui-doc-position 'at-point)
+  (setq lsp-ui-doc-alignment 'window)         ; 'frame or 'window
+  (setq lsp-ui-doc-side 'right)               ; 'right or 'left
+  (setq lsp-ui-doc-delay 0.5)
+  (setq lsp-ui-doc-show-with-cursor t)
+  (setq lsp-ui-doc-show-with-mouse t)
+  (setq lsp-ui-doc-max-width 85)
+  (setq lsp-ui-doc-max-height 15)
+
+  ;; ==== Child frame settings =============================
+  (setf (alist-get 'internal-border-width lsp-ui-doc-frame-parameters) 2)
+  (setf (alist-get 'left-fringe lsp-ui-doc-frame-parameters) 2)
+  (setf (alist-get 'right-fringe lsp-ui-doc-frame-parameters) 2)
+
+  (set-face-attribute 'lsp-ui-doc-header nil
+                      :height 210        ; TODO: make dynamically deducted (lazy-eval) 
+                      :weight 'bold)
+
+
   ;; Keybindings for lsp-ui-peek
   (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
   (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
@@ -169,7 +184,7 @@
 
   ;; Configure formatters
   (setf (alist-get 'ruff apheleia-formatters)
-        '("ruff" "format" "--stdin-filename" filepath))
+        '("ruff" "format" "--stdin-filename" filepath "-"))
 
   (setf (alist-get 'clang-format apheleia-formatters)
         '("clang-format"
@@ -177,6 +192,8 @@
           "-style=file"))  ; Uses .clang-format file discovery
 
   ;; Add formatter mappings for major modes
+  ;; Python: ruff handles formatting + import sorting (replaces black + isort)
+  ;; For projects without ruff, use .dir-locals.el: ((python-mode . ((apheleia-formatter . (isort black)))))
   (setf (alist-get 'python-mode apheleia-mode-alist) 'ruff)
   (setf (alist-get 'python-ts-mode apheleia-mode-alist) 'ruff)
 
@@ -184,6 +201,11 @@
   (setf (alist-get 'c-ts-mode apheleia-mode-alist) 'clang-format)
   (setf (alist-get 'c++-mode apheleia-mode-alist) 'clang-format)
   (setf (alist-get 'c++-ts-mode apheleia-mode-alist) 'clang-format)
+
+  (setf (alist-get 'csharpier apheleia-formatters)
+	'("csharpier" "--write-stdout"))
+  (setf (alist-get 'csharp-mode apheleia-mode-alist) 'csharpier)
+  (setf (alist-get 'csharp-ts-mode apheleia-mode-alist) 'csharpier)
 
   (setf (alist-get 'go-mode apheleia-mode-alist) 'gofmt)
   (setf (alist-get 'go-ts-mode apheleia-mode-alist) 'gofmt)
@@ -195,6 +217,25 @@
 	'("jq" "."))
   (add-to-list 'apheleia-mode-alist '(json-mode . jq))
   (add-to-list 'apheleia-mode-alist '(json-ts-mode . jq)))
+
+;; =============================================================================
+;; CUSTOM MENU ENTRIES
+;; =============================================================================
+
+(defun my/lsp-find-references-export ()
+  "Find references and export them via embark to a persistent buffer."
+  (interactive)
+  (minibuffer-with-setup-hook
+      (lambda ()
+        (run-with-idle-timer 0.1 nil #'embark-export))
+    (lsp-find-references)))
+
+(with-eval-after-load 'lsp-mode
+  (define-key-after lsp-mode-menu
+    [find-references-export]
+    '(menu-item "Find references (export)" my/lsp-find-references-export
+                :active (lsp-feature? "textDocument/references"))
+    'lsp-find-references))
 
 ;; =============================================================================
 ;; KEYBINDINGS

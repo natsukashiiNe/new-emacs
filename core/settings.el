@@ -13,7 +13,7 @@
 (scroll-bar-mode 0)     ;; Enables visible scrollbar
 (tooltip-mode 0)        ;; Disable tooltips
 (blink-cursor-mode 0)   ;; Disables cursor blinking
-(set-fringe-mode 16)    ;; Fringe width
+(setq require-final-newline 'visit)
 
 (setq visible-cursor nil)
 (setq inhibit-startup-message t) ;; Do not show startup screen
@@ -34,23 +34,48 @@
   ;; (set-face-background 'line-number unspecified)
   )
 
-(set-frame-parameter nil 'alpha-background 92)
+(set-frame-parameter nil 'alpha '(92 . 92))
 
 
 ;; ----------------------------
 ;; Other basic settings & built-in packages (or their replacements)
 ;; ----------------------------
-(global-display-line-numbers-mode 1) ;; Shows line numbering globally
+;; (global-display-line-numbers-mode t) ;; Shows line numbering globalle
 (global-hl-line-mode 1)              ;; Highlight the current line globally
 (show-paren-mode 1)                  ;; Highlight matching
 (fset 'yes-or-no-p 'y-or-n-p)        ;; Make `y` and `n` confirm instead of `yes` and `no`
 
+;; (setq display-line-numbers-type 'visual)
 (setq display-line-numbers-type 'visual)
 (setq display-line-numbers-current-absolute nil)  ;; Show '0' for current line
 (setq display-line-numbers-width 2)               ;; TODO: Fixed minimal width
 (setq display-line-numbers-grow-only nil)         ;; Allow shrinking
 (setq display-line-numbers-widen nil)             ;; prevents widening
-(global-visual-line-mode 1)                       ;; Visual line mode for wrapped lines
+(global-visual-line-mode -1)
+(dolist (hook '(text-mode-hook
+		org-mode-hook
+		markdown-mode-hook
+		help-mode-hook
+		diff-mode-hook
+		prog-mode-hook))
+  (add-hook hook #'visual-line-mode))
+
+(setq lazy-highlight-cleanup nil) ;; persistent isearch colors
+
+
+;; TODO: make it not suck
+(setq ibuffer-formats
+      '((mark modified read-only locked
+              " " (name 35 35 :left :elide)
+              " " (size 9 -1 :right)
+              " " (mode 16 16 :left :elide)
+              "\n" "      " filename-and-process)
+        ;; Compact fallback — press ` to toggle
+        (mark modified read-only locked
+              " " (name 35 35 :left :elide)
+              " " (size 9 -1 :right)
+              " " (mode 16 16 :left :elide)
+              " " filename-and-process)))
 
 ;; TODO: possible move in the modes themselves
 (defun display-line-numbers--turn-on ()
@@ -67,19 +92,27 @@
   :ensure t
   :demand t
   :config
-  (setq which-key-idle-delay 0.01)
+  (setq which-key-idle-delay 0.175)
   (which-key-mode 1))
 
 (use-package rg
   :ensure t
+  :defer t
   :config
   (rg-enable-menu))
+
+
+(use-package fd-dired
+  :ensure t
+  :config
+  (setq fd-dired-ls-option
+	'("| xargs -0 ls -1d --quoting-style=literal" . "-1d")))
 
 (use-package autorevert
   :ensure nil
   :demand t
   :config
-  (setq global-auto-revert-non-file-buffers t)
+  (setq global-auto-revert-non-file-buffers nil)  ; was t — causes constant dired revert & CPU spike
   (setq auto-revert-verbose nil)
   (global-auto-revert-mode 1))
 
@@ -128,11 +161,16 @@
   :init
   (winner-mode t))
 
+(use-package command-log-mode
+  :ensure t)
+
 (use-package colorful-mode
   :ensure t
   :init
   ;; If non-nil, use prefix for preview color instead highlight them.)
-  (setq colorful-use-prefix nil))
+  :custom
+  (colorful-use-prefix t)
+  (colorful-prefix-string "  "))
 
 (use-package adaptive-wrap
   :ensure t
@@ -185,18 +223,71 @@
 (use-package avy
   :ensure t
   :after evil
-  :bind (:map evil-normal-state-map ("s" . avy-goto-char-2)))
+  ;; :bind (:map evil-normal-state-map ("s" . avy-goto-char-2))
+  )
 
 ;; TODO contract
 (use-package expand-region
   :ensure t
   :after evil
-  :bind (:map evil-normal-state-map ("M-f" . er/expand-region)))
+  ;;:bind (:map evil-normal-state-map ("M-f" . er/expand-region))
+  )
 
 (use-package grid
   :ensure (:host github :repo "ichernyshovvv/grid.el")
   :demand t)
 
+(use-package indent-bars
+  :ensure t
+  ;; :hook ((prog-mode . indent-bars-mode)
+  ;;        (lisp-mode . indent-bars-mode)
+  ;;        (emacs-lisp-mode . indent-bars-mode))
+  :custom
+  (indent-bars-color-by-depth nil)  
+  ;; base color
+  (indent-bars-color '(highlight :face-bg t :blend 0.3))
+  (indent-bars-highlight-current-depth '(:color "#7A6200" :blend 0.7))  ; active scope: orange/yellow
+
+  (indent-bars-treesit-support t)  ; enable when treesit modes are available
+  (indent-bars-no-descend-string t)
+  (indent-bars-no-descend-lists 'skip) 
+  (indent-bars-width-frac 0.15))     ; thin lines
+
+(use-package symbol-overlay
+  :ensure t
+  :hook (prog-mode . symbol-overlay-mode)
+  :bind-keymap ("C-c o" . symbol-overlay-map)
+  :custom
+  (symbol-overlay-idle-time 0.1)
+  (symbol-overlay-temp-highlight-single t)
+  :config)
+
+(use-package highlight-indent-guides
+
+  :ensure t
+  ;; :hook (prog-mode . highlight-indent-guides-mode)
+  :custom
+  (highlight-indent-guides-method 'character)
+  (highlight-indent-guides-responsive 'stack)
+  (highlight-indent-guides-auto-enabled t)
+  (highlight-indent-guides-delay 0) 
+
+  :config
+  ;;  (set-face-foreground 'highlight-indent-guides-top-character-face "dimgray")
+  ;;  (set-face-foreground 'highlight-indent-guides-top-even-face        "dimgray")
+  ;;  (set-face-foreground 'highlight-indent-guides-top-odd-face "dimgray")
+
+  ;;  (set-face-foreground 'highlight-indent-guides-even-face "dimgray")
+  ;;  (set-face-foreground 'highlight-indent-guides-odd-face "dimgray")
+
+  (set-face-foreground 'highlight-indent-guides-stack-character-face "#D7AF00")
+  (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
+  
+
+  ;; (setq highlight-indent-guides-auto-stack-odd-face-perc       2)
+  ;; (setq highlight-indent-guides-auto-stack-even-face-perc      2)
+  ;; (setq highlight-indent-guides-auto-stack-top-character-face-perc 2)
+  )
+
 (provide 'settings)
 ;;; settings.el ends here
-

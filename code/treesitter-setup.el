@@ -15,6 +15,10 @@
   :custom
   (treesit-auto-install 'prompt)  ; or t for automatic
   :config
+  ;; Yuck (eww widgets)
+  (add-to-list 'treesit-language-source-alist
+               '(yuck "https://github.com/Philipp-M/tree-sitter-yuck"))
+
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 

@@ -24,7 +24,18 @@
     (modify-syntax-entry ?_ "w")
     (modify-syntax-entry ?- "w"))
 
+  :custom 
+  ;; cursor
+  ;; (evil-insert-state-cursor  '(box "#FF7F9F"))
+  ;; (evil-normal-state-cursor  '(box "#FF8020"))
+  (evil-insert-state-cursor  '(box "#000000"))
+  (evil-normal-state-cursor  '(box "#990000"))
+  ;; ;;  (evil-visual-state-cursor  'box)
+  ;; (evil-replace-state-cursor 'box)
+  (evil-emacs-state-cursor   'box)
+
   :config
+  
   (evil-mode 1)
   ;; KEYMAPS
   (dolist (map (list evil-normal-state-map evil-visual-state-map))
@@ -33,8 +44,6 @@
     (keymap-set map "C-w" #'backward-kill-word)
     (keymap-set map "C-h" #'delete-backward-char))
   (keymap-set evil-normal-state-map "M-i" 'evil-switch-to-windows-last-buffer)
-  (keymap-set evil-normal-state-map "M-h" 'tab-previous)
-  (keymap-set evil-normal-state-map "M-l" 'tab-next)
   (global-set-key (kbd "C-x h") help-map)
 
   ;; hooks

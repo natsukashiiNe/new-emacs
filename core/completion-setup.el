@@ -118,11 +118,11 @@
   :demand t
   :bind (:map minibuffer-mode-map
 	      ("C-;" . embark-act)
-	      ("C-c e" . embark-act)
+	      ("C-c O" . embark-act)
 	      ("C-c E" . embark-dwim)
-	      ("C-c C-c" . embark-collect)
-	      ("C-c C-e" . embark-export)
-	      ("C-c C" . embark-become)
+	      ("C-c C-e" . embark-collect)
+	      ("C-c C-c" . embark-export)
+	      ("C-c B" . embark-become)
 	      )
   :init
   (setq prefix-help-command #'embark-prefix-help-command))
