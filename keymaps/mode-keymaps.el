@@ -86,9 +86,9 @@
   (kbd "g c") #'comment-line)
 
 (with-eval-after-load 'symbol-overlay
-  (evil-define-key 'normal symbol-overlay-mode-map
-    (kbd "M-n") (li (symbol-overlay-jump-next) (recenter-top-bottom))
-    (kbd "M-p") (li (symbol-overlay-jump-prev) (recenter-top-bottom))))
+  (evil-define-key 'normal 'symbol-overlay-mode-map
+    (kbd "M-n") (li (symbol-overlay-jump-next) (recenter))
+    (kbd "M-p") (li (symbol-overlay-jump-prev) (recenter))))
 
 ;; == Lisp Editing ==============================================================
 (defvar-keymap my-lisp-edit-map

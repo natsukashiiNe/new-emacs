@@ -99,10 +99,12 @@ Also reports errors with file and line number."
 (add-to-list 'load-path (expand-file-name "custom/packages" my-config-dir))
 
 (load-config-file "local/custom-macro.el")
-(load-config-file "local/local-env.el")
+;; (load-config-file "local/local-env.el")
+(load-config-file "local/setup-local-env.el")
 (load-config-file "local/setup-local-variables.el")
-
 (load-config-file "core/evil-settings.el")
+(elpaca-wait)
+
 (load-config-file "core/settings.el")
 (load-config-file "core/gui-settings.el")
 (load-config-file "keymaps/mode-keymaps.el")

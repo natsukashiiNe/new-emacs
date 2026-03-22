@@ -136,7 +136,7 @@
  ;; --- LSP FACES ---------------------------------------------------------------
  ;; TODO: light variant for symbol-overlay
  `(symbol-overlay-default-face ((t :background "#f6c3cf" :foreground unspecified :weight normal
-				   :box (:line-width (1 . -1) :color ,exu-black :style flat-button))))
+				   :box (:line-width (2 . -2) :color ,exu-black :style flat-button))))
 
  ;; TODO: light variant for lsp highlight (read/textual/write with visible bg)
  ;; `(lsp-face-highlight-textual ((t (:background ,exu-bg-dim1 :foreground unspecified :weight bold))))
@@ -253,6 +253,9 @@
  ;; --- ORG ---------------------------------------------------------------------
  ;; TODO: light variant for org-verbatim
  ;; `(org-verbatim ((t (:background ,exu-bg :foreground ,exu-blue))))
+ `(org-indent ((t (:foreground ,exu-comment))))
+ `(org-hide ((t (:foreground ,exu-comment))))
+
  `(org-block ((t (:background ,exu-bg-dim2))))
  `(org-block-begin-line ((t (:background ,exu-bg-dim2))))
  `(org-block-end-line ((t (:background ,exu-bg-dim2))))

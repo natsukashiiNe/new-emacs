@@ -5,6 +5,13 @@
 
 ;;; Code:
 
+(add-to-list 'exec-path "/home/nane/.npm-global/bin/")
+
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (exec-path-from-shell-initialize))
+
 (use-package pyvenv
   :ensure t
   :config
