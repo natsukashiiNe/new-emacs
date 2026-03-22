@@ -23,6 +23,9 @@
   :ensure t
   :demand t)
 
+(use-package catppuccin-theme
+  :ensure t)
+
 (use-package modus-themes
   :ensure t
   :demand t
