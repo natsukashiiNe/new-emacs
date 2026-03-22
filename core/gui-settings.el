@@ -15,14 +15,16 @@
 (set-face-attribute 'default nil :font "GoMono Nerd Font-21")
 (set-face-attribute 'variable-pitch nil :font "GoMono Nerd Font-20")
 
+(defun my/theme-disable-theme ()
+  (mapc #'disable-theme (custom-available-themes) ))
 
-
-(defun reload-my-theme()
+(defun my/theme-reload-my-theme()
   (interactive)
+  ;; (mapc #'disable-theme (custom-available-themes))
   (add-to-list 'custom-theme-load-path (expand-file-name "themes" my-config-dir))
   (load-theme (car custom-enabled-themes ) t))
 ;; TODO: move to INTERFACE theme (C-c u) + toggling of terminal, divish, flycheck, resizing etc.
-(keymap-set global-map "C-c R" #'reload-my-theme)
+(keymap-set global-map "C-c R" #'my/theme-reload-my-theme)
 
 (defun my/setup-tty-frame (&optional frame)
   "Apply settings for TTY frames."

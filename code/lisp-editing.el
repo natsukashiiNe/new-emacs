@@ -71,6 +71,7 @@
   :config
   ;; (setq hl-sexp-background-color "#EEE2BF")
   ;; (setq hl-sexp-background-color "#DBCC97")
+  ;; (setq hl-sexp-background-color "#1c1c1c")
   :hook ((emacs-lisp-mode . highlight-sexp-mode)
 	 (lisp-mode . highlight-sexp-mode)
 	 (highlight-sexp-mode . (lambda () (hl-line-mode -1)))))

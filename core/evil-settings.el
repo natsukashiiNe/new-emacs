@@ -26,10 +26,10 @@
 
   :custom 
   ;; cursor
-  ;; (evil-insert-state-cursor  '(box "#FF7F9F"))
-  ;; (evil-normal-state-cursor  '(box "#FF8020"))
-  (evil-insert-state-cursor  '(box "#000000"))
-  (evil-normal-state-cursor  '(box "#990000"))
+  (evil-insert-state-cursor  '(box "#FF7F9F"))
+  (evil-normal-state-cursor  '(box "#FF8020"))
+  ;; (evil-insert-state-cursor  '(box "#000000"))
+  ;; (evil-normal-state-cursor  '(box "#990000"))
   ;; ;;  (evil-visual-state-cursor  'box)
   ;; (evil-replace-state-cursor 'box)
   (evil-emacs-state-cursor   'box)
@@ -47,14 +47,14 @@
   (global-set-key (kbd "C-x h") help-map)
 
   ;; hooks
-  (add-hook 'evil-insert-state-exit-hook
-            (lambda ()
-              (when (not (display-graphic-p))
-		(send-string-to-terminal "\033]12;#FF8020\007"))))
-  (add-hook 'evil-insert-state-entry-hook
-            (lambda ()
-              (when (not (display-graphic-p))
-		(send-string-to-terminal "\033]12;#FF7F9F\007"))))
+  ;; (add-hook 'evil-insert-state-exit-hook
+  ;;           (lambda ()
+  ;;             (when (not (display-graphic-p))
+  ;; 		(send-string-to-terminal "\033]12;#FF8020\007"))))
+  ;; (add-hook 'evil-insert-state-entry-hook
+  ;;           (lambda ()
+  ;;             (when (not (display-graphic-p))
+  ;; 		(send-string-to-terminal "\033]12;#FF7F9F\007"))))
 
   (add-hook 'prog-mode-hook #'my/modify-word-syntax-for-underscore)
 
