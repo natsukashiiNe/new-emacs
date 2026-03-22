@@ -318,17 +318,31 @@ Useful for Neovim plugin development or Awesome WM configuration."
 
 
 ;; =============================================================================
-;; C# - OmniSharp
+;; C Sharp
 ;; =============================================================================
 
-;; Hook setup (omnisharp client is built into lsp-mode)
+(with-eval-after-load 'lsp-csharp
+  (setq lsp-csharp-omnisharp-enable nil))
+
 (add-hook 'csharp-ts-mode-hook #'lsp-deferred)
 (add-hook 'csharp-mode-hook #'lsp-deferred)
 
 (use-package csharp-ts-mode
   :ensure nil
+  :defer t
   :mode "\\.cs\\'")
 
+(use-package sharper ;; == Transient menu for CSharp ============================
+  :ensure t
+  :defer t
+  :bind ("C-c d" . sharper-main-transient))
+
+(use-package csproj-mode ;; == Helper syntax hi for .csproj files ===============
+  :ensure t
+  :defer t)
+
+
+;; ==============================================================================
 (use-package json-ts-mode
   :ensure nil  ; built-in
   :mode "\\.json\\'")

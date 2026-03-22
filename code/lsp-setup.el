@@ -203,7 +203,7 @@
   (setf (alist-get 'c++-ts-mode apheleia-mode-alist) 'clang-format)
 
   (setf (alist-get 'csharpier apheleia-formatters)
-	'("csharpier" "--write-stdout"))
+	'("dotnet-csharpier" "--write-stdout"))
   (setf (alist-get 'csharp-mode apheleia-mode-alist) 'csharpier)
   (setf (alist-get 'csharp-ts-mode apheleia-mode-alist) 'csharpier)
 
