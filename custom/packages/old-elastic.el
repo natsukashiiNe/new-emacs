@@ -190,6 +190,9 @@ This function creates and stores the frame in `elastic-vterm--frame`."
         (when (fboundp 'vterm)
           (let ((vterm-buffer (vterm)))
             (set-window-buffer (frame-root-window elastic-vterm--frame) vterm-buffer)
+            ;; Tag window for buffer routing
+            (set-window-parameter (frame-root-window elastic-vterm--frame)
+                                  'emux-slot "elastic-vterm")
             ;; Disable the mode-line and line numbers in the vterm buffer.
             (with-current-buffer vterm-buffer
               (setq-local mode-line-format nil)
