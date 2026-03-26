@@ -134,6 +134,7 @@ Also reports errors with file and line number."
 (load-config-file "code/lisp-editing.el")     ;; TODO: actual lisp
 (load-config-file "code/git-settings.el")     ;; Core lsp-mode + lsp-ui + formatting.
 (load-config-file "code/flycheck-setup.el")   ;; Diagnostics display (flycheck + flyover).
+(load-config-file "code/test-flymake-setup.el")
 (load-config-file "code/snippets-setup.el")   ;; code/snippets stores snippet files.
 (load-config-file "code/treesitter-setup.el")
 

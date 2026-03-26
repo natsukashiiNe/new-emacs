@@ -13,6 +13,7 @@
 ;; =============================================================================
 ;; FLYCHECK - Core Diagnostic Framework
 ;; =============================================================================
+(require 'lsp-utils-setup)
 
 (use-package flycheck
   :ensure t
@@ -61,6 +62,25 @@
     :fringe-face 'flycheck-fringe-info
     :error-list-face 'flycheck-error-list-info))
 
+;; ==== Using flymake to complement flycheck ====================================
+(defvar my-diagnostics/flymake-presents
+  '((default . (:indicator-type fringes
+				:fringe-indicator-position left-fringe
+				:mode-line-format (" " flymake-mode-line-title
+						   flymake-mode-line-exception
+						   flymake--mode-line-counters)
+				:show-eol t
+				:suppress-underlines nil
+				:suppress-flymake-proc nil))
+
+    (complement-flycheck . (:indicator-type nil
+					    :fringe-indicator-position nil
+					    :mode-line-format nil
+					    :show-eol t
+					    :suppress-underlines t
+					    :suppress-flymake-proc t))))
+
+
 ;; LSP integration - use flycheck as diagnostics provider
 (with-eval-after-load 'lsp-mode
   (setq lsp-diagnostics-provider :flycheck))
@@ -77,9 +97,9 @@
   
   ;; Fix face to properly extend background color
   (set-face-attribute 'quick-peek-background-face nil
-                      :background nil
-                      :inherit 'default
-                      :extend t))
+		      :background nil
+		      :inherit 'default
+		      :extend t))
 
 ;; =============================================================================
 ;; FLYCHECK-INLINE - Inline Error Display
@@ -92,14 +112,14 @@
   :config
   ;; Configure inline display with quick-peek
   (setq flycheck-inline-display-function
-        (lambda (msg pos err)
-          (let* ((ov (quick-peek-overlay-ensure-at pos))
-                 (contents (quick-peek-overlay-contents ov)))
-            (setf (quick-peek-overlay-contents ov)
-                  (concat contents (when contents "\n") msg))
-            (quick-peek-update ov)))
-        
-        flycheck-inline-clear-function #'quick-peek-hide))
+	(lambda (msg pos err)
+	  (let* ((ov (quick-peek-overlay-ensure-at pos))
+		 (contents (quick-peek-overlay-contents ov)))
+	    (setf (quick-peek-overlay-contents ov)
+		  (concat contents (when contents "\n") msg))
+	    (quick-peek-update ov)))
+	
+	flycheck-inline-clear-function #'quick-peek-hide))
 
 ;; =============================================================================
 ;; FLYOVER - End-of-Line Diagnostic Display
