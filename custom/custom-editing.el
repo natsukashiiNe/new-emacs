@@ -15,7 +15,7 @@
 ;; Copy Previous Word Functions
 ;; ----------------------------
 
-(defun my/copy-previous-word ()
+(defun my-edit/copy-previous-word ()
   "Copy the previous word and paste it at point."
   (interactive)
   (let ((word (save-excursion
@@ -25,7 +25,7 @@
         (insert word)
       (user-error "No previous word found"))))
 
-(defun my/toggle-first-char-case (str)
+(defun my-edit/toggle-first-char-case (str)
   "Toggle the case of the first character in STR."
   (if (and str (> (length str) 0))
       (let ((first-char (aref str 0))
@@ -37,7 +37,7 @@
                 rest))
     str))
 
-(defun my/copy-previous-word-toggle-case ()
+(defun my-edit/copy-previous-word-toggle-case ()
   "Copy the previous word, toggle case of first letter, and paste at point.
 Useful for: MyClass -> myClass or myClass -> MyClass."
   (interactive)
@@ -48,7 +48,7 @@ Useful for: MyClass -> myClass or myClass -> MyClass."
         (insert (my/toggle-first-char-case word))
       (user-error "No previous word found"))))
 
-(defun my/avy-copy-word-backward ()
+(defun my-edit/avy-copy-word-backward ()
   "Use avy to select a word backward from cursor, copy from it to cursor position.
 Words are enumerated from cursor backwards to beginning of line.
 After selection, text from selected word to original cursor position is pasted."

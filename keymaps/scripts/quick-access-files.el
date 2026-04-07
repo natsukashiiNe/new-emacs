@@ -1,4 +1,5 @@
-;;; quick-access-files.el --- One-actions to access certain files. -*- lexical-binding: t; -*-
+;;; quick-access-files.el --- One-actions to access certain files.
+;;; -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Functions to access files and projects in one motion.

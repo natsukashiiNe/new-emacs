@@ -15,6 +15,7 @@
 	(:key "c" :path "~/.config")
 	("e r" . "~/.emacs.d/elpaca/repos/")
 	("e s" . "/run/user/1000/emacs")
+	("e p" . "~/.emacs.d/persp-confs")
 	("R" . "/")
 	))
 

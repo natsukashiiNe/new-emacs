@@ -20,7 +20,7 @@
   :bind (:map projectile-mode-map
 	      ("C-c b" . consult-project-buffer))
   :bind-keymap
-  ("C-c O" . projectile-command-map))
+  ("C-c C-c" . projectile-command-map))
 
 ;; (use-package perspective
 ;;   :ensure t
@@ -36,7 +36,7 @@
 ;;   :bind ("C-c i" . persp-switch-last))
 
 (defvar my-persp/settings (make-hash-table :test 'equal)
-  "Hash-map for global persp-mode settings.
+  "Hash-map for global 'persp-mode' settings.
 Currently stores:
   `last-visited' - name of the previously active perspective.")
 
@@ -54,14 +54,6 @@ NAME is the target perspective; ignored here."
     (if last
         (persp-switch last)
       (message "No previous perspective recorded."))))
-
-;; Per-daemon perspective isolation: each named daemon gets its own save
-;; directory so daemons never overwrite each other's perspectives.
-;; (daemonp) returns the daemon name string during init, before server-name is set.
-(when-let* ((dn (and (stringp (daemonp)) (daemonp))))
-  (setq persp-save-dir
-        (expand-file-name (format "persp-confs/%s/" dn)
-                          user-emacs-directory)))
 
 ;; --- Window config normalization for cross-display persistence ---
 
@@ -117,6 +109,18 @@ check fails and proportional (normal-*) sizing is used instead."
   :custom
   (persp-keymap-prefix (kbd "C-c n"))
   :config
+  ;; Per-daemon perspective isolation: each named daemon gets its own save
+  ;; directory so daemons never overwrite each other's perspectives.
+  ;; Must be inside :config to override no-littering's persp-save-dir.
+  ;; Non-daemon and unnamed-daemon instances disable auto-save/restore entirely.
+  (if-let* ((dn (and (stringp (daemonp)) (daemonp))))
+      (setq persp-save-dir
+            (expand-file-name (format "persp-confs/%s/" dn)
+                              user-emacs-directory)
+            persp-auto-resume-time 1.0
+            persp-auto-save-opt 1)
+    (setq persp-auto-resume-time -1
+          persp-auto-save-opt 0))
   (make-directory persp-save-dir t)
   (add-hook 'persp-before-switch-functions #'my-persp--save-current-before-switch)
   (persp-mode)

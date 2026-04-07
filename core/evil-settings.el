@@ -24,7 +24,7 @@
     (modify-syntax-entry ?_ "w")
     (modify-syntax-entry ?- "w"))
 
-  :custom 
+  :custom
   ;; cursor
   (evil-insert-state-cursor  '(box "#FF7F9F"))
   (evil-normal-state-cursor  '(box "#FF8020"))
@@ -89,6 +89,10 @@
   :after evil
   :config
   (evil-collection-init))
+
+;; (use-package )
+(use-package siege-mode
+  :ensure (:host github :repo "tslilc/siege-mode"))
 
 (provide 'evil-settings)
 ;;; evil-settings.el ends here

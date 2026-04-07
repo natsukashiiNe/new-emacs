@@ -1,6 +1,6 @@
 ;;; general-keymaps.el --- General (global overrides) keymaps. -*- lexical-binding: t; -*-
 
-;; Commentary:
+;;; Commentary:
 ;; Set up General keymaps that would be avalable in any mode.
 
 ;;; Code:

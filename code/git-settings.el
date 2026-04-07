@@ -73,9 +73,19 @@
   ;; Show diff popup for current hunk
   (define-key diff-hl-mode-map (kbd "C-x v p") 'diff-hl-show-hunk)
 
-  ;; To make flycheck appear on top of diff-hl:
+  ;; To make flymake appear on top of diff-hl:
+  ;; NOTE: is it tho?
   (setq-default diff-hl-side 'left))
 
+(use-package blamer
+  :ensure t
+  :defer 10
+  :custom
+  (blamer-idle-time 0.3)
+  (blamer-min-offset 0)
+  :custom-face
+  :config
+  (global-blamer-mode 1))
 
 (provide 'git-settings)
 ;;; git-settings.el ends here
