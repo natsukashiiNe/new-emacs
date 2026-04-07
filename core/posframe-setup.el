@@ -38,7 +38,7 @@
       consult-line
       consult-imenu
       consult-outline
-      consult-flycheck
+      consult-flymake
       consult-flyspell
       consult-compile-error
       consult-org-heading
@@ -48,6 +48,8 @@
 
       evil-collection-consult-mark
       evil-collection-consult-jump-list
+
+      minuet-complete-with-minibuffer
 
       my/consult-definitions
       my/elastic-files-consult)

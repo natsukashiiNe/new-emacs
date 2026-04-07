@@ -4,7 +4,6 @@
 ;; Setup grammars for the treesitter.
 
 ;;; Code:
-(add-hook 'prog-mode-hook #'electric-pair-mode)
 (use-package treesit
   :ensure nil  ; built-in
   :custom

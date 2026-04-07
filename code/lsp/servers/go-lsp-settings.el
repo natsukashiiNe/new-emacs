@@ -1,0 +1,33 @@
+;;; go-lsp-settings.el --- Settings for go-ts-mode. -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Go language configuration: gopls LSP and tree-sitter mode.
+
+;;; Code:
+
+;; --- Tree-sitter mode ---
+(use-package go-ts-mode
+  :ensure nil  ; built-in (Emacs 29+)
+  :mode "\\.go\\'")
+
+;; --- LSP Server Configuration ---
+(with-eval-after-load 'lsp-mode
+  (setq lsp-go-use-placeholders t)
+  (setq lsp-go-analyses '((fieldalignment . t)
+                          (nilness . t)
+                          (unusedparams . t)
+                          (unusedwrite . t)
+                          (useany . t)))
+  (setq lsp-go-codelenses '((generate . t)
+                            (regenerate_cgo . t)
+                            (test . t)
+                            (tidy . t)
+                            (upgrade_dependency . t)
+                            (vendor . t))))
+
+;; Hook setup
+(add-hook 'go-ts-mode-hook #'lsp-deferred)
+(add-hook 'go-mode-hook #'lsp-deferred)
+
+(provide 'go-lsp-settings)
+;;; go-lsp-settings.el ends here

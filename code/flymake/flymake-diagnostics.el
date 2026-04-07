@@ -1,71 +1,31 @@
-;;; test-flymake-setup.el --- Standalone flymake test config -*- lexical-binding: t; -*-
+;;; flymake-diagnostics.el --- My inline flymake hints. -*- lexical-binding: t; -*-
 
 ;;; Commentary:
-;; Test file to evaluate flymake as a sole diagnostic backend (no flycheck).
-;; Load manually: M-x load-file RET ~/.config/emacs/code/test-flymake-setup.el
-;; Or: (load-config-file "code/test-flymake-setup.el")
-;;
-;; What this does:
-;; - Switches lsp-mode diagnostics provider to :flymake
-;; - Enables flymake in prog-mode buffers
-;; - Configures left-fringe indicators with custom bitmap
-;; - Enables end-of-line diagnostic display
-;; - Removes flymake-proc legacy backend
-;; - Sets up consult-flymake if available
-;;
-;; After loading, restart LSP in your buffer: M-x lsp-workspace-restart
+;; Diagnostic display for flymake with Evil state awareness:
+;; - Normal mode: built-in EOL short diagnostics
+;; - Insert mode: EOL disabled, quick-peek inline overlay under cursor
 
 ;;; Code:
 
-;; =============================================================================
-;; LSP INTEGRATION - Switch to flymake
-;; =============================================================================
-
-(with-eval-after-load 'lsp-mode
-  (setq lsp-diagnostics-provider :flymake))
-
-;; =============================================================================
-;; FLYMAKE - Core Setup
-;; =============================================================================
-
-(require 'flymake)
-
-;; -- Fringe indicators --------------------------------------------------------
-(define-fringe-bitmap 'my-flymake-fringe-indicator
-  (vector #b0000011111100000)
-  nil 16 '(top t))
-
-(setq flymake-indicator-type 'fringes)
-(setq flymake-fringe-indicator-position 'left-fringe)
-
-;; Apply custom bitmap to all severity levels
-(setq flymake-error-bitmap   '(my-flymake-fringe-indicator flymake-error-fringe))
-(setq flymake-warning-bitmap '(my-flymake-fringe-indicator flymake-warning-fringe))
-(setq flymake-note-bitmap    '(my-flymake-fringe-indicator flymake-note-fringe))
-
 ;; -- End-of-line diagnostics --------------------------------------------------
-(setq flymake-show-diagnostics-at-end-of-line t)
-
-;; -- Suppress flymake-proc legacy backend -------------------------------------
-(with-eval-after-load 'flymake-proc
-  (remove-hook 'flymake-diagnostic-functions 'flymake-proc-legacy-flymake))
-
-;; -- Activate in prog-mode ----------------------------------------------------
-(add-hook 'prog-mode-hook #'flymake-mode)
-
-;; =============================================================================
-;; CONSULT-FLYMAKE (if available)
-;; =============================================================================
-
-(with-eval-after-load 'consult
-  (when (locate-library "consult-flymake")
-    (autoload 'consult-flymake "consult-flymake" nil t)))
+(setq flymake-show-diagnostics-at-end-of-line 'short)
+(setq flymake-no-changes-timeout 2)
 
 ;; =============================================================================
 ;; INLINE DIAGNOSTICS - quick-peek display on cursor hover
 ;; =============================================================================
 
-(require 'quick-peek nil t)
+(use-package quick-peek
+  :ensure t
+  :config
+  ;; Configure display settings
+  (setq quick-peek-add-spacer nil)
+  
+  ;; Fix face to properly extend background color
+  (set-face-attribute 'quick-peek-background-face nil
+		      :background nil
+		      :inherit 'default
+		      :extend t))
 
 (defvar my-flymake-qp-match 'line
   "How to match diagnostics for quick-peek display.
@@ -105,12 +65,11 @@
 
 (defun my-flymake--qp-show ()
   "Show flymake diagnostics for the current line via quick-peek."
-  (when-let* ((diagnostics (my-flymake--qp-diagnostics)))
-    (let* ((pos (line-beginning-position))
-           (ov (quick-peek-overlay-ensure-at pos))
-           (text (mapconcat #'my-flymake--qp-format diagnostics "\n")))
-      (setf (quick-peek-overlay-contents ov) text)
-      (quick-peek-update ov)
+  (when (and (fboundp 'quick-peek-show)
+             (my-flymake--qp-diagnostics))
+    (let ((text (mapconcat #'my-flymake--qp-format
+                           (my-flymake--qp-diagnostics) "\n")))
+      (quick-peek-show text (line-beginning-position))
       (setq my-flymake--qp-showing t)
       (setq my-flymake--qp-last-line (line-number-at-pos)))))
 
@@ -153,7 +112,39 @@ Set `my-flymake-qp-match' to `exact' or `line' to control scope."
     (remove-hook 'flymake-after-diagnostics-hook
                  #'my-flymake--qp-refresh t)))
 
-(add-hook 'flymake-mode-hook #'my-flymake-quick-peek-mode)
+;; =============================================================================
+;; EVIL STATE INTEGRATION
+;; =============================================================================
+;; Normal: EOL 'short ON, quick-peek OFF
+;; Insert: EOL OFF, quick-peek ON (inline under cursor)
 
-(provide 'test-flymake-setup)
-;;; test-flymake-setup.el ends here
+(defun my-flymake--hide-eol-overlays ()
+  "Hide all flymake EOL overlays by clearing their display property."
+  (dolist (ov (overlays-in (point-min) (point-max)))
+    (when (overlay-get ov 'flymake--eol-overlay)
+      (overlay-put ov 'display nil))))
+
+(defun my-flymake--redraw-eol-overlays ()
+  "Regenerate display for all flymake EOL overlays from current diagnostics."
+  (flymake--update-eol-overlays))
+
+(defun my-flymake--enter-insert-state ()
+  "Switch to insert-mode diagnostics: disable EOL, enable quick-peek."
+  (when (bound-and-true-p flymake-mode)
+    (setq-local flymake-show-diagnostics-at-end-of-line nil)
+    (my-flymake--hide-eol-overlays)
+    (my-flymake-quick-peek-mode 1)))
+
+(defun my-flymake--exit-insert-state ()
+  "Switch to 'normal-mode' diagnostics: enable EOL, disable quick-peek."
+  (when (bound-and-true-p flymake-mode)
+    (my-flymake-quick-peek-mode -1)
+    (setq-local flymake-show-diagnostics-at-end-of-line 'short)
+    (my-flymake--redraw-eol-overlays)))
+
+(with-eval-after-load 'evil
+  (add-hook 'evil-insert-state-entry-hook #'my-flymake--enter-insert-state)
+  (add-hook 'evil-insert-state-exit-hook #'my-flymake--exit-insert-state))
+
+(provide 'flymake-diagnostics)
+;;; flymake-diagnostics.el ends here

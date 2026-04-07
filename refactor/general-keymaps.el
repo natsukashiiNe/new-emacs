@@ -353,6 +353,11 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
     "h"   '(:ignore t :which-key "[+] help / completions")
     "h e" '((lambda () (interactive) (my/exec-with-prefix "evil- "))
             :which-key "[e]vil commands")
+    "h E" '((lambda () (interactive) (my/exec-with-prefix "elpaca- "))
+            :which-key "[e]vil commands")
+    ;; todo: fix
+    "h U" '((elpaca-update)
+            :which-key "[e]vil commands")
     "h C" '((lambda () (interactive) (my/exec-with-prefix "evilnc- "))
             :which-key "evil [c]omment commands")
     "h h" '((lambda () (interactive) (my/exec-with-prefix "describe- "))
@@ -402,8 +407,7 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
 
     ;; interface
     "u e" '(treemacs-select-window :which-key "treemacs")
-    "u f" '(flycheck-list-errors :which-key "flycheck-list-errors")
-
+    "u f" '(flymake-diagnostic-buffer :which-key "flymake-diagnostic-buffer")
     ))
 
 ;; =============================== EVIL NORMAL KEYMAPS ===============================

@@ -72,14 +72,15 @@
                                (concat (substring branch 0 27) "...")
                              branch)))
             (concat "  " truncated " "))))
-  ;; flycheck diagnostics
+  ;; flymake diagnostics
   (setq my/tab-bar--diagnostics-cache
-        (when (bound-and-true-p flycheck-current-errors)
-          (let* ((counts (flycheck-count-errors flycheck-current-errors))
-                 (errors   (or (cdr (assq 'error   counts)) 0))
-                 (warnings (or (cdr (assq 'warning counts)) 0))
-                 (infos    (or (cdr (assq 'info    counts)) 0)))
-            (format " E:%d W:%d I:%d " errors warnings infos))))
+        (when (bound-and-true-p flymake-mode)
+          (let* ((diags (flymake-diagnostics))
+                 (errors   (cl-count :error   diags :key #'flymake-diagnostic-type))
+                 (warnings (cl-count :warning diags :key #'flymake-diagnostic-type))
+                 (notes    (cl-count :note    diags :key #'flymake-diagnostic-type)))
+            (when (> (+ errors warnings notes) 0)
+              (format " E:%d W:%d I:%d " errors warnings notes)))))
   (force-mode-line-update t))
 
 (run-with-idle-timer 1 t #'my/tab-bar--refresh-cache)

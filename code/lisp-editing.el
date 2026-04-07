@@ -8,7 +8,8 @@
 ;; (setq-mode-local emacs-lisp-mode global-hl-line-mode nil)
 ;; (setq-mode-local lisp-mode global-hl-line-mode nil)
 
-(add-hook 'emacs-lisp-mode-hook (lambda () (flycheck-mode -1)))
+;; MOVED to flymake
+;; (add-hook 'emacs-lisp-mode-hook (lambda () (flycheck-mode -1)))
 
 (keymap-set emacs-lisp-mode-map "C-x E" 'eval-defun)
 

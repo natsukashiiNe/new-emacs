@@ -31,7 +31,7 @@
   :custom
   ;; Completion
   ;; prevents lsp from force-enabling company (CAPF still works).
-  (lsp-completion-provider :none)  
+  (lsp-completion-provider :none)
 
   ;; Session management
   (lsp-session-file (expand-file-name "lsp-session-v1" "~/.local/emacs/"))
@@ -44,7 +44,7 @@
   (lsp-modeline-diagnostics-enable nil)
   (lsp-auto-configure t)
   (lsp-enable-snippet nil)  ; Snippets handled by yasnippet
-  (lsp-prefer-flymake nil)  ; Use flycheck instead
+  (lsp-prefer-flymake t)
   (lsp-idle-delay 0.2)
   (lsp-log-io nil)          ; Disable for performance
 
@@ -116,7 +116,6 @@
   :commands lsp-ui-mode
   :hook (lsp-mode . lsp-ui-mode)
   :custom
-  ;; Sideline (disable - using flycheck-inline instead)
   (lsp-ui-sideline-enable nil)
   (lsp-ui-sideline-show-hover nil)
   (lsp-ui-sideline-show-diagnostics nil)
@@ -158,7 +157,7 @@
   (setf (alist-get 'right-fringe lsp-ui-doc-frame-parameters) 2)
 
   (set-face-attribute 'lsp-ui-doc-header nil
-                      :height 210        ; TODO: make dynamically deducted (lazy-eval) 
+                      :height 210        ; TODO: make dynamically deducted (lazy-eval)
                       :weight 'bold)
 
 
@@ -203,7 +202,7 @@
   (setf (alist-get 'c++-ts-mode apheleia-mode-alist) 'clang-format)
 
   (setf (alist-get 'csharpier apheleia-formatters)
-	'("dotnet-csharpier" "--write-stdout"))
+	'("csharpier" "format" "--write-stdout" "--stdin-path" filepath))
   (setf (alist-get 'csharp-mode apheleia-mode-alist) 'csharpier)
   (setf (alist-get 'csharp-ts-mode apheleia-mode-alist) 'csharpier)
 
@@ -275,6 +274,19 @@
             (lambda ()
               (when (boundp 'evil-normal-state-map)
                 (evil-normalize-keymaps)))))
+
+;; =============================================================================
+;; LOAD LANGUAGE SERVER CONFIGURATIONS
+;; =============================================================================
+
+(require 'cpp-lsp-settings)
+(require 'python-lsp-settings)
+(require 'rust-lsp-settings)
+(require 'go-lsp-settings)
+(require 'java-lsp-settings)
+(require 'lua-lsp-settings)
+(require 'dotnet-lsp-settings)
+(require 'minor-langs-settings)
 
 (provide 'lsp-setup)
 ;;; lsp-setup.el ends here

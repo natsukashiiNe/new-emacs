@@ -1,7 +1,7 @@
 ;;; lsp-utils-setup.el --- Helper functions for lsp setup. -*- lexical-binding: t; -*-
 
 ;;; Commentary:
-;; This file has some helper functions to make the actual configuration look 
+;; This file has some helper functions to make the actual configuration look
 ;; concise.
 
 ;;; Code:

@@ -91,11 +91,14 @@ Also reports errors with file and line number."
 ;; ==================================
 
 (add-to-list 'custom-theme-load-path (expand-file-name "themes" my-config-dir))
-(add-to-list 'load-path (expand-file-name "org" my-config-dir))
-(add-to-list 'load-path (expand-file-name "core" my-config-dir))
-(add-to-list 'load-path (expand-file-name "code" my-config-dir))
-(add-to-list 'load-path (expand-file-name "local" my-config-dir))
-(add-to-list 'load-path (expand-file-name "custom" my-config-dir))
+(add-to-list 'load-path (expand-file-name "org"             my-config-dir))
+(add-to-list 'load-path (expand-file-name "core"            my-config-dir))
+(add-to-list 'load-path (expand-file-name "code"            my-config-dir))
+(add-to-list 'load-path (expand-file-name "code/lsp"        my-config-dir))
+(add-to-list 'load-path (expand-file-name "code/lsp/servers" my-config-dir))
+(add-to-list 'load-path (expand-file-name "code/flymake"    my-config-dir))
+(add-to-list 'load-path (expand-file-name "local"           my-config-dir))
+(add-to-list 'load-path (expand-file-name "custom"          my-config-dir))
 (add-to-list 'load-path (expand-file-name "custom/packages" my-config-dir))
 
 (load-config-file "local/custom-macro.el")
@@ -115,7 +118,7 @@ Also reports errors with file and line number."
 (load-config-file "core/ego-setup.el")
 (load-config-file "core/bar-settings.el")
 ;; TODO: remove test to an actual file
-(load-config-file "core/dirvish-settings-test.el") 
+(load-config-file "core/dirvish-settings-test.el")
 (load-config-file "core/posframe-setup.el")
 (load-config-file "core/completion-setup.el")
 (load-config-file "core/session-settings.el")
@@ -128,13 +131,12 @@ Also reports errors with file and line number."
 
 ;; (load-config-file "core/treemacs-settings.el")
 
-(load-config-file "code/lsp-setup.el")        ;; Core lsp-mode + lsp-ui + formatting.
-;; (load-config-file "code/docs-setup.el")    ;; Core lsp-mode + lsp-ui + formatting.
-(load-config-file "code/lsp-servers.el")      ;; Language-specific server configs.
+(load-config-file "code/lsp/lsp-setup.el")    ;; Core lsp-mode + lsp-ui + formatting.
+(load-config-file "code/docs-setup.el")       ;; Core lsp-mode + lsp-ui + formatting.
 (load-config-file "code/lisp-editing.el")     ;; TODO: actual lisp
 (load-config-file "code/git-settings.el")     ;; Core lsp-mode + lsp-ui + formatting.
-(load-config-file "code/flycheck-setup.el")   ;; Diagnostics display (flycheck + flyover).
-(load-config-file "code/test-flymake-setup.el")
+;; (load-config-file "code/flycheck-setup.el")   ;; OLD: Diagnostics display (flycheck + flyover).
+(load-config-file "code/flymake/test-flymake-setup.el")   ;; FLYMAKE built-in.
 (load-config-file "code/snippets-setup.el")   ;; code/snippets stores snippet files.
 (load-config-file "code/treesitter-setup.el")
 
@@ -161,8 +163,6 @@ Also reports errors with file and line number."
 ;; ==-- TODO: TEMP mappings --================================================================
 (keymap-set global-map "C-x g"   'consult-ripgrep)
 (keymap-set global-map "C-x F"   'consult-ls-git)
-
-;; Note: M-j and M-k are defined in code/flycheck-setup.el
 
 (with-eval-after-load 'transient
   (transient-define-prefix my/layout-menu ()
