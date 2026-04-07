@@ -8,6 +8,7 @@
 ;; ----------------------------
 ;; Basic GUI settings
 ;; ----------------------------
+
 (menu-bar-mode 0)       ;; Disable the menu bar
 (tool-bar-mode 0)       ;; Disable the toolbar
 (scroll-bar-mode 0)     ;; Enables visible scrollbar
@@ -18,6 +19,18 @@
 (setq visible-cursor nil)
 (setq inhibit-startup-message t) ;; Do not show startup screen
 (setq visible-bell nil)          ;; No visual bell
+
+(set-frame-parameter nil 'alpha '(92 . 92))
+
+;; == Performance ===============================================================
+
+(setq-default bidi-paragraph-direction 'left-to-right)
+(setq bidi-inhibit-bpa t)
+(global-so-long-mode 1)
+(when (boundp 'long-line-threshold)
+  (setq long-line-threshold 1000))
+
+;; == Some utility packages =====================================================
 
 (use-package nerd-icons
   :ensure t
@@ -36,9 +49,6 @@
   ;; (set-face-background 'default unspecified)
   ;; (set-face-background 'line-number unspecified)
   )
-
-(set-frame-parameter nil 'alpha '(92 . 92))
-
 
 ;; ----------------------------
 ;; Other basic settings & built-in packages (or their replacements)
@@ -59,8 +69,7 @@
 		org-mode-hook
 		markdown-mode-hook
 		help-mode-hook
-		diff-mode-hook
-		prog-mode-hook))
+		diff-mode-hook))
   (add-hook hook #'visual-line-mode))
 
 (setq lazy-highlight-cleanup nil) ;; persistent isearch colors
@@ -240,30 +249,20 @@
   :ensure (:host github :repo "ichernyshovvv/grid.el")
   :demand t)
 
-(use-package indent-bars
-  :ensure t
-  ;; :hook ((prog-mode . indent-bars-mode)
-  ;;        (lisp-mode . indent-bars-mode)
-  ;;        (emacs-lisp-mode . indent-bars-mode))
-  :custom
-  (indent-bars-color-by-depth nil)  
-  ;; base color
-  (indent-bars-color '(highlight :face-bg t :blend 0.3))
-  (indent-bars-highlight-current-depth '(:color "#7A6200" :blend 0.7))  ; active scope: orange/yellow
-
-  (indent-bars-treesit-support t)  ; enable when treesit modes are available
-  (indent-bars-no-descend-string t)
-  (indent-bars-no-descend-lists 'skip) 
-  (indent-bars-width-frac 0.15))     ; thin lines
 
 (use-package symbol-overlay
   :ensure t
   :hook (prog-mode . symbol-overlay-mode)
-  :bind-keymap ("C-c o" . symbol-overlay-map)
+  :bind-keymap ("C-c O" . symbol-overlay-map)
   :custom
   (symbol-overlay-idle-time 0.1)
-  (symbol-overlay-temp-highlight-single t)
-  :config)
+  (symbol-overlay-temp-highlight-single t))
+
+(use-package smartparens
+  :ensure t
+  :hook (prog-mode text-mode markdown-mode org-mode)
+  :config
+  (require 'smartparens-config))
 
 (use-package highlight-indent-guides
 
@@ -292,5 +291,20 @@
   ;; (setq highlight-indent-guides-auto-stack-top-character-face-perc 2)
   )
 
+(use-package indent-bars
+  :ensure t
+  ;; :hook ((prog-mode . indent-bars-mode)
+  ;;        (lisp-mode . indent-bars-mode)
+  ;;        (emacs-lisp-mode . indent-bars-mode))
+  :custom
+  (indent-bars-color-by-depth nil)  
+  ;; base color
+  (indent-bars-color '(highlight :face-bg t :blend 0.3))
+  (indent-bars-highlight-current-depth '(:color "#7A6200" :blend 0.7))  ; active scope: orange/yellow
+
+  (indent-bars-treesit-support t)  ; enable when treesit modes are available
+  (indent-bars-no-descend-string t)
+  (indent-bars-no-descend-lists 'skip) 
+  (indent-bars-width-frac 0.15))     ; thin lines
 (provide 'settings)
 ;;; settings.el ends here

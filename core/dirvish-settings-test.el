@@ -30,9 +30,7 @@
 
   (setq dirvish-use-mode-line nil)
   (setq dirvish-use-header-line nil)
-  (setq dirvish-attributes
-        ;;'(nerd-icons file-info file-size vc-state git-msg))
-	'(nerd-icons file-info file-size subtree-state))
+  (setq dirvish-attributes '(file-size nerd-icons))
 
 
   ;; Main listing: --all keeps . and .. visible
@@ -67,7 +65,9 @@
       (kbd "S") #'dirvish-quicksort
 
       (kbd "C-j") #'dired-next-dirline
-      (kbd "C-k") #'dired-prev-dirline)
+      (kbd "C-k") #'dired-prev-dirline
+
+      (kbd "L") #'dirvish-layout-switch)
     )
 
 
@@ -75,7 +75,8 @@
 
   ;; Preview
 
-  (add-hook 'dirvish-special-preview-mode-hook (lambda () (display-line-numbers-mode -1)))
+  (add-hook 'dirvish-special-preview-mode-hook
+	    (lambda () (display-line-numbers-mode -1)))
 
   ;;(dirvish-define-preview directory-custom (file ext preview-window)
   ;;   "Minimal directory preview with name, size, and date."
@@ -101,8 +102,25 @@
   )
 
 
+;; Prevent dirvish from re-rendering overlays when viewport hasn't changed.
+;; Without this, dirvish--render-attrs runs on every pre-redisplay event
+;; (tears down and rebuilds all overlays), consuming ~69% CPU while idle.
+(defvar-local my/dirvish--last-render-state nil)
+
+(defun my/dirvish--skip-unchanged-render (orig-fn &optional window)
+  "Skip dirvish attribute re-rendering when viewport hasn't changed."
+  (let* ((win (or window (selected-window)))
+         (state (list (window-start win) (window-end win t) (window-width win)
+                      (with-selected-window win (point)))))
+    (unless (equal state my/dirvish--last-render-state)
+      (setq my/dirvish--last-render-state state)
+      (funcall orig-fn window))))
+
+(with-eval-after-load 'dirvish
+  (advice-add 'dirvish--render-attrs :around #'my/dirvish--skip-unchanged-render))
+
 (defun my/dirvish-fd-narrow ()
-  "Run dirvish-fd in project root, then dirvish-narrow.
+  "Run 'dirvish-fd' in project root, then 'dirvish-narrow'.
 If already in a project, use current project root.
 Otherwise, prompt to select a project first."
   (interactive)

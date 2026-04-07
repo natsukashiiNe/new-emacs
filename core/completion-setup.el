@@ -131,7 +131,10 @@
   :ensure t
   :demand t
   :after (embark consult)
-  :hook (embark-collect-mode . consult-preview-at-point-mode))
+  :config
+  (add-hook 'embark-collect-mode-hook
+            (lambda () (when (fboundp 'consult-preview-at-point-mode)
+                         (consult-preview-at-point-mode)))))
 
 
 ;; Pop-up consult window
