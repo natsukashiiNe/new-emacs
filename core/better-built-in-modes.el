@@ -73,10 +73,32 @@
   :ensure t
   :init
   (setq vterm-always-compile-module t)
+  (setenv "INSIDE_EMACS_VTERM" "1")
   :hook
   (vterm-mode . (lambda () (display-line-numbers-mode -1)))
   (vterm-mode . (lambda () (hl-line-mode -1)))
+  (vterm-mode . my/vterm-set-modeline)
   :config
+  (defun my/vterm--evil-state-face ()
+    "Return the doom-modeline face for the current evil state."
+    (pcase evil-state
+      ('normal  'doom-modeline-evil-normal-state)
+      ('insert  'doom-modeline-evil-insert-state)
+      ('visual  'doom-modeline-evil-visual-state)
+      ('replace 'doom-modeline-evil-replace-state)
+      ('motion  'doom-modeline-evil-motion-state)
+      ('emacs   'doom-modeline-evil-emacs-state)
+      ('operator 'doom-modeline-evil-operator-state)
+      (_        'doom-modeline-evil-normal-state)))
+
+  (defun my/vterm-set-modeline ()
+    "Set a minimal modeline showing [evil-state] [pwd]."
+    (setq-local mode-line-format
+                '(" "
+                  (:eval (propertize (concat " " (upcase (symbol-name evil-state)) " ")
+                                     'face (my/vterm--evil-state-face)))
+                  "  "
+                  default-directory)))
   ;; keymaps
   (with-eval-after-load 'evil
     (evil-define-key 'insert vterm-mode-map (kbd "C-h") #'vterm-send-backspace)))

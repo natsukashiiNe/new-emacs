@@ -6,6 +6,18 @@
 
 ;;; Code:
 
+;; --- Indent bars scope ---
+(with-eval-after-load 'indent-bars
+  (add-to-list 'indent-bars-treesit-scope
+               '(javascript function_declaration function class_declaration if_statement
+                            for_statement while_statement switch_statement try_statement))
+  (add-to-list 'indent-bars-treesit-scope
+               '(typescript function_declaration function class_declaration if_statement
+                            for_statement while_statement switch_statement try_statement))
+  (add-to-list 'indent-bars-treesit-scope
+               '(bash function_definition if_statement for_statement while_statement
+                      case_statement)))
+
 ;; =============================================================================
 ;; BASH
 ;; =============================================================================
@@ -62,10 +74,6 @@
 ;; =============================================================================
 ;; DATA FORMATS
 ;; =============================================================================
-
-(use-package json-ts-mode
-  :ensure nil  ; built-in
-  :mode "\\.json\\'")
 
 (use-package yaml-ts-mode
   :ensure nil  ; built-in

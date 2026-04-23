@@ -5,6 +5,12 @@
 
 ;;; Code:
 
+;; --- Indent bars scope ---
+(with-eval-after-load 'indent-bars
+  (add-to-list 'indent-bars-treesit-scope
+               '(lua function_declaration if_statement for_statement while_statement
+                     repeat_statement)))
+
 ;; --- Mode ---
 (use-package lua-mode
   :ensure t

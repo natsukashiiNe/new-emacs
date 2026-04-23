@@ -5,6 +5,12 @@
 
 ;;; Code:
 
+;; --- Indent bars scope ---
+(with-eval-after-load 'indent-bars
+  (add-to-list 'indent-bars-treesit-scope
+               '(rust function_item impl_item if_expression for_expression while_expression
+                      match_expression loop_expression mod_item)))
+
 ;; --- Tree-sitter mode ---
 (use-package rust-ts-mode
   :ensure nil  ; built-in (Emacs 29+)

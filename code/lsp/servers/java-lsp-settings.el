@@ -5,6 +5,12 @@
 
 ;;; Code:
 
+;; --- Indent bars scope ---
+(with-eval-after-load 'indent-bars
+  (add-to-list 'indent-bars-treesit-scope
+               '(java class_declaration method_declaration if_statement for_statement
+                      while_statement switch_expression try_statement)))
+
 ;; --- Configuration Variables ---
 (defcustom my/java-runtime-path "/usr/lib/jvm/java-23-openjdk"
   "Path to Java runtime for JDT language server."

@@ -7,7 +7,9 @@
 (use-package treesit
   :ensure nil  ; built-in
   :custom
-  (treesit-font-lock-level 4))  ; maximum highlighting
+  (treesit-font-lock-level 4) ; maximum highlighting
+  (treesit-max-buffer-size (* 100 1024 1024))
+  )
 
 (use-package treesit-auto
   :ensure (:host github :repo "renzmann/treesit-auto")

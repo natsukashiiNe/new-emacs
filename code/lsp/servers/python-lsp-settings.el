@@ -6,6 +6,12 @@
 
 ;;; Code:
 
+;; --- Indent bars scope ---
+(with-eval-after-load 'indent-bars
+  (add-to-list 'indent-bars-treesit-scope
+               '(python function_definition class_definition for_statement
+                        if_statement with_statement while_statement try_statement)))
+
 ;; --- Tree-sitter mode ---
 (use-package python-ts-mode
   :ensure nil  ; built-in
@@ -65,9 +71,10 @@
                 "s t" #'python-skeleton-try
                 "s w" #'python-skeleton-while)))
 
-(which-key-add-keymap-based-replacements python-ts-mode-map
-  "C-c h s" "skeletons"
-  "C-c h i" "imports")
+(with-eval-after-load 'python
+  (which-key-add-keymap-based-replacements python-ts-mode-map
+    "C-c h s" "skeletons"
+    "C-c h i" "imports"))
 
 (provide 'python-lsp-settings)
 ;;; python-lsp-settings.el ends here

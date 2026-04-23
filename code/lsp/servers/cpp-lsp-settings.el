@@ -6,6 +6,15 @@
 
 ;;; Code:
 
+;; --- Indent bars scope ---
+(with-eval-after-load 'indent-bars
+  (add-to-list 'indent-bars-treesit-scope
+               '(cpp function_definition class_specifier if_statement for_statement
+                     while_statement switch_statement namespace_definition try_statement))
+  (add-to-list 'indent-bars-treesit-scope
+               '(c function_definition if_statement for_statement while_statement
+                   switch_statement)))
+
 ;; --- Tree-sitter modes ---
 (use-package c-ts-mode
   :ensure nil  ; built-in
