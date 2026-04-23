@@ -10,6 +10,7 @@
 ;; - mode-keympas -> which would define functions to define kyes on a specific modeso
 ;; general-keymaps -> which would define global keys
 ;; scrpts/* -> all the scripts
+(require 'keymap-utils)
 
 (define-key input-decode-map "\e[104;7u" (kbd "C-M-h"))
 (define-key input-decode-map "\e[106;7u" (kbd "C-M-j"))
@@ -325,15 +326,16 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
     "C-j C-h V"   '(my/open-vasiniyo :which-key "[V]asiniyo (persp+magit)")
     
     ;; “SPC f” prefix for “search” or “files”
-    "f"   '(:ignore t :which-key "[+] search / files")
-    "f f" '(projectile-find-file :which-key "projectile-find-file")
-    "f j" '(consult-project-buffer :which-key "consult-project-buffer")
-    "f J" '(pop-to-buffer :which-key "pop-to-buffer")
-    "f g" '(consult-ripgrep :which-key "consult-r[g]")
-    "f G" '(projectile-ripgrep :which-key "projectile r[g]")
+    "f"   '(:ignore t                :which-key "[+] search / files")
+    "f f" '(projectile-find-file     :which-key "projectile-find-file")
+    "f j" '(consult-project-buffer   :which-key "consult-project-buffer")
+    "f J" '(pop-to-buffer            :which-key "pop-to-buffer")
+    "f g" '(consult-ripgrep          :which-key "consult-r[g]")
+    "f G" '(projectile-ripgrep       :which-key "projectile r[g]")
     "f s" '(consult-lsp-file-symbols :which-key "lsp symbols")
-    "f S" '(consult-lsp-symbols :which-key "lsp symbols")
-    "f e" '(projectile-dired :which-key "dired in project")
+    "f S" '(consult-lsp-symbols      :which-key "lsp symbols")
+    "f e" '(projectile-dired         :which-key "dired in project")
+    "f h" '(treemacs                 :which-key "treemacs")
 
 
     ;; Buffer
@@ -351,35 +353,35 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
 
     ;; “SPC h” prefix for help or “completions”
     "h"   '(:ignore t :which-key "[+] help / completions")
-    "h e" '((lambda () (interactive) (my/exec-with-prefix "evil- "))
+    "h e" '((lambda () (interactive) (my-keymaps/exec-with-prefix "evil- "))
             :which-key "[e]vil commands")
-    "h E" '((lambda () (interactive) (my/exec-with-prefix "elpaca- "))
+    "h E" '((lambda () (interactive) (my-keymaps/exec-with-prefix "elpaca- "))
             :which-key "[e]vil commands")
     ;; todo: fix
     "h U" '((elpaca-update)
             :which-key "[e]vil commands")
-    "h C" '((lambda () (interactive) (my/exec-with-prefix "evilnc- "))
+    "h C" '((lambda () (interactive) (my-keymaps/exec-with-prefix "evilnc- "))
             :which-key "evil [c]omment commands")
-    "h h" '((lambda () (interactive) (my/exec-with-prefix "describe- "))
+    "h h" '((lambda () (interactive) (my-keymaps/exec-with-prefix "describe- "))
             :which-key "describe")
-    "h c" '((lambda () (interactive) (my/exec-with-prefix "consult- "))
+    "h c" '((lambda () (interactive) (my-keymaps/exec-with-prefix "consult- "))
             :which-key "[c]onsult commands")
-    "h p" '((lambda () (interactive) (my/exec-with-prefix "projectile- "))
+    "h p" '((lambda () (interactive) (my-keymaps/exec-with-prefix "projectile- "))
             :which-key "[p]rojectile commands")
-    "h b" '((lambda () (interactive) (my/exec-with-prefix "eyebrowse- "))
+    "h b" '((lambda () (interactive) (my-keymaps/exec-with-prefix "eyebrowse- "))
             :which-key "eye[b]rowse commands")
-    "h d" '((lambda () (interactive) (my/exec-with-prefix "dired - "))
+    "h d" '((lambda () (interactive) (my-keymaps/exec-with-prefix "dired - "))
             :which-key "[d]ired commands")
-    "h l" '((lambda () (interactive) (my/exec-with-prefix "lsp - "))
+    "h l" '((lambda () (interactive) (my-keymaps/exec-with-prefix "lsp - "))
             :which-key "[l]sp commands")
-    "h t" '((lambda () (interactive) (my/exec-with-prefix "treemacs - "))
+    "h t" '((lambda () (interactive) (my-keymaps/exec-with-prefix "treemacs - "))
             :which-key "treemacs commands")
-    "h n" '((lambda () (interactive) (my/exec-with-prefix "persp - "))
+    "h n" '((lambda () (interactive) (my-keymaps/exec-with-prefix "persp - "))
             :which-key "persp commands")
     "h g" '(:ignore t :which-key "[+] ma[g]it")
-    "h g d" '((lambda () (interactive) (my/exec-with-prefix "vdiff-magit- "))
+    "h g d" '((lambda () (interactive) (my-keymaps/exec-with-prefix "vdiff-magit- "))
               :which-key "v[d]iff")
-    "h o" '((lambda () (interactive) (my/exec-with-prefix "agent-shell - "))
+    "h o" '((lambda () (interactive) (my-keymaps/exec-with-prefix "agent-shell - "))
             :which-key "ai-agent commands")
 
     ;; “SPC j” for LSP multi-file navigation
@@ -406,6 +408,7 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
     "S p S" (list (lambda () (interactive) (profiler-stop) (profiler-report)) :which-key "profiler stop+report")
 
     ;; interface
+    "e"   '(dirvish-side :which-key "dirvish-side")
     "u e" '(treemacs-select-window :which-key "treemacs")
     "u f" '(flymake-diagnostic-buffer :which-key "flymake-diagnostic-buffer")
     ))
