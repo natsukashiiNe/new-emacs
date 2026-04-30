@@ -61,9 +61,19 @@
 (use-package highlight-sexp
   :ensure (:host github :repo "daimrod/highlight-sexp")
   :config
+  ;; Use nil colors so the overlay uses `hl-sexp-face' directly instead of a
+  ;; raw attribute plist.  A bare plist like (:background "#xxx") on the
+  ;; overlay's 'face property can confuse code that expects a face name (e.g.
+  ;; flymake's process sentinel calling face-attribute on overlay faces).
+  (setq hl-sexp-background-color nil)
+  (setq hl-sexp-foreground-color nil)
+  ;; Set desired colors on the face itself
   ;; (setq hl-sexp-background-color "#EEE2BF")
   ;; (setq hl-sexp-background-color "#DBCC97")
-  ;; (setq hl-sexp-background-color "#1c1c1c")
+
+  ;; (set-face-attribute 'hl-sexp-face nil :background "#EEE2BF")
+  (set-face-attribute 'hl-sexp-face nil :background "#1c1c1c")
+
   :hook ((emacs-lisp-mode . highlight-sexp-mode)
 	 (lisp-mode . highlight-sexp-mode)
 	 (highlight-sexp-mode . (lambda () (hl-line-mode -1)))))

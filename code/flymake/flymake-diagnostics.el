@@ -25,6 +25,7 @@
   (set-face-attribute 'quick-peek-background-face nil
 		      :background nil
 		      :inherit 'default
+		      :stipple nil
 		      :extend t))
 
 (defvar my-flymake-qp-match 'line
@@ -128,23 +129,47 @@ Set `my-flymake-qp-match' to `exact' or `line' to control scope."
   "Regenerate display for all flymake EOL overlays from current diagnostics."
   (flymake--update-eol-overlays))
 
+;; TODO: quick-peek inline removed for now, needs further testing.
+;; Proved to be unstable.
+
 (defun my-flymake--enter-insert-state ()
   "Switch to insert-mode diagnostics: disable EOL, enable quick-peek."
   (when (bound-and-true-p flymake-mode)
     (setq-local flymake-show-diagnostics-at-end-of-line nil)
     (my-flymake--hide-eol-overlays)
-    (my-flymake-quick-peek-mode 1)))
+    ;; (my-flymake-quick-peek-mode 1)
+    ))
 
 (defun my-flymake--exit-insert-state ()
   "Switch to 'normal-mode' diagnostics: enable EOL, disable quick-peek."
   (when (bound-and-true-p flymake-mode)
-    (my-flymake-quick-peek-mode -1)
+    ;; (my-flymake-quick-peek-mode -1)
     (setq-local flymake-show-diagnostics-at-end-of-line 'short)
     (my-flymake--redraw-eol-overlays)))
 
 (with-eval-after-load 'evil
   (add-hook 'evil-insert-state-entry-hook #'my-flymake--enter-insert-state)
   (add-hook 'evil-insert-state-exit-hook #'my-flymake--exit-insert-state))
+
+(defun my/evil-toggle-enter-insert-flymake-hook ()
+  "Toggle flymake quick-peek activation on evil insert entry."
+  (interactive)
+  (if (memq #'my-flymake--enter-insert-state evil-insert-state-entry-hook)
+      (progn
+        (remove-hook 'evil-insert-state-entry-hook #'my-flymake--enter-insert-state)
+        (message "Flymake insert-entry hook disabled"))
+    (add-hook 'evil-insert-state-entry-hook #'my-flymake--enter-insert-state)
+    (message "Flymake insert-entry hook enabled")))
+
+(defun my/evil-toggle-exit-insert-flymake-hook ()
+  "Toggle flymake EOL restore on evil insert exit."
+  (interactive)
+  (if (memq #'my-flymake--exit-insert-state evil-insert-state-exit-hook)
+      (progn
+        (remove-hook 'evil-insert-state-exit-hook #'my-flymake--exit-insert-state)
+        (message "Flymake insert-exit hook disabled"))
+    (add-hook 'evil-insert-state-exit-hook #'my-flymake--exit-insert-state)
+    (message "Flymake insert-exit hook enabled")))
 
 (provide 'flymake-diagnostics)
 ;;; flymake-diagnostics.el ends here

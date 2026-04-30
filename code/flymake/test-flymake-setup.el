@@ -17,8 +17,9 @@
     :add-on? t)))
 
 ;; -- bash: built-in to emacs 29 ------------------------------------------------
-(add-hook 'sh-mode-hook #'flymake-shellcheck-load)
-(add-hook 'bash-ts-mode-hook #'flymake-shellcheck-load)
+(when (require 'flymake-shellcheck nil t)
+  (add-hook 'sh-mode-hook #'flymake-shellcheck-load)
+  (add-hook 'bash-ts-mode-hook #'flymake-shellcheck-load))
 
 ;; -- elisp --------------------------------------------------------------------
 (use-package package-lint-flymake

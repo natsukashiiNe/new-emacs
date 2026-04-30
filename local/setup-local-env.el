@@ -12,12 +12,13 @@
   :config
   (exec-path-from-shell-initialize))
 
-(use-package pyvenv
-  :ensure t
-  :config
-  (pyvenv-activate "~/src/venvs/emacs-venv")
-  (setq python-shell-interpreter "python3")
-  (pyvenv-mode 1))
+;; I suppose pyright-lsp does it fine anyway.
+;; (use-package pyvenv
+;;   :ensure t
+;;   :config
+;;   (pyvenv-activate "~/src/venvs/emacs-venv")
+;;   (setq python-shell-interpreter "python3")
+;;   (pyvenv-mode 1))
 
 ;; ;; Optional: pyenv-mode if you also use pyenv for version management
 ;; ;; Comment out if you only use venv

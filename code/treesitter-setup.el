@@ -38,6 +38,8 @@
 (use-package treesit-jump
   :ensure (:host github :repo "dmille56/treesit-jump" :files ("*.el" "treesit-queries"))
   :config
+  ;; Fix upstream bug: bash-ts-mode is mapped to "sh" instead of "bash"
+  (setf (alist-get 'bash-ts-mode treesit-jump-major-mode-language-alist) "bash")
   ;; TODO: Filter out cluttered results
   (setq treesit-jump-queries-filter-list '("inner" "test" "param")))
 

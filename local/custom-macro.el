@@ -5,13 +5,26 @@
 
 ;;; Code:
 (defmacro l (&rest body)
+  "Lamba convinience macro.  Executes BODY."
   `(lambda ()
      ,@body))
 
 (defmacro li (&rest body)
+  "Lamba interactive convinience macro.  Executes BODY."
   `(lambda ()
      (interactive)
      ,@body))
+
+(defmacro fl (&rest body)
+  `(funcall (lambda () ,@body)))
+
+(defmacro fli (&rest body)
+  `(funcall (lambda () (interactive) ,@body)))
+
+(defmacro iput (expr)
+  `(save-excursion
+     (end-of-line)
+     (insert "\n" (format "%s" ,expr))))
 
 (provide 'custom-macro)
 ;;; custom-macro.el ends here

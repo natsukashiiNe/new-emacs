@@ -29,7 +29,11 @@
 
 (my-keymaps/define-submaps my-override-mode-map
   (my-maps/global-utility   :prefix "C-c o"   :doc "Global utility map." :wk "Utility")
-  (my-maps/quick-edit       :prefix "C-c C-s" :doc "Quick editing."      :wk "Quick-edit"))
+  (my-maps/quick-edit       :prefix "C-c C-s" :doc "Quick editing."      :wk "Quick-edit")
+  (my-maps/quick-open       :prefix "M-g"     :doc "Quick access map."   :wk "Quick-locations")
+  :populate
+  ("M-h"  #'isearch-backward  "isearch-backward")
+  ("M-l"  #'isearch-forward   "isearch-forward"))
 
 (my-keymaps/define-submaps my-maps/global-utility
   (my-maps/agent-shell :prefix "a" :doc "Agent shell map."                  :wk "AI [a]gent")
@@ -54,12 +58,17 @@
 
 (keymap-set global-map "M-l"     #'isearch-forward)
 (keymap-set global-map "M-h"     #'isearch-backward)
-(keymap-set evil-normal-state-map "n"     #'isearch-repeat-forward)
-(keymap-set evil-normal-state-map "N"     #'isearch-repeat-backward)
+
+;; n/N uses isearch
+(keymap-set evil-normal-state-map "n"
+	    (li (isearch-repeat-forward) (isearch-lazy-highlight-new-loop)))
+(keymap-set evil-normal-state-map "N"
+	    (li (isearch-repeat-backward) (isearch-lazy-highlight-new-loop)))
+(keymap-set search-map "h U" (li (isearch-dehighlight) (lazy-highlight-cleanup t)))
 
 (keymap-set isearch-mode-map "C-j" #'isearch-repeat-forward)
 (keymap-set isearch-mode-map "C-k" #'isearch-repeat-backward)
-(keymap-set search-map "h U" #'lazy-highlight-cleanup)
+(keymap-set isearch-mode-map "C-S-V" #'isearch-yank-kill)
 
 (with-eval-after-load 'consult
   (keymap-set evil-normal-state-map "C-s" 'consult-line)
@@ -80,7 +89,7 @@
   "l" #'display-line-numbers-mode
   "L" #'hl-line-mode
   "m" #'hide-mode-line-mode
-  
+
   "f t" #'toggle-frame-tab-bar
   )
 (keymap-set global-map "C-x i" my-interface-map)
@@ -137,7 +146,19 @@
   ("o"   #'compile)
   ("g"   #'first-error              "first error"))
 
-;; == QUICK INSERT MAP ================================================
+;; == QUICK LOCATIONS ===========================================================
+
+(my-keymaps/populate my-maps/quick-open
+  ("C-o" (li (my/project-switch-projectile 'dired)))
+  ("M-d" #'devdocs-lookup)
+  :after persp-mode
+  ("M-s" #'persp-switch)
+  ("M-e" #'my-persp/switch-to-last-visited)
+  :after 'ego
+  ("M-w"   (li (ego-project-buffers-by-mode 'vterm-mode)) "project vterms"))
+
+
+;; == Quick INSERT MAP ================================================
 
 (my-keymaps/populate my-maps/quick-edit
   ("t"   (li (transpose-words 1))                 "transpose >")

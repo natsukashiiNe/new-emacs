@@ -16,11 +16,30 @@
         projectile-enable-caching t              ; Enable caching
         projectile-git-command "git ls-files -zco --exclude-standard"
         projectile-git-submodule-command nil)
+  :init
+  (defun my/project-switch-projectile (mode)
+    "Switch project with `projectile-switch-project' using MODE as the action.
+MODE can be:
+  \\='magit  - Open magit-status
+  \\='dired  - Open Dired in project root
+  \\='find   - Open projectile-find-file prompt
+  \\='shell  - Open shell in project root
+  \\='eshell - Open eshell in project root"
+    (interactive)
+    (let ((projectile-switch-project-action
+           (pcase mode
+             ('magit  (lambda () (magit-status (projectile-project-root))))
+             ('dired  (lambda () (dired (projectile-project-root))))
+             ('find   #'projectile-find-file)
+             ('shell  #'projectile-run-shell)
+             ('eshell #'projectile-run-eshell)
+             (_       (lambda () (magit-status (projectile-project-root)))))))
+      (projectile-switch-project)))
   ;; TODO: move to a proper keymap file.
   :bind (:map projectile-mode-map
 	      ("C-c b" . consult-project-buffer))
   :bind-keymap
-  ("C-c C-c" . projectile-command-map))
+  ("C-c p" . projectile-command-map))
 
 ;; (use-package perspective
 ;;   :ensure t
@@ -118,12 +137,24 @@ check fails and proportional (normal-*) sizing is used instead."
             (expand-file-name (format "persp-confs/%s/" dn)
                               user-emacs-directory)
             persp-auto-resume-time 1.0
-            persp-auto-save-opt 1)
+            ;; Use on-exit save (2) instead of timer-based (1) to avoid
+            ;; autosave triggering "Unknown terminal type" in headless daemon.
+            persp-auto-save-opt 2)
     (setq persp-auto-resume-time -1
           persp-auto-save-opt 0))
   (make-directory persp-save-dir t)
   (add-hook 'persp-before-switch-functions #'my-persp--save-current-before-switch)
   (persp-mode)
+
+  ;; Don't persist dirvish-side buffers — dirvish' session struct isn't
+  ;; rehydrated on restore, so restored side buffers leave `dirvish--sessions'
+  ;; with stale roots and break `dirvish-quit'.
+  (add-to-list 'persp-filter-save-buffers-functions
+               (lambda (b)
+                 (with-current-buffer b
+                   (when (fboundp 'dirvish-curr)
+                     (let ((dv (dirvish-curr)))
+                       (and dv (eq 'side (dv-type dv))))))))
 
   ;; Process buffer save/load handlers for daemon restart (reboot) recovery.
   ;; While the daemon is alive, all process buffers persist naturally in memory.
@@ -182,19 +213,18 @@ check fails and proportional (normal-*) sizing is used instead."
       (let ((old-name (safe-persp-name persp)))
         (funcall orig-fn new-name persp phash)))))
 
-(use-package activities
-  :ensure (:host github :repo "alphapapa/activities.el" )
-  :demand t
-  :init
-  (activities-mode)
-  (lambda () (activities-tabs-mode -1))
-  ;; Prevent `edebug' default bindings from interfering.
-  (setq edebug-inhibit-emacs-lisp-mode-bindings t)
-  :config
-  (my-keymaps-set-activities-global-keymaps))
-
-
 ;; TODO
+;; (use-package activities
+;;   :ensure (:host github :repo "alphapapa/activities.el" )
+;;   :demand t
+;;   :init
+;;   (activities-mode)
+;;   (lambda () (activities-tabs-mode -1))
+;;   ;; Prevent `edebug' default bindings from interfering.
+;;   (setq edebug-inhibit-emacs-lisp-mode-bindings t)
+;;   :config
+;;   (my-keymaps-set-activities-global-keymaps))
+
 ;; (use-package eyebrowse
 ;;   :ensure t
 ;;   :init

@@ -93,6 +93,7 @@ Also reports errors with file and line number."
 (add-to-list 'custom-theme-load-path (expand-file-name "themes" my-config-dir))
 (add-to-list 'load-path (expand-file-name "org"             my-config-dir))
 (add-to-list 'load-path (expand-file-name "core"            my-config-dir))
+(add-to-list 'load-path (expand-file-name "core/dired"      my-config-dir))
 (add-to-list 'load-path (expand-file-name "code"            my-config-dir))
 (add-to-list 'load-path (expand-file-name "code/lsp"        my-config-dir))
 (add-to-list 'load-path (expand-file-name "code/lsp/servers" my-config-dir))
@@ -100,6 +101,8 @@ Also reports errors with file and line number."
 (add-to-list 'load-path (expand-file-name "local"           my-config-dir))
 (add-to-list 'load-path (expand-file-name "custom"          my-config-dir))
 (add-to-list 'load-path (expand-file-name "custom/packages" my-config-dir))
+(add-to-list 'load-path (expand-file-name "keymaps"         my-config-dir))
+(add-to-list 'load-path (expand-file-name "refactor"        my-config-dir))
 
 (load-config-file "local/custom-macro.el")
 ;; (load-config-file "local/local-env.el")
@@ -117,8 +120,7 @@ Also reports errors with file and line number."
 
 (load-config-file "core/ego-setup.el")
 (load-config-file "core/bar-settings.el")
-;; TODO: remove test to an actual file
-(load-config-file "core/dirvish-settings-test.el")
+(load-config-file "core/dired/dirvish-setup.el")
 (load-config-file "core/posframe-setup.el")
 (load-config-file "core/completion-setup.el")
 (load-config-file "core/session-settings.el")
@@ -154,6 +156,7 @@ Also reports errors with file and line number."
 ;; APPS
 (load-config-file "apps/telega-setup.el")
 (load-config-file "apps/agent-shell-setup.el")
+(load-config-file "apps/minuet-ai-setup.el")
 
 ;; TODO: fix:
 (load-config-file "refactor/general-keymaps.el")
@@ -182,7 +185,7 @@ Also reports errors with file and line number."
      ("q" "quit" transient-quit-one)]))
 
 (defun my/show-messages-below-window ()
-  "Split current window and show messages in 30% below"
+  "Split current window and show messages in 30% below."
   (interactive)
   (let ((height (floor (* 0.3 (window-height)))))
     (split-window-below (- height))
@@ -190,7 +193,7 @@ Also reports errors with file and line number."
     (switch-to-buffer "*Messages*")))
 
 (defun my/show-messages-below-frame ()
-  "Split from frame bottom and show messages in 30%"
+  "Split from frame bottom and show messages in 30%."
   (interactive)
   (let ((height (floor (* 0.3 (frame-height)))))
     (select-window (split-root-window-below (- height)))

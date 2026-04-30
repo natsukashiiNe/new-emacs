@@ -7,11 +7,13 @@
 (require 'ego)
 
 (setq ego-ql-locations my-local--ego-ql-locations)
-(setq ego-ql-global-prefix     "C-c G")
+(setq ego-ql-global-prefix     "C-c M-g")
 (setq ego-ql-dired-prefix      "M-f")
-(setq ego-ql-minibuffer-prefix "C-c l")
+(setq ego-ql-minibuffer-prefix "C-c M-g")
 
 (ego-ql-setup)
+
+(keymap-set ego-ql--map "M-g" #'ego-open-dirvish-at-quick-location)
 
 (provide 'ego-setup)
 ;;; ego-setup.el ends here

@@ -23,7 +23,7 @@
 
 ;; Disable conflicting clients before lsp-mode loads
 (with-eval-after-load 'lsp-mode
-  (setq lsp-disabled-clients '(alive-lsp)))
+  (setq lsp-disabled-clients '(alive-lsp ruff-lsp)))
 
 (use-package lsp-mode
   :ensure t
@@ -43,7 +43,7 @@
 
   (lsp-modeline-diagnostics-enable nil)
   (lsp-auto-configure t)
-  (lsp-enable-snippet nil)  ; Snippets handled by yasnippet
+  (lsp-enable-snippet t)
   (lsp-prefer-flymake t)
   (lsp-idle-delay 0.2)
   (lsp-log-io nil)          ; Disable for performance

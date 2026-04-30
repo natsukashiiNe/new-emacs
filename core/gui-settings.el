@@ -20,9 +20,10 @@
 
 (defun my/theme-reload-my-theme()
   (interactive)
-  ;; (mapc #'disable-theme (custom-available-themes))
-  (add-to-list 'custom-theme-load-path (expand-file-name "themes" my-config-dir))
-  (load-theme (car custom-enabled-themes ) t))
+  (let ((theme (car custom-enabled-themes)))
+    (my/theme-disable-theme)
+    (add-to-list 'custom-theme-load-path (expand-file-name "themes" my-config-dir))
+    (load-theme theme t)))
 ;; TODO: move to INTERFACE theme (C-c u) + toggling of terminal, divish, flycheck, resizing etc.
 (keymap-set global-map "C-c R" #'my/theme-reload-my-theme)
 

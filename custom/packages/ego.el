@@ -7,17 +7,17 @@
 ;;   (require 'ego)
 ;;
 ;;   (setq ego-ql-locations
-;;     '(;; Simple cons pairs — desc defaults to "eql <path>":
-;;       ("d"   . "~/Downloads")
-;;       ("h s" . "~/Pictures/screenshots")
+;;     '(;; Prefix-only label (no :path — just a which-key group label):
+;;       (:key "e"   :label "Emacs")
 ;;
-;;       ;; Plist with custom desc — @path expands to the :path value:
-;;       (:key "p" :path "~/Projects" :desc "ego @path")
+;;       ;; Leaf binding with which-key description:
+;;       (:key "e s" :path "/run/user/1000/emacs" :wk "sockets")
 ;;
-;;       ;; Plist without :desc — defaults to "eql <path>":
-;;       (:key "c" :path "~/.config")
+;;       ;; Leaf without :wk — defaults to the :path value:
+;;       (:key "c"   :path "~/.config")
 ;;
-;;       ;; Both formats can be mixed freely in the same list.
+;;       ;; Custom :wk description:
+;;       (:key "R"   :path "/"          :wk "root (/)")
 ;;       ))
 ;;
 ;;   ;; Optionally override defaults:
@@ -27,21 +27,11 @@
 ;;
 ;;   (ego-ql-setup)
 ;;
-;; Description templates:
-;;   @path  — expands to the :path value
+;; Entry format:
+;;   (:key KEY :path PATH [:wk DESC])   — bind KEY to open PATH
+;;   (:key KEY :label LABEL)            — prefix-only which-key label
 ;;
-;; Examples:
-;;   (:key "d" :path "~/Downloads" :desc "ego @path")
-;;     => which-key shows: "ego ~/Downloads"
-;;
-;;   (:key "s" :path "~/src" :desc "sources")
-;;     => which-key shows: "sources"
-;;
-;;   (:key "n" :path "~/Notes")
-;;     => which-key shows: "eql ~/Notes"
-;;
-;;   ("t" . "/tmp")
-;;     => which-key shows: "eql /tmp"
+;; :wk defaults to PATH when omitted.
 
 ;;; Code:
 
@@ -51,9 +41,10 @@
 
 (defvar ego-ql-locations nil
   "List of quick-location entries.
-Each entry is either a cons pair (KEY . PATH) or a plist
-\(:key KEY :path PATH [:desc DESC]).  DESC supports @path
-expansion.  Default description is \"eql @path\".")
+Each entry is a plist:
+  (:key KEY :path PATH [:wk DESC])   — bind KEY to open PATH
+  (:key KEY :label LABEL)            — prefix-only which-key label
+:wk defaults to PATH when omitted.")
 
 (defvar ego-ql-global-prefix nil
   "Key sequence string for the global quick-locations prefix (e.g. \"C-c G\").")
@@ -93,24 +84,17 @@ expansion.  Default description is \"eql @path\".")
       (delete-minibuffer-contents)
       (insert expanded-path))))
 
-(defun ego-ql--normalize-entry (entry)
-  "Normalize ENTRY to (:key KEY :path PATH :desc DESC).
-ENTRY is either (KEY . PATH) or (:key KEY :path PATH [:desc DESC]).
-@path in DESC expands to PATH.  Default desc is \"eql @path\"."
-  (let (key path desc)
-    (if (keywordp (car entry))
-        (setq key  (plist-get entry :key)
-              path (plist-get entry :path)
-              desc (or (plist-get entry :desc) "eql @path"))
-      (setq key  (car entry)
-            path (cdr entry)
-            desc "eql @path"))
-    (setq desc (string-replace "@path" path desc))
-    (list :key key :path path :desc desc)))
+(defun ego-ql--leaf-entries ()
+  "Return leaf entries from `ego-ql-locations' (those with :path)."
+  (cl-remove-if-not (lambda (e) (plist-get e :path)) ego-ql-locations))
 
-(defun ego-ql--normalize-locations ()
-  "Normalize `ego-ql-locations' into a list of canonical plists."
-  (mapcar #'ego-ql--normalize-entry ego-ql-locations))
+(defun ego-ql--prefix-entries ()
+  "Return prefix-only entries from `ego-ql-locations' (those with :label)."
+  (cl-remove-if-not (lambda (e) (plist-get e :label)) ego-ql-locations))
+
+(defun ego-ql--entry-wk (entry)
+  "Return the which-key description for ENTRY, defaulting to :path."
+  (or (plist-get entry :wk) (plist-get entry :path)))
 
 (defun ego-ql--bind-to-map (keymap key-str path desc make-action-fn)
   "Bind KEY-STR in KEYMAP to a command created by MAKE-ACTION-FN for PATH.
@@ -135,12 +119,19 @@ DESC is shown in which-key.  KEY-STR can be \"d\" or multi-key like \"h s\"."
   "Rebuild `ego-ql--map' and `ego-ql--minibuffer-map' from `ego-ql-locations'."
   (setq ego-ql--map (make-sparse-keymap))
   (setq ego-ql--minibuffer-map (make-sparse-keymap))
-  (dolist (entry (ego-ql--normalize-locations))
+  ;; Bind leaf entries
+  (dolist (entry (ego-ql--leaf-entries))
     (let ((key  (plist-get entry :key))
           (path (plist-get entry :path))
-          (desc (plist-get entry :desc)))
-      (ego-ql--bind-to-map ego-ql--map key path desc #'ego-ql--make-dired-action)
-      (ego-ql--bind-to-map ego-ql--minibuffer-map key path desc #'ego-ql--make-minibuffer-action))))
+          (wk   (ego-ql--entry-wk entry)))
+      (ego-ql--bind-to-map ego-ql--map key path wk #'ego-ql--make-dired-action)
+      (ego-ql--bind-to-map ego-ql--minibuffer-map key path wk #'ego-ql--make-minibuffer-action)))
+  ;; Apply prefix labels
+  (dolist (entry (ego-ql--prefix-entries))
+    (let ((key   (plist-get entry :key))
+          (label (plist-get entry :label)))
+      (which-key-add-keymap-based-replacements ego-ql--map key label)
+      (which-key-add-keymap-based-replacements ego-ql--minibuffer-map key label))))
 
 ;;;; Public setup
 
@@ -170,6 +161,43 @@ Binds prefixes only when the corresponding variable is non-nil:
         (define-key dirvish-mode-map (kbd ego-ql-dired-prefix) ego-ql--map)
       (with-eval-after-load 'dirvish
         (define-key dirvish-mode-map (kbd ego-ql-dired-prefix) ego-ql--map)))))
+
+;;;; Interactive quick-location opener
+
+(defun ego-open-dirvish-at-quick-location ()
+  "Open a quick-location directory with completing-read.
+Candidates are shown as WK | PATH."
+  (interactive)
+  (let* ((entries (ego-ql--leaf-entries))
+         (candidates
+          (mapcar (lambda (e)
+                    (let ((wk (ego-ql--entry-wk e))
+                          (path (plist-get e :path)))
+                      (cons (format "%-12s %s" wk path) path)))
+                  entries))
+         (choice (completing-read "Quick location: " candidates nil t))
+         (path (cdr (assoc choice candidates))))
+    (funcall ego-ql--dired-command (expand-file-name path))))
+
+;;;; Project vterm switcher
+
+(defun ego-project-buffers-by-mode (mode)
+  "Switch to a buffer with major MODE in the current project.
+If only one such buffer exists, switch to it directly.
+If several exist, offer completion with buffer preview."
+  (if-let* ((proj (project-current))
+            (bufs (cl-remove-if-not
+                   (lambda (b) (eq (buffer-local-value 'major-mode b) mode))
+                   (project-buffers proj)))
+            (names (mapcar #'buffer-name bufs)))
+      (if (= (length names) 1)
+          (switch-to-buffer (car bufs))
+        (switch-to-buffer
+         (consult--read names
+                        :prompt (format "%s: " mode)
+                        :category 'buffer
+                        :state (consult--buffer-state))))
+    (user-error "No %s buffers in this project" mode)))
 
 (provide 'ego)
 ;;; ego.el ends here

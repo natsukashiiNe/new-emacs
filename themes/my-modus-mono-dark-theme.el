@@ -116,10 +116,8 @@
  `(avy-lead-face-1       ((t  (:foreground ,exu-black :background ,exu-cyan-accent :weight normal))))
  `(avy-lead-face-2       ((t  (:foreground ,exu-black :background ,exu-cyan-accent :weight normal))))
 
- 
- `(help-key-binding   ((t  (:foreground ,exu-black  :background ,exu-main-sup1 :weight normal ))))
- `(help-argument-name ((t  (:foreground ,exu-accent :weight bold ))))
 
+ `(custom-link       ((t  (:foreground ,exu-main-sup2 :underline t))))
  `(button            ((t  (:foreground ,exu-accent-alt :slant italic :weight normal :underline (:color ,exu-accent-alt)))))
  `(minibuffer-prompt ((t  (:foreground ,exu-black  :background ,exu-strong :box nil ))))
  `(border            ((t  (:foreground ,exu-strong :background ,exu-black :box nil ))))
@@ -130,6 +128,9 @@
  `(orderless-match-face-1   ((t  (:foreground ,exu-accent :weight bold :slant normal))))
  `(orderless-match-face-2   ((t  (:foreground ,exu-yellow :weight bold :slant normal))))
  `(orderless-match-face-3   ((t  (:foreground ,exu-accent-alt :weight bold :slant normal))))
+
+ ;; `(indent-bars-ts-face   ((t  (:foreground "#141c1c" ))))
+ ;; `(indent-bars-invisible-face   ((t  (:foreground "#141c1c" ))))
  
  `(marginalia-documentation ((t  (:foreground ,exu-main-sup3 :slant ,exu-italic :weight normal))))
  `(marginalia-key           ((t  (:foreground ,exu-yellow    :slant ,exu-italic :weight normal))))
@@ -159,7 +160,9 @@
 
  ;; LSP faces
  ;; Errors, warnings, etc. can be minimal or softly highlighted
- `(symbol-overlay-default-face ((t :background ,exu-fg2 :foreground unspecified :weight bold)))
+ `(symbol-overlay-default-face ((t :background ,exu-fg2 :foreground unspecified :weight bold
+				   :box (:line-width (2 . -2) :color ,exu-accent :style flat-button))))
+
  
  `(lsp-face-highlight-textual ((t
 				(:background ,exu-fg2
@@ -241,6 +244,23 @@
  `(flycheck-overlay-marker             ((t (:foreground ,exu-cyan-accent :background ,exu-bg-orange))))
 
 
+
+ `(flymake-error-fringe     ((t (:foreground ,exu-cyan-accent    :background ,exu-bg-cyan :extend t))))
+ `(flymake-warning-fringe   ((t (:foreground ,exu-magenta-accent :background ,exu-bg-magenta
+					     :weight ,exu-bold :extend t))))
+ `(flymake-note-fringe      ((t (:foreground ,exu-slate-accent   :background ,exu-bg-slate :extend t ))))
+
+
+ `(flymake-error-echo-at-eol   ((t :foreground ,exu-cyan-accent :background ,exu-bg-cyan
+				   :height 1.00
+				   :box (:line-width (1 . -1) :color ,exu-cyan-accent :style flat-button))))
+ `(flymake-warning-echo-at-eol   ((t :foreground ,exu-magenta-accent :background ,exu-bg-magenta
+				     :height 1.00
+				     :box (:line-width (1 . -1) :color ,exu-magenta-accent :style flat-button))))
+ `(flymake-note-echo-at-eol   ((t :foreground ,exu-slate-accent :background ,exu-bg-slate
+				  :height 1.00
+				  :box (:line-width (1 . -1) :color ,exu-slate-accent :style flat-button))))
+
  ;; --- GIT ----------------------------------------------------------------
  `(magit-diff-file-heading     ((t (:foreground ,exu-accent-weak :weight normal))))
  `(magit-filename              ((t (:foreground ,exu-accent-alt2 :weight normal))))
@@ -249,9 +269,9 @@
  `(magit-branch-remote         ((t (:foreground ,exu-strong      :weight normal))))
 
 
- `(diff-hl-insert ((t (:foreground "#88f5b3" :background ,(face-background 'default)))))
- `(diff-hl-change ((t (:foreground "#a0c4ff" :background ,(face-background 'default)))))
- `(diff-hl-delete ((t (:foreground "#ff8fa3" :background ,(face-background 'default)))))
+ `(diff-hl-insert ((t (:foreground "#88f5b3" :background ,(face-background 'default) :stipple nil))))
+ `(diff-hl-change ((t (:foreground "#a0c4ff" :background ,(face-background 'default) :stipple nil))))
+ `(diff-hl-delete ((t (:foreground "#ff8fa3" :background ,(face-background 'default) :stipple nil))))
 
  ;; --- Dired ----------------------------------------------------------------
  `(dirvish-hl-line             ((t (:foreground ,exu-black :background ,exu-accent :weight normal))))
@@ -282,13 +302,14 @@
 
  ;; --- HELP --------------------------------------------------------------------
  ;; `(help-argument-name             ((t (:foreground ,exu-strong  :weight normal))))
+ 
+ `(help-key-binding   ((t  (:foreground ,exu-black  :background ,exu-main-sup1 :weight normal ))))
+ `(help-argument-name ((t  (:foreground ,exu-accent :weight bold ))))
 
-
-
-
-
-
-
+ `(custom-variable-tag ((t  (:foreground ,exu-accent-weak :weight normal ))))
+ `(custom-group-tag    ((t  (:foreground ,exu-strong      :weight normal))))
+ `(custom-state        ((t  (:foreground ,exu-main-sup1   :slant italic))))
+ `(custom-visibility   ((t  (:inherit custom-link :height 0.8))))
 
  ;; --- TELEGA ------------------------------------------------------------------
 

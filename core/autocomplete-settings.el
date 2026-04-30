@@ -59,19 +59,43 @@
   :hook (lsp-bridge-mode . (lambda ()
                              (corfu-mode -1))))
 
-(use-package corfu-terminal
-  :ensure (:host codeberg :repo "akib/emacs-corfu-terminal")
+;; I am on emacs 31 now.
+;; (use-package corfu-terminal
+;;   :ensure (:host codeberg :repo "akib/emacs-corfu-terminal")
+;;   :after corfu
+;;   :config
+;;   (unless (display-graphic-p)
+;;     (corfu-terminal-mode 1))
+
+;;   ;; Disable corfu-terminal in lsp-bridge modes
+;;   ;; ACM handles auto-complete
+;;   (add-hook 'lsp-bridge-mode-hook
+;;             (lambda ()
+;;               (when (bound-and-true-p corfu-terminal-mode)
+;;                 (corfu-terminal-mode -1)))))
+
+
+(use-package cape
+  :ensure t
+  :init
+  ;; order of the sources matters
+  (add-to-list 'completion-at-point-functions #'cape-file)       ; Files
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)    ; Dynamic words
+  (add-to-list 'completion-at-point-functions #'cape-keyword))   ; Programming keywords
+
+(use-package yasnippet-capf
+  :ensure t
+  :after cape
+  :init
+  (add-to-list 'completion-at-point-functions #'yasnippet-capf))
+
+(use-package corfu-prescient
+  :ensure t
   :after corfu
   :config
-  (unless (display-graphic-p)
-    (corfu-terminal-mode 1))
-  
-  ;; Disable corfu-terminal in lsp-bridge modes
-  ;; ACM handles auto-complete
-  (add-hook 'lsp-bridge-mode-hook
-            (lambda ()
-              (when (bound-and-true-p corfu-terminal-mode)
-                (corfu-terminal-mode -1)))))
+  (corfu-prescient-mode 1))
+
+;; == APPEARENCE ================================================================
 
 (use-package kind-icon
   :ensure t
@@ -84,13 +108,11 @@
   :config
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
-(use-package cape
+(use-package nerd-icons-corfu
   :ensure t
-  :init
-  ;; order of the sources matters
-  (add-to-list 'completion-at-point-functions #'cape-file)      ; Files
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)   ; Dynamic words
-  (add-to-list 'completion-at-point-functions #'cape-keyword))  ; Programming keywords
+  :after corfu
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 (provide 'autocomplete-settings)
 ;;; autocomplete-settings ends here

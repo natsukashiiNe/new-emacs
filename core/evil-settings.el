@@ -25,11 +25,13 @@
     (modify-syntax-entry ?- "w"))
 
   :custom
+  ;; TODO: make it hook into my themes (light and dark)
   ;; cursor
-  (evil-insert-state-cursor  '(box "#FF7F9F"))
-  (evil-normal-state-cursor  '(box "#FF8020"))
-  ;; (evil-insert-state-cursor  '(box "#000000"))
-  ;; (evil-normal-state-cursor  '(box "#990000"))
+  ;; (evil-normal-state-cursor   '(box    "#990000"))
+  ;; (evil-visual-state-cursor   '(box    "#0B5E30"))
+  ;; (evil-motion-state-cursor   '(box    "#0B5E30"))
+  ;; (evil-insert-state-cursor   '(box    "#000000"))
+  
   ;; ;;  (evil-visual-state-cursor  'box)
   ;; (evil-replace-state-cursor 'box)
   (evil-emacs-state-cursor   'box)
@@ -69,8 +71,14 @@
   ;; For visual state as well
   (define-key evil-visual-state-map "j" 'evil-next-visual-line)
   (define-key evil-visual-state-map "k" 'evil-previous-visual-line)
+  ;; Visual block + $ needs logical EOL so each row extends to its own end.
+  (define-key evil-visual-state-map "$" 'evil-end-of-line)
   )
 
+(with-eval-after-load 'evil
+  (setq evil-insert-state-cursor  '(box "#FF7F9F"))
+  (setq evil-normal-state-cursor  '(box "#FF8020"))
+  (setq evil-visual-state-cursor  '(box "#FF8020")))
 
 ;; Evil-escape
 (use-package evil-escape

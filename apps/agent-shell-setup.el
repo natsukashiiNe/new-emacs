@@ -15,14 +15,10 @@
   :after acp
   :ensure t
   :defer t
-  :config
-  (my-keymaps-set-agent-shell-mode)
   :custom
   (agent-shell-anthropic-authentication
    (agent-shell-anthropic-make-authentication :login t))
-
-  (agent-shell-header-style 'text)
-  )
+  (agent-shell-header-style 'text))
 
 
 (use-package agent-review

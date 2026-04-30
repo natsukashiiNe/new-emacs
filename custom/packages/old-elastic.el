@@ -27,7 +27,7 @@ FORMAT-STRING and ARGS are passed to `format'."
         (append-to-file (point-min) (point-max) elastic-debug-log-file)))))
 
 (defvar elastic-vterm--frame nil
-  "The floating vterm frame used by elastic-vterm.
+  "The floating vterm frame used by 'elastic-vterm'.
 This frame is reused when toggling the terminal.")
 
 (defvar floating-frame--parent nil
@@ -36,7 +36,7 @@ Initialized lazily when first needed.")
 
 (defvar floating-frame--parent-geometry nil
   "A plist storing the current pixel geometry of `floating-frame--parent'.
-The keys are :width and :height. Initialized lazily when first needed.")
+The keys are :width and :height.  Initialized lazily when first needed.")
 
 (defun floating-frame--get-parent ()
   "Get the appropriate parent frame for child frames.
@@ -105,10 +105,10 @@ This function creates and stores the frame in `elastic-vterm--frame`."
            (base-height (if use-native parent-native-height parent-pixel-height))
            
            ;; Calculate the desired child frame dimensions in pixels.
-           (child-width-pixels (* 0.9 base-width))
-           (child-height-pixels (* 0.7 base-height))
-           (child-left (round (* 0.05 base-width)))
-           (child-top (round (* 0.15 base-height)))
+           (child-width-pixels (* 0.85 base-width))
+           (child-height-pixels (* 0.8 base-height))
+           (child-left (round (* 0.055 base-width)))
+           (child-top (round (* 0.09 base-height)))
            
            ;; Convert pixel dimensions to text dimensions.
            (char-width parent-char-width)
@@ -187,8 +187,8 @@ This function creates and stores the frame in `elastic-vterm--frame`."
         (select-frame-set-input-focus elastic-vterm--frame)
         
         ;; Launch vterm in the new frame if available.
-        (when (fboundp 'vterm)
-          (let ((vterm-buffer (vterm)))
+        (when (fboundp 'multi-vterm)
+          (let ((vterm-buffer (multi-vterm)))
             (set-window-buffer (frame-root-window elastic-vterm--frame) vterm-buffer)
             ;; Tag window for buffer routing
             (set-window-parameter (frame-root-window elastic-vterm--frame)

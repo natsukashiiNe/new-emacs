@@ -85,7 +85,7 @@
   (blamer-min-offset 0)
   :custom-face
   :config
-  (global-blamer-mode 1))
+  (global-blamer-mode -1))
 
 (provide 'git-settings)
 ;;; git-settings.el ends here

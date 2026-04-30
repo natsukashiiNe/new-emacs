@@ -14,7 +14,7 @@
 (scroll-bar-mode 0)     ;; Enables visible scrollbar
 (tooltip-mode 0)        ;; Disable tooltips
 (blink-cursor-mode 0)   ;; Disables cursor blinking
-(setq require-final-newline 'visit)
+(setq require-final-newline nil)
 
 (setq visible-cursor nil)
 (setq inhibit-startup-message t) ;; Do not show startup screen
@@ -50,11 +50,30 @@
   ;; (set-face-background 'line-number unspecified)
   )
 
+(use-package ef-themes
+  :ensure t
+  :init
+  (ef-themes-take-over-modus-themes-mode 1)
+  :bind
+  ;; (("<f5>" . modus-themes-rotate)
+  ;;  ("C-<f5>" . modus-themes-select)
+  ;;  ("M-<f5>" . modus-themes-load-random))
+  :config
+  ;; All customisations here.
+  (setq modus-themes-mixed-fonts t)
+  (setq modus-themes-italic-constructs t)
+
+  ;; Finally, load your theme of choice (or a random one with
+  ;; `modus-themes-load-random', `modus-themes-load-random-dark',
+  ;; `modus-themes-load-random-light').
+  ;;(modus-themes-load-theme 'ef-day)
+  )
+
 ;; ----------------------------
 ;; Other basic settings & built-in packages (or their replacements)
 ;; ----------------------------
 ;; (global-display-line-numbers-mode t) ;; Shows line numbering globalle
-(global-hl-line-mode 1)              ;; Highlight the current line globally
+(global-hl-line-mode -1)             ;; DO NOT Highlight the current line globally
 (show-paren-mode 1)                  ;; Highlight matching
 (fset 'yes-or-no-p 'y-or-n-p)        ;; Make `y` and `n` confirm instead of `yes` and `no`
 
@@ -72,7 +91,9 @@
 		diff-mode-hook))
   (add-hook hook #'visual-line-mode))
 
-(setq lazy-highlight-cleanup nil) ;; persistent isearch colors
+(setq lazy-highlight-cleanup nil)           ;; persistent isearch colors
+(setq lazy-highlight-buffer-max-at-a-time nil) ;; no per-cycle limit
+(setq lazy-highlight-buffer t)                 ;; highlight across entire buffer
 
 
 ;; TODO: make it not suck
@@ -104,7 +125,7 @@
   :ensure t
   :demand t
   :config
-  (setq which-key-idle-delay 0.175)
+  (setq which-key-idle-delay 0.250)
   (which-key-mode 1))
 
 (use-package rg
@@ -293,18 +314,33 @@
 
 (use-package indent-bars
   :ensure t
-  ;; :hook ((prog-mode . indent-bars-mode)
-  ;;        (lisp-mode . indent-bars-mode)
-  ;;        (emacs-lisp-mode . indent-bars-mode))
+  :hook ((prog-mode . indent-bars-mode)
+         (lisp-mode . indent-bars-mode)
+         (emacs-lisp-mode . indent-bars-mode))
+  :init
+  (defvar indent-bars-treesit-scope nil
+    "Pre-declare so lang files can `add-to-list' before indent-bars-ts loads.")
   :custom
   (indent-bars-color-by-depth nil)  
   ;; base color
   (indent-bars-color '(highlight :face-bg t :blend 0.3))
   (indent-bars-highlight-current-depth '(:color "#7A6200" :blend 0.7))  ; active scope: orange/yellow
 
-  (indent-bars-treesit-support t)  ; enable when treesit modes are available
+  (indent-bars-treesit-support t)
+  (indent-bars-treesit-scope-min-lines 3)
   (indent-bars-no-descend-string t)
-  (indent-bars-no-descend-lists 'skip) 
+  (indent-bars-no-descend-lists 'skip)
+  (indent-bars-starting-column 0)
   (indent-bars-width-frac 0.15))     ; thin lines
+
+(use-package hl-todo
+  :ensure t
+  :hook (prog-mode . hl-todo-mode))
+
+(use-package consult-todo
+  :ensure t
+  :after (consult hl-todo)
+  :demand t)
+
 (provide 'settings)
 ;;; settings.el ends here

@@ -15,12 +15,15 @@
                '(typescript function_declaration function class_declaration if_statement
                             for_statement while_statement switch_statement try_statement))
   (add-to-list 'indent-bars-treesit-scope
-               '(bash function_definition if_statement for_statement while_statement
-                      case_statement)))
+               '(bash function_definition compound_statement if_statement
+                      for_statement while_statement do_group
+                      case_statement subshell)))
 
 ;; =============================================================================
 ;; BASH
 ;; =============================================================================
+
+(setq sh-use-tree-sitter t)
 
 (use-package bash-ts-mode
   :ensure nil  ; built-in

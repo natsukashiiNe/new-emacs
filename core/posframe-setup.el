@@ -88,5 +88,17 @@
 ;; TODO: make it toggle
 (keymap-set minibuffer-mode-map "C-c C" (li (vertico-posframe-mode 'toggle)))
 
+(defun my/toggle-posframe-minibuffer-hooks ()
+  "Toggle vertico-posframe auto-disable/enable on minibuffer entry/exit."
+  (interactive)
+  (if (memq #'my/disable-vertico-posframe minibuffer-setup-hook)
+      (progn
+        (remove-hook 'minibuffer-setup-hook #'my/disable-vertico-posframe)
+        (remove-hook 'minibuffer-exit-hook #'my/enable-vertico-posframe)
+        (message "Posframe minibuffer hooks disabled"))
+    (add-hook 'minibuffer-setup-hook #'my/disable-vertico-posframe)
+    (add-hook 'minibuffer-exit-hook #'my/enable-vertico-posframe)
+    (message "Posframe minibuffer hooks enabled")))
+
 (provide 'posframe-settings)
 ;;; posframe-settings ends here

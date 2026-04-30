@@ -53,6 +53,8 @@
   (vertico-mode 1)
   ;; Persist across Emacs sessions
   (add-to-list 'savehist-additional-variables 'vertico-repeat-history)
+  (unless (display-graphic-p)
+    (set-face-attribute 'vertico-current nil :inverse-video t))
   :bind
   (:map minibuffer-mode-map
 	("M-RET" . vertico-exit-input )
@@ -125,7 +127,32 @@
 	      ("C-c B" . embark-become)
 	      )
   :init
-  (setq prefix-help-command #'embark-prefix-help-command))
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  (defun embark-which-key-indicator ()
+    "An embark indicator that displays keymaps hints using which-key."
+    (lambda (&optional keymap targets prefix)
+      (if (null keymap)
+          (which-key--hide-popup-ignore-command)
+	(which-key--show-keymap
+	 (if (eq (plist-get (car targets) :type) 'embark-become)
+             "Become"
+           (format "Act on %s '%s'%s"
+                   (plist-get (car targets) :type)
+                   (embark--truncate-target (plist-get (car targets) :target))
+                   (if (cdr targets) "..." "")))
+	 (if prefix
+             (pcase (lookup-key keymap prefix 'accept-default)
+               ((and (pred keymapp) km) km))
+           keymap)
+	 nil nil t (lambda (binding)
+                     (not (string-suffix-p "-argument" (cdr binding))))))))
+  :config
+  (setq embark-indicators
+	'(embark-which-key-indicator
+          embark-highlight-indicator
+          embark-isearch-highlight-indicator))
+  )
 
 (use-package embark-consult
   :ensure t
