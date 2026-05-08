@@ -7,9 +7,8 @@
 
 ;;; Code:
 
-(require 'evil)
-(require 'avy)
 (require 'cl-lib)
+(declare-function avy-process "avy" (candidates &optional overlay-fn cleanup-fn))
 
 ;; ----------------------------
 ;; Copy Previous Word Functions
@@ -45,7 +44,7 @@ Useful for: MyClass -> myClass or myClass -> MyClass."
                 (backward-word)
                 (thing-at-point 'word t))))
     (if word
-        (insert (my/toggle-first-char-case word))
+        (insert (my-edit/toggle-first-char-case word))
       (user-error "No previous word found"))))
 
 (defun my-edit/avy-copy-word-backward ()
@@ -123,13 +122,13 @@ DELTA is positive for increment, negative for decrement."
           (message "No number found on this line to %s"
                    (if (> delta 0) "increment" "decrement")))))))
 
-(defun my/increment-number-at-point-or-line ()
+(defun my-edit/increment-number-at-point-or-line ()
   "Increment the first number found on the line.
 Searches forward from cursor first, then backward from cursor."
   (interactive)
   (my/change-number-on-line 1))
 
-(defun my/decrement-number-at-point-or-line ()
+(defun my-edit/decrement-number-at-point-or-line ()
   "Decrement the first number found on the line.
 Searches forward from cursor first, then backward from cursor.
 Negative numbers become more negative (e.g., -5 becomes -6)."
@@ -257,6 +256,66 @@ and call `my/edit--insert-comment' or `my/edit--insert-centered-comment'."
 			 (let ((text (read-string "Text: ")))
 			   (my/edit--insert-centered-comment
 			    :symbol "=" :length 80 :dir dir :text text)))
+
+;; ------------------------------------
+;; Org Table to Bullet List
+;; ------------------------------------
+
+(declare-function org-at-table-p "org" (&optional table-type))
+(declare-function org-table-to-lisp "org-table" (&optional txt))
+(declare-function org-table-begin "org-table" (&optional table-type))
+(declare-function org-table-end "org-table" (&optional table-type))
+
+(defun my/edit-org-table-to-bullets ()
+  "Convert the org table at point into a nested bullet list.
+
+First column becomes top-level bullets (`-'), labeled with the first
+column's header name. Remaining columns become sub-bullets (`+'),
+labeled with their header names padded so the colons align to the
+widest header. Each sub-bullet value is terminated with a period.
+
+Replaces the table in place. Signals an error if point is not inside
+an org table. Separator rows (|---...) are ignored."
+  (interactive)
+  (unless (org-at-table-p)
+    (user-error "Not inside an org table"))
+  (let* ((rows (cl-remove-if (lambda (r) (eq r 'hline))
+                             (org-table-to-lisp)))
+         (header (car rows))
+         (data-rows (cdr rows))
+         (_ (unless data-rows
+              (user-error "Table has no data rows")))
+         (first-col-name (string-trim (car header)))
+         (sub-col-names (mapcar #'string-trim (cdr header)))
+         (max-width (apply #'max (mapcar #'string-width sub-col-names)))
+         (table-beg (org-table-begin))
+         (table-end (org-table-end))
+         (output
+          (mapconcat
+           (lambda (row)
+             (let ((first-val (string-trim (car row)))
+                   (sub-vals (cdr row)))
+               (concat
+                (format "- %s: %s\n" first-col-name first-val)
+                (mapconcat
+                 (lambda (pair)
+                   (let* ((name (car pair))
+                          (val (string-trim (cdr pair)))
+                          (pad (make-string
+                                (- max-width (string-width name)) ?\s))
+                          (val-with-dot
+                           (if (or (string-empty-p val)
+                                   (string-match-p "[.!?]\\'" val))
+                               val
+                             (concat val "."))))
+                     (format "  + %s%s: %s" name pad val-with-dot)))
+                 (cl-mapcar #'cons sub-col-names sub-vals)
+                 "\n"))))
+           data-rows
+           "\n")))
+    (goto-char table-beg)
+    (delete-region table-beg table-end)
+    (insert output "\n")))
 
 (provide 'custom-editing)
 ;;; custom-editing.el ends here

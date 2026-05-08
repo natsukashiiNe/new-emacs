@@ -113,6 +113,7 @@ Also reports errors with file and line number."
 
 (load-config-file "core/settings.el")
 (load-config-file "core/gui-settings.el")
+(load-config-file "custom/custom-editing.el")
 (load-config-file "keymaps/mode-keymaps.el")
 
 ;; MOVE to custom/
@@ -141,6 +142,7 @@ Also reports errors with file and line number."
 (load-config-file "code/flymake/test-flymake-setup.el")   ;; FLYMAKE built-in.
 (load-config-file "code/snippets-setup.el")   ;; code/snippets stores snippet files.
 (load-config-file "code/treesitter-setup.el")
+(load-config-file "code/code-utilities-setup.el")
 
 (load-config-file "org/org-plugins.el")
 (load-config-file "org/org-settings.el")
@@ -148,7 +150,6 @@ Also reports errors with file and line number."
 ;; CUSTOM
 (load-config-file "custom/elgo.el")
 (load-config-file "custom/custom-compile.el")
-(load-config-file "custom/custom-editing.el")
 (load-config-file "custom/scripts-org.el")
 ;;(load-config-file "custom/packages/elastic.el")
 (load-config-file "custom/packages/old-elastic.el")

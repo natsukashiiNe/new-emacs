@@ -4,7 +4,10 @@
 ;; Contains keymaps that are active only in specific modes.
 
 ;;; Code:
+(add-to-list 'load-path (expand-file-name "org"             my-config-dir))
+
 (require 'keymap-utils)
+(require 'custom-editing)
 
 ;; == Global (override) map =====================================================
 
@@ -25,12 +28,13 @@
 (my-keymaps/define-submaps global-map
   (my-maps/compile-map    :prefix "C-c C"    :doc "My compilation map." :wk "[C]ompile")
   (my-maps/build-map      :prefix "C-c B"    :doc "My build map."       :wk "[B]uild")
-  (my-maps/diff-map       :prefix "C-c C-d"  :doc "My dif map."         :wk "[D]iff"))
+  (my-maps/diff-map       :prefix "C-c M-d"  :doc "My dif map."         :wk "[D]iff"))
 
 (my-keymaps/define-submaps my-override-mode-map
-  (my-maps/global-utility   :prefix "C-c o"   :doc "Global utility map." :wk "Utility")
-  (my-maps/quick-edit       :prefix "C-c C-s" :doc "Quick editing."      :wk "Quick-edit")
-  (my-maps/quick-open       :prefix "M-g"     :doc "Quick access map."   :wk "Quick-locations")
+  (my-maps/global-utility   :prefix "C-c o"   :doc "Global utility map."      :wk "Utility")
+  (my-maps/quick-edit       :prefix "C-c C-s" :doc "Quick editing."           :wk "Quick-edit")
+  (my-maps/quick-open       :prefix "M-g"     :doc "Quick access map."        :wk "Quick-locations")
+  (my-maps/buffer-actions   :prefix "C-c C-b" :doc "Actions for this buffer." :wk "[B]uffer actions")
   :populate
   ("M-h"  #'isearch-backward  "isearch-backward")
   ("M-l"  #'isearch-forward   "isearch-forward"))
@@ -54,18 +58,19 @@
 (keymap-set global-map "C-S-l"   #'eval-expression)
 (keymap-set global-map "C-c E"   #'eplaca-log)
 
-;; ---- Isearch -----------------------------------------------------------------
+(define-key evil-insert-state-map (kbd "C-SPC") #'completion-at-point)
+(define-key evil-insert-state-map (kbd "M-SPC") #'completion-at-point)
 
+;; ---- Isearch -----------------------------------------------------------------
 (keymap-set global-map "M-l"     #'isearch-forward)
 (keymap-set global-map "M-h"     #'isearch-backward)
-
 ;; n/N uses isearch
 (keymap-set evil-normal-state-map "n"
 	    (li (isearch-repeat-forward) (isearch-lazy-highlight-new-loop)))
 (keymap-set evil-normal-state-map "N"
 	    (li (isearch-repeat-backward) (isearch-lazy-highlight-new-loop)))
 (keymap-set search-map "h U" (li (isearch-dehighlight) (lazy-highlight-cleanup t)))
-
+;; when in isearch, navigate with C-j/k
 (keymap-set isearch-mode-map "C-j" #'isearch-repeat-forward)
 (keymap-set isearch-mode-map "C-k" #'isearch-repeat-backward)
 (keymap-set isearch-mode-map "C-S-V" #'isearch-yank-kill)
@@ -76,7 +81,6 @@
 
 (with-eval-after-load 'treesit-jump
   (keymap-set global-map "C-c C-t" #'treesit-jump-transient))
-
 
 ;; ---- Evil-insert -------------------------------------------------------------
 (keymap-set evil-insert-state-map "C-a" #'move-beginning-of-line)
@@ -89,9 +93,7 @@
   "l" #'display-line-numbers-mode
   "L" #'hl-line-mode
   "m" #'hide-mode-line-mode
-
-  "f t" #'toggle-frame-tab-bar
-  )
+  "f t" #'toggle-frame-tab-bar)
 (keymap-set global-map "C-x i" my-interface-map)
 (which-key-add-keymap-based-replacements my-interface-map
   "f" "frame settigns"
@@ -139,7 +141,6 @@
     (kbd "M-p") (li (symbol-overlay-jump-prev) (recenter))))
 
 ;; == COMPILE MAP =====================================================
-
 (my-keymaps/populate my-maps/compile-map
   ("C"   #'my/project-custom-comint "custom-comint")
   ("r"   #'recompile                "recompile")
@@ -147,7 +148,6 @@
   ("g"   #'first-error              "first error"))
 
 ;; == QUICK LOCATIONS ===========================================================
-
 (my-keymaps/populate my-maps/quick-open
   ("C-o" (li (my/project-switch-projectile 'dired)))
   ("M-d" #'devdocs-lookup)
@@ -159,7 +159,6 @@
 
 
 ;; == Quick INSERT MAP ================================================
-
 (my-keymaps/populate my-maps/quick-edit
   ("t"   (li (transpose-words 1))                 "transpose >")
   ("T"   (li (transpose-words -1))                "transpose <")
@@ -184,7 +183,15 @@
   ("C"   #'my/edit-insert-comment         "comment (prompt)"))
 
 
-;; == MINUET ====================================================================
+;; == THIS BUFFERS ACTIONS =======================================================
+(my-keymaps/populate my-maps/buffer-actions
+  ("K" #'kill-this-buffer  "[K]ill buffer ")
+  ("r" #'recover-this-file "[r]ecover buffer ")
+
+  ("n"   #'evil-buffer-new "[n]ew buffer")
+  ("d"   #'dired-jump "[d]ired here"))
+
+;; == Minuet ====================================================================
 
 (with-eval-after-load 'minuet
   (my-keymaps/populate my-maps/minuet
@@ -237,7 +244,10 @@
 ;; == PROJECTILE ======================================================
 
 ;; == DIRVVISH ========================================================
-(defun my-keymaps-set-dired-mode ()
+;; Wrapped in `with-eval-after-load' so these bindings apply after dirvish
+;; (and evil-collection-dired) have installed theirs — otherwise they get
+;; clobbered.
+(with-eval-after-load 'dirvish
   (evil-define-key 'normal dired-mode-map
     (kbd "T") #'dired-create-empty-file
     (kbd "o") (li (other-window-prefix)
@@ -254,8 +264,6 @@
     (kbd "a"  )  #'dirvish-quick-access
     (kbd "q"  )  #'dirvish-quit
     (kbd "C-g")  #'dirvish-quit))
-
-(my-keymaps-set-dired-mode)
 
 ;; == GOTO ============================================================
 
@@ -281,8 +289,15 @@
 (with-eval-after-load 'lsp-mode
   (evil-define-key '(normal visual) lsp-mode-map
     (kbd "K") nil
-    (kbd "J") nil))
+    (kbd "J") nil)
 
+  ;; C-c l prefix
+  (define-keymap :keymap lsp-mode-map
+    "k" #'lsp-signature-activate)
+
+  (define-keymap :keymap lsp-signature-mode-map
+    "M-n" #'lsp-signature-next
+    "M-p" #'lsp-signature-previous))
 
 ;; == ORG MODE ========================================================
 
