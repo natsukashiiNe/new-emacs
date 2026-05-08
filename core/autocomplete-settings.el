@@ -46,6 +46,10 @@
   (corfu-history-mode)
 
   :config
+  ;; Free M-n / M-p so lsp-signature-next/previous can use them.
+  (keymap-unset corfu-map "M-n" t)
+  (keymap-unset corfu-map "M-p" t)
+
   ;; Use fuzzy orderless matching only in corfu completion buffers.
   ;; Also override lsp-capf category to use orderless instead of lsp-passthrough,
   ;; so corfu actually filters candidates from the LSP server.

@@ -251,34 +251,6 @@
     'lsp-find-references))
 
 ;; =============================================================================
-;; KEYBINDINGS
-;; =============================================================================
-
-(with-eval-after-load 'lsp-mode
-  ;; Evil mode keybindings (normal state)
-  (when (featurep 'evil)
-    (evil-define-key 'normal lsp-mode-map
-      "gd" 'lsp-find-definition
-      "gr" 'lsp-find-references
-      "gi" 'lsp-find-implementation
-      "K"  'lsp-describe-thing-at-point
-      "gD" 'lsp-find-declaration))
-
-  ;; Global keybindings under C-c l prefix
-  (define-key lsp-mode-map (kbd "C-c l r") 'lsp-rename)
-  (define-key lsp-mode-map (kbd "C-c l F") 'lsp-format-buffer)
-  (define-key lsp-mode-map (kbd "C-c l a") 'lsp-execute-code-action)
-  (define-key lsp-mode-map (kbd "C-c l i") 'lsp-organize-imports)
-  (define-key lsp-mode-map (kbd "C-c l d") 'lsp-describe-thing-at-point)
-  (define-key lsp-mode-map (kbd "C-c l s") 'lsp-ivy-workspace-symbol)
-  (define-key lsp-mode-map (kbd "C-c l R") 'lsp-workspace-restart)
-  (define-key lsp-mode-map (kbd "C-c l Q") 'lsp-workspace-shutdown)
-
-  ;; Additional useful bindings
-  (define-key lsp-mode-map (kbd "M-.") 'lsp-find-definition)
-  (define-key lsp-mode-map (kbd "M-?") 'lsp-find-references))
-
-;; =============================================================================
 ;; INTEGRATION WITH EVIL
 ;; =============================================================================
 

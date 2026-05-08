@@ -30,6 +30,10 @@
   (my-maps/build-map      :prefix "C-c B"    :doc "My build map."       :wk "[B]uild")
   (my-maps/diff-map       :prefix "C-c M-d"  :doc "My dif map."         :wk "[D]iff"))
 
+(my-keymaps/add-submaps global-map
+  (lsp-mode-map :after 'lsp-mode :prefix "C-c l"
+                :doc "default lsp-mode map." :wk "[l]sp"))
+
 (my-keymaps/define-submaps my-override-mode-map
   (my-maps/global-utility   :prefix "C-c o"   :doc "Global utility map."      :wk "Utility")
   (my-maps/quick-edit       :prefix "C-c C-s" :doc "Quick editing."           :wk "Quick-edit")
@@ -287,17 +291,30 @@
 
 ;; == LSP-mode =====================================================
 (with-eval-after-load 'lsp-mode
+  (my-keymaps/populate lsp-mode-map
+    ("C-c l r" #'lsp-rename                  "[r]ename")
+    ("C-c l F" #'lsp-format-buffer           "[F]ormat buffer")
+    ("C-c l a" #'lsp-execute-code-action     "code [a]ction")
+    ("C-c l i" #'lsp-organize-imports        "organize [i]mports")
+    ("C-c l d" #'lsp-describe-thing-at-point "[d]escribe")
+    ("C-c l s" #'lsp-ivy-workspace-symbol    "[s]ymbol")
+    ("C-c l R" #'lsp-workspace-restart       "[R]estart")
+    ("C-c l Q" #'lsp-workspace-shutdown      "[Q]uit")
+    ("C-c l k" #'lsp-signature-activate      "signature")
+    ("M-."     #'lsp-find-definition)
+    ("M-?"     #'lsp-find-references))
+
+  (evil-define-key 'normal lsp-mode-map
+    "gd" #'lsp-find-definition
+    "gr" #'lsp-find-references
+    "gi" #'lsp-find-implementation
+    "gD" #'lsp-find-declaration)
   (evil-define-key '(normal visual) lsp-mode-map
     (kbd "K") nil
     (kbd "J") nil)
 
-  ;; C-c l prefix
-  (define-keymap :keymap lsp-mode-map
-    "k" #'lsp-signature-activate)
-
-  (define-keymap :keymap lsp-signature-mode-map
-    "M-n" #'lsp-signature-next
-    "M-p" #'lsp-signature-previous))
+  (define-key lsp-signature-mode-map (kbd "M-n") #'lsp-signature-next)
+  (define-key lsp-signature-mode-map (kbd "M-p") #'lsp-signature-previous))
 
 ;; == ORG MODE ========================================================
 

@@ -81,6 +81,42 @@ Use :after FEATURE to defer following entries via `with-eval-after-load'."
   (declare (indent 1))
   `(progn ,@(my-keymaps--emit-populate map (my-keymaps--parse-populate body))))
 
+(defmacro my-keymaps/add-submaps (parent-map &rest body)
+  "Register which-key labels for prefixes inside existing keymaps.
+PARENT-MAP is informational only -- kept for visual symmetry with
+`my-keymaps/define-submaps' but ignored at expansion time.
+
+Each spec is:
+  (EXISTING-MAP :after FEAT :prefix KEY [:doc STR] [:wk LABEL])
+
+When :prefix and :wk are given, emits a deferred
+`which-key-add-keymap-based-replacements' on EXISTING-MAP."
+  (declare (indent 1))
+  (ignore parent-map)
+  `(progn
+     ,@(delq
+        nil
+        (mapcar
+         (lambda (spec)
+           (let* ((sym (car spec)) (rest (cdr spec))
+                  after prefix doc wk)
+             (ignore doc)
+             (while (and rest (memq (car rest) '(:after :prefix :doc :wk)))
+               (pcase (pop rest)
+                 (:after  (setq after  (pop rest)))
+                 (:prefix (setq prefix (pop rest)))
+                 (:doc    (setq doc    (pop rest)))
+                 (:wk     (setq wk     (pop rest)))))
+             (let* ((feat (if (and (listp after) (eq (car after) 'quote))
+                              (cadr after)
+                            after))
+                    (form (when (and prefix wk)
+                            `(which-key-add-keymap-based-replacements
+                              ,sym ,prefix ,wk))))
+               (when form
+                 (if feat `(with-eval-after-load ',feat ,form) form)))))
+         body))))
+
 (defmacro my-keymaps/define-submaps (parent-map &rest body)
   "Define submaps and bind them into PARENT-MAP.
 BODY contains submap specs, then optional :populate/:populate-after sections
