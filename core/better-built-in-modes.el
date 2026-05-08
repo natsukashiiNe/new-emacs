@@ -89,6 +89,9 @@
 (use-package fancy-compilation
   :ensure t
   :commands (fancy-compilation-mode)
+  :custom
+  (fancy-compilation-quiet-prelude nil)
+  (fancy-compilation-quiet-prolog  nil)
   :init
   (with-eval-after-load 'compile
     (fancy-compilation-mode)))

@@ -27,7 +27,7 @@
 
   ;; Attributes to show (including preview)
   (setq dirvish-attributes
-        '(nerd-icons file-info file-size vc-state git-msg)) 
+        '(nerd-icons file-info file-size vc-state git-msg))
 
   (setq dirvish-default-layout '(0 0.4 0.6))  ; (window-min-height left-width right-width)
   )

@@ -147,6 +147,9 @@
   :config
   (good-scroll-mode 1))
 
+(with-eval-after-load 'org
+  (require 'org-tempo))
+
 
 (provide 'org-settings)
 ;;; org-settings.el ends here

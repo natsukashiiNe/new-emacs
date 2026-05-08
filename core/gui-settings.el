@@ -70,5 +70,35 @@
 
 ;; == MODE LINE ======================================================
 
+;; == CUSTOMS ===================================================================
+
+
+(defun my-gui/switch-ui (mode)
+  "Switch UI between zen (hide bars) and normal (show bars).
+MODE is either \\='zen or \\='normal."
+  (interactive
+   (list (intern (completing-read "UI mode: " '("zen" "normal") nil t))))
+  (pcase mode
+    ('zen
+     (tab-bar-mode -1)
+     (hide-mode-line-mode 1)
+     (lsp-headerline-breadcrumb-mode -1))
+    ('normal
+     (tab-bar-mode 1)
+     (hide-mode-line-mode -1)
+     (lsp-headerline-breadcrumb-mode 1))
+    (_ (user-error "Unknown UI mode: %S (expected 'zen or 'normal)" mode))))
+
+(defun my-gui/hide-ui ()
+  "Hides bars and any other distractions (zen mode)."
+  (interactive)
+  (my-gui/switch-ui 'zen))
+
+
+(defun my-gui/hide-ui ()
+  "Shows bars and any other distractions (zen mode)."
+  (interactive)
+  (my-gui/switch-ui 'normal))
+
 (provide 'gui-settings)
 ;;; gui-settings.el ends here

@@ -31,7 +31,7 @@ Each entry is (STATE . SYMBOL-STRING).")
     (removed           . diff-hl-delete)
     (missing           . diff-hl-delete)
     (conflict          . diff-hl-delete)
-    (unregistered      . font-lock-comment-face)
+    (unregistered      . font-lock-doc-markup-face)
     (needs-merge       . error)
     (needs-update      . warning)
     (unlocked-changes  . diff-hl-change)
@@ -55,7 +55,7 @@ Each entry is (STATE . FACE).  Uses `diff-hl' faces for consistency.")
 
 ;; == SIDEBAR SETTINGS =================================================
 
-(setq dirvish-side-width 37)
+(setq dirvish-side-width 23)
 (setq dirvish-side-auto-expand t)
 (setq dirvish-side-attributes '(vc-state-text nerd-icons))
 (setq dirvish-side-header-line-format '(:left (project)))

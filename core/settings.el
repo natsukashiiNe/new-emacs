@@ -175,7 +175,7 @@
   :ensure t
   :defer t
   :config
-  (global-company-mode -1)) 
+  (global-company-mode -1))
 
 (use-package visual-regexp
   :ensure t
@@ -276,7 +276,7 @@
   :hook (prog-mode . symbol-overlay-mode)
   :bind-keymap ("C-c O" . symbol-overlay-map)
   :custom
-  (symbol-overlay-idle-time 0.1)
+  (symbol-overlay-idle-time 0.375)
   (symbol-overlay-temp-highlight-single t))
 
 (use-package smartparens
@@ -293,7 +293,7 @@
   (highlight-indent-guides-method 'character)
   (highlight-indent-guides-responsive 'stack)
   (highlight-indent-guides-auto-enabled t)
-  (highlight-indent-guides-delay 0) 
+  (highlight-indent-guides-delay 0)
 
   :config
   ;;  (set-face-foreground 'highlight-indent-guides-top-character-face "dimgray")
@@ -305,7 +305,7 @@
 
   (set-face-foreground 'highlight-indent-guides-stack-character-face "#D7AF00")
   (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
-  
+
 
   ;; (setq highlight-indent-guides-auto-stack-odd-face-perc       2)
   ;; (setq highlight-indent-guides-auto-stack-even-face-perc      2)
@@ -321,7 +321,7 @@
   (defvar indent-bars-treesit-scope nil
     "Pre-declare so lang files can `add-to-list' before indent-bars-ts loads.")
   :custom
-  (indent-bars-color-by-depth nil)  
+  (indent-bars-color-by-depth nil)
   ;; base color
   (indent-bars-color '(highlight :face-bg t :blend 0.3))
   (indent-bars-highlight-current-depth '(:color "#7A6200" :blend 0.7))  ; active scope: orange/yellow
