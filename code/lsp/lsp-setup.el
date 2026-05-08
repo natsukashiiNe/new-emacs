@@ -62,6 +62,7 @@
   (lsp-eldoc-render-all nil)
   (lsp-eldoc-enable-hover t)
   (lsp-signature-render-documentation t)
+  (lsp-signature-function 'lsp-signature-posframe)
 
   ;; Icons (nerd-icons for terminal compatibility)
   (lsp-icons-provider 'nerd-icons)
@@ -75,6 +76,19 @@
   :config
   ;; Set xref backend to use LSP
   (setq xref-backend-functions '(lsp--xref-backend))
+
+  ;; Render the signature help popup via posframe at the top of the frame
+  ;; instead of the default `lv' window at the bottom -- avoids overlap with
+  ;; corfu's child frame.
+  (setq lsp-signature-posframe-params
+	(list :poshandler #'posframe-poshandler-frame-top-center
+              :min-height 5
+              :height 13          ; max — posframe auto-fits up to this
+              :min-width 60
+              :width 80
+              :border-width 1
+              :border-color "gray50"
+              :internal-border-width 6))
 
   ;; Enable which-key integration
   (with-eval-after-load 'which-key
@@ -252,7 +266,7 @@
 
   ;; Global keybindings under C-c l prefix
   (define-key lsp-mode-map (kbd "C-c l r") 'lsp-rename)
-  (define-key lsp-mode-map (kbd "C-c l f") 'lsp-format-buffer)
+  (define-key lsp-mode-map (kbd "C-c l F") 'lsp-format-buffer)
   (define-key lsp-mode-map (kbd "C-c l a") 'lsp-execute-code-action)
   (define-key lsp-mode-map (kbd "C-c l i") 'lsp-organize-imports)
   (define-key lsp-mode-map (kbd "C-c l d") 'lsp-describe-thing-at-point)
