@@ -197,6 +197,7 @@
  ;; `(flycheck-overlay-marker ((t (:foreground ,exu-green-accent :background ,exu-bg-orange))))
 
  ;; --- GIT ---------------------------------------------------------------------
+
  ;; TODO: light variant for magit faces
  ;; `(magit-diff-file-heading ((t (:foreground ,exu-blue :weight normal))))
  ;; `(magit-filename          ((t (:foreground ,exu-red :weight normal))))
@@ -205,9 +206,9 @@
  ;; `(magit-branch-remote     ((t (:foreground ,exu-red :weight normal))))
 
  ;; TODO: light variant for diff-hl
- `(diff-hl-insert ((t (:foreground "#37712F" :background ,exu-bg-dim2))))
- `(diff-hl-change ((t (:foreground "#485496" :background ,exu-bg-dim2))))
- `(diff-hl-delete ((t (:foreground "#914834" :background ,exu-bg-dim2))))
+ `(diff-hl-insert ((t (:foreground "#37712F" :background ,exu-bg-dim2 :stipple nil))))
+ `(diff-hl-change ((t (:foreground "#485496" :background ,exu-bg-dim2 :stipple nil))))
+ `(diff-hl-delete ((t (:foreground "#914834" :background ,exu-bg-dim2 :stipple nil))))
 
  ;; --- DIRED -------------------------------------------------------------------
  ;; TODO: light variant for dirvish/dired
@@ -253,6 +254,9 @@
  ;; --- ORG ---------------------------------------------------------------------
  ;; TODO: light variant for org-verbatim
  ;; `(org-verbatim ((t (:background ,exu-bg :foreground ,exu-blue))))
+
+ `(org-level-1 ((t (:foreground ,exu-bg :background ,exu-red :weight bold :extend t))))
+ 
  `(org-indent ((t (:foreground ,exu-comment))))
  `(org-hide ((t (:foreground ,exu-comment))))
 
