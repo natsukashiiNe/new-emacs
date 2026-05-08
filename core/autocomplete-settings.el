@@ -93,7 +93,37 @@
   :ensure t
   :after corfu
   :config
-  (corfu-prescient-mode 1))
+  (corfu-prescient-mode 1)
+
+  ;; LSP's capf sets `display-sort-function' to `identity', which corfu honors
+  ;; over `corfu-sort-function' (so prescient's sort never sees LSP candidates).
+  ;; `corfu-sort-override-function' takes precedence -- use it to group by
+  ;; match quality: prefix > substring > fuzzy.
+  (defun my/corfu-sort-prefer-contiguous (candidates)
+    "Sort CANDIDATES: prefix matches first, then substring, then fuzzy."
+    (let* ((data (and (boundp 'completion-in-region--data)
+                      completion-in-region--data))
+           (input (and data (buffer-substring-no-properties
+                             (car data) (cadr data))))
+           ;; Strip namespace/path qualifiers like asio:: or foo.
+           (word (and input
+                      (if (string-match "[A-Za-z0-9_]+\\'" input)
+                          (match-string 0 input)
+                        input))))
+      (if (or (null word) (string-empty-p word))
+          (prescient-completion-sort candidates)
+        (let (prefix substring other)
+          (dolist (c candidates)
+            (let ((s (substring-no-properties c)))
+              (cond
+               ((string-prefix-p word s t) (push c prefix))
+               ((string-search word s) (push c substring))
+               (t (push c other)))))
+          (nconc (prescient-completion-sort (nreverse prefix))
+                 (prescient-completion-sort (nreverse substring))
+                 (prescient-completion-sort (nreverse other)))))))
+
+  (setq corfu-sort-override-function #'my/corfu-sort-prefer-contiguous))
 
 ;; == APPEARENCE ================================================================
 
