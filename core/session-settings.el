@@ -46,12 +46,12 @@ MODE can be:
 ;;   :demand t
 ;;   :init
 ;;   (persp-mode)
-;; 
+;;
 ;;   :custom
 ;;   (persp-mode-prefix-key (kbd "C-c n"))
 ;;   (persp-suppress-no-prefix-key-warning t)
 ;;   (persp-state-default-file "~/.emacs.d/perspective-session")
-;; 
+;;
 ;;   :bind ("C-c i" . persp-switch-last))
 
 (defvar my-persp/settings (make-hash-table :test 'equal)
@@ -212,6 +212,27 @@ check fails and proportional (normal-*) sizing is used instead."
           (phash (or phash *persp-hash*)))
       (let ((old-name (safe-persp-name persp)))
         (funcall orig-fn new-name persp phash)))))
+
+
+;; FIX: issue 156
+(with-eval-after-load "persp-mode"
+  (cl-defun persp-rename (new-name
+                          &optional (persp (get-current-persp)) (phash *persp-hash*))
+    "Change the name field of the `PERSP'.
+ Return old name on success, otherwise nil."
+    (interactive "i")
+    (if persp
+        (progn
+          (unless new-name
+            (setq new-name
+                  (read-string
+                   (let ((old-name (persp-name persp)))
+                     (concat "New name for the " old-name " perspective: ") old-name))))
+          (persp--rename new-name persp phash))
+      (message
+       "[persp-mode] Error: You can't rename the `nil' perspective, use \
+ M-x: customize-variable RET persp-nil-name RET")
+      nil)))
 
 ;; TODO
 ;; (use-package activities
