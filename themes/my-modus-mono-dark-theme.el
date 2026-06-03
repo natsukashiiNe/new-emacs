@@ -321,6 +321,10 @@
  `(shr-link ((t ( :box nil :underline t))))
 
  ;; --- ORG ---------------------------------------------------------------------
+ `(modus-themes-heading-1  (( t (:foreground ,exu-white :extend t :height 1.20 :weight extra-bold ))))
+ `(modus-themes-heading-2  (( t (:foreground ,exu-accent-weak :extend t :height 1.15 :weight bold ))))
+ `(modus-themes-heading-3  (( t (:foreground ,exu-main-sup1 :extend t :height 1.1 :weight bold ))))
+ 
  `(org-verbatim ((t (:background ,exu-black :foreground ,exu-slate-accent))))
  ;;`(org-property-value ((t (:background ,exu-black :foreground ,exu-slate-accent))))
 

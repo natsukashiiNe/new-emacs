@@ -15,6 +15,15 @@
      (interactive)
      ,@body))
 
+(defmacro ow (&rest body)
+  "Interactive lambda that runs BODY under the \"other window\" prefix.
+Installs `other-window-prefix' so BODY's buffer is displayed in
+another window."
+  `(lambda ()
+     (interactive)
+     (other-window-prefix)
+     ,@body))
+
 (defmacro fl (&rest body)
   `(funcall (lambda () ,@body)))
 

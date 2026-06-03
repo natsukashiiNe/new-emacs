@@ -96,7 +96,7 @@ Also reports errors with file and line number."
 (add-to-list 'load-path (expand-file-name "core/dired"      my-config-dir))
 (add-to-list 'load-path (expand-file-name "code"            my-config-dir))
 (add-to-list 'load-path (expand-file-name "code/lsp"        my-config-dir))
-(add-to-list 'load-path (expand-file-name "code/lsp/servers" my-config-dir))
+(add-to-list 'load-path (expand-file-name "code/lsp/language-settings/" my-config-dir))
 (add-to-list 'load-path (expand-file-name "code/flymake"    my-config-dir))
 (add-to-list 'load-path (expand-file-name "local"           my-config-dir))
 (add-to-list 'load-path (expand-file-name "custom"          my-config-dir))
@@ -114,6 +114,7 @@ Also reports errors with file and line number."
 (load-config-file "core/settings.el")
 (load-config-file "core/gui-settings.el")
 (load-config-file "custom/custom-editing.el")
+(load-config-file "custom/image-clipboard.el")
 (load-config-file "keymaps/mode-keymaps.el")
 
 ;; MOVE to custom/

@@ -27,18 +27,18 @@
 
 (my-keymaps/define-submaps global-map
   (my-maps/compile-map    :prefix "C-c C"    :doc "My compilation map." :wk "[C]ompile")
-  (my-maps/build-map      :prefix "C-c B"    :doc "My build map."       :wk "[B]uild")
+  (my-maps/build-map      :prefix "C-c C-b"    :doc "My build map."       :wk "[B]uild")
   (my-maps/diff-map       :prefix "C-c M-d"  :doc "My dif map."         :wk "[D]iff"))
 
 (my-keymaps/add-submaps global-map
   (lsp-mode-map :after 'lsp-mode :prefix "C-c l"
-                :doc "default lsp-mode map." :wk "[l]sp"))
+		:doc "default lsp-mode map." :wk "[l]sp"))
 
 (my-keymaps/define-submaps my-override-mode-map
   (my-maps/global-utility   :prefix "C-c o"   :doc "Global utility map."      :wk "Utility")
   (my-maps/quick-edit       :prefix "C-c C-s" :doc "Quick editing."           :wk "Quick-edit")
   (my-maps/quick-open       :prefix "M-g"     :doc "Quick access map."        :wk "Quick-locations")
-  (my-maps/buffer-actions   :prefix "C-c C-b" :doc "Actions for this buffer." :wk "[B]uffer actions")
+  (my-maps/buffer-actions   :prefix "C-c B" :doc "Actions for this buffer." :wk "[B]uffer actions")
   :populate
   ("M-h"  #'isearch-backward  "isearch-backward")
   ("M-l"  #'isearch-forward   "isearch-forward"))
@@ -51,8 +51,14 @@
   :populate-after 'agent-shell
   ("o" #'agent-shell-toggle))
 
+;; == Global map ================================================================
+(evil-define-key '(insert visual) my-override-mode-map
+  (kbd "C-n") #'next-line
+  (kbd "C-p") #'previous-line)
+
 ;; == Emacs-(almost)-build-in keymaps  ==========================================
 
+(keymap-set global-map "C-x M-b" #'consult-buffer-other-window)
 (keymap-set global-map "C-x C-b" #'projectile-ibuffer)
 (keymap-set global-map "C-x B"   #'ibuffer)
 (keymap-set global-map "C-x C-x" #'previous-buffer)
@@ -62,8 +68,7 @@
 (keymap-set global-map "C-S-l"   #'eval-expression)
 (keymap-set global-map "C-c E"   #'eplaca-log)
 
-(define-key evil-insert-state-map (kbd "C-SPC") #'completion-at-point)
-(define-key evil-insert-state-map (kbd "M-SPC") #'completion-at-point)
+(evil-define-key 'insert global-map (kbd "C-SPC") #'completion-at-point)
 
 ;; ---- Isearch -----------------------------------------------------------------
 (keymap-set global-map "M-l"     #'isearch-forward)
@@ -81,7 +86,9 @@
 
 (with-eval-after-load 'consult
   (keymap-set evil-normal-state-map "C-s" 'consult-line)
-  (keymap-set evil-visual-state-map "C-s" 'consult-line))
+  (keymap-set evil-visual-state-map "C-s" 'consult-line)
+
+  (keymap-set search-map "M-s" 'consult-outline))
 
 (with-eval-after-load 'treesit-jump
   (keymap-set global-map "C-c C-t" #'treesit-jump-transient))
@@ -113,9 +120,8 @@
 
 (keymap-set minibuffer-local-map "C-S-v" 'evil-paste-before)
 (keymap-set minibuffer-local-map "<escape>" 'abort-recursive-edit)
-(keymap-set minibuffer-local-map "C-c o" (li
-					  (my/set-vertico-count
-					   (+ vertico-count 10))))
+(keymap-set minibuffer-local-map "C-c o"
+	    (li (my/set-vertico-count (+ vertico-count 10))))
 
 (keymap-set minibuffer-local-map
             "C-c w"
@@ -152,12 +158,14 @@
   ("g"   #'first-error              "first error"))
 
 ;; == QUICK LOCATIONS ===========================================================
+
 (my-keymaps/populate my-maps/quick-open
-  ("C-o" (li (my/project-switch-projectile 'dired)))
-  ("M-d" #'devdocs-lookup)
+  ("C-s" (li (my/project-switch-projectile 'dired)) "project [s]witch")
+  ("M-d" #'devdocs-lookup "[d]ocs lookup")
+  ;; (C-d is ego locations)
   :after persp-mode
   ("M-s" #'persp-switch)
-  ("M-e" #'my-persp/switch-to-last-visited)
+  ("M-e" #'my-persp/switch-to-last-visited "last perspective")
   :after 'ego
   ("M-w"   (li (ego-project-buffers-by-mode 'vterm-mode)) "project vterms"))
 
@@ -186,6 +194,7 @@
   ("c"   #'my/edit-insert-comment-default "comment")
   ("C"   #'my/edit-insert-comment         "comment (prompt)"))
 
+(evil-define-key 'insert global-map (kbd "M-w") #'delete-all-space)
 
 ;; == THIS BUFFERS ACTIONS =======================================================
 (my-keymaps/populate my-maps/buffer-actions
@@ -203,6 +212,13 @@
 
 ;; ==== AGENT SHELL KEYMAPS =====================================================
 
+(evil-define-key 'insert comint-mode-map
+  (kbd "RET") #'newline
+  (kbd "<up>") nil
+  (kbd "<down>") nil
+  (kbd "M-p") nil
+  (kbd "M-n") nil)
+
 (with-eval-after-load 'agent-shell
   ;; global map
   (my-keymaps/populate my-maps/agent-shell
@@ -219,7 +235,12 @@
     (kbd "M-n") #'agent-shell-next-input)
   (evil-define-key 'insert agent-shell-mode-map
     (kbd "RET") #'newline
-    (kbd "<up>") nil))
+    (kbd "<up>") nil
+    (kbd "<down>") nil
+    (kbd "M-p") nil
+    (kbd "M-n") nil))
+
+
 
 
 ;; == Lisp Editing ==============================================================
@@ -292,17 +313,27 @@
 ;; == LSP-mode =====================================================
 (with-eval-after-load 'lsp-mode
   (my-keymaps/populate lsp-mode-map
-    ("C-c l r" #'lsp-rename                  "[r]ename")
-    ("C-c l F" #'lsp-format-buffer           "[F]ormat buffer")
-    ("C-c l a" #'lsp-execute-code-action     "code [a]ction")
-    ("C-c l i" #'lsp-organize-imports        "organize [i]mports")
-    ("C-c l d" #'lsp-describe-thing-at-point "[d]escribe")
-    ("C-c l s" #'lsp-ivy-workspace-symbol    "[s]ymbol")
-    ("C-c l R" #'lsp-workspace-restart       "[R]estart")
-    ("C-c l Q" #'lsp-workspace-shutdown      "[Q]uit")
-    ("C-c l k" #'lsp-signature-activate      "signature")
     ("M-."     #'lsp-find-definition)
-    ("M-?"     #'lsp-find-references))
+    ("M-?"     #'lsp-find-references)
+
+    ("C-c l d" #'lsp-find-definition        "goto [d]efiniton")
+    ("C-c l D" (ow (lsp-find-definition))    "[*] goto [d]efiniton")
+    ("C-c l l" #'lsp-find-references         "find [l]inks (refs.)")
+    ("C-c l r" #'lsp-rename                  "[r]ename")
+    ("C-c l a" #'lsp-execute-code-action     "code [a]ction")
+    ("C-c l h" #'lsp-describe-thing-at-point "[d]escribe")
+    ("C-c l k" #'lsp-signature-activate      "signature")
+
+
+    ("C-c l C-i" #'lsp-organize-imports        "organize [i]mports")
+    ("C-c l C-f" #'lsp-format-buffer           "[F]ormat buffer")
+
+    ("C-c l M-R" #'lsp-workspace-restart       "[R]estart")
+    ("C-c l M-q" #'lsp-workspace-shutdown      "[Q]uit")
+
+    ;; After consult
+    ("C-c l s" #'consult-lsp-symbols         "[s]ymbol")
+    )
 
   (evil-define-key 'normal lsp-mode-map
     "gd" #'lsp-find-definition

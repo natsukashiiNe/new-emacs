@@ -73,9 +73,19 @@
 
 (setq org-latex-default-figure-position "H")
 
-;; For inline previews: use dvipng with standard latex (faster, works reliably)
-(setq org-preview-latex-default-process 'dvipng)
+;; Preview via xelatex + dvisvgm: matches `org-latex-compiler' (xelatex)
+;; so fontspec/amsmath in the auto-generated preamble compile cleanly.
+(setq org-preview-latex-default-process 'dvisvgm)
 (with-eval-after-load 'org
+  (setf (alist-get 'dvisvgm org-preview-latex-process-alist)
+        '(:programs ("xelatex" "dvisvgm")
+          :description "xdv > svg"
+          :message "you need to install the programs: xelatex and dvisvgm."
+          :image-input-type "xdv"
+          :image-output-type "svg"
+          :image-size-adjust (1.7 . 1.5)
+          :latex-compiler ("xelatex -no-pdf -interaction nonstopmode -output-directory %o %f")
+          :image-converter ("dvisvgm %f --no-fonts --exact-bbox --scale=%S --output=%O")))
   (setq org-format-latex-options
         (plist-put org-format-latex-options :scale 2.0)))
 
@@ -113,7 +123,8 @@
      (lisp . t)
      (emacs-lisp . t)
      (latex . t)
-     (plantuml . t)))
+     (plantuml . t)
+     (C . t)))
 
   (setq org-babel-lisp-eval-fn 'sly-eval))  ; Use SLY to evaluate
 
@@ -124,7 +135,7 @@
 
 (defun my-org-babel-ansi-colorize ()
   "Apply ANSI color codes to the results of the current babel block."
-  (when (not org-export-current-backend)
+  (when (not (bound-and-true-p org-export-current-backend))
     (let ((result-pos (org-babel-where-is-src-block-result)))
       (when result-pos
         (let ((beg (save-excursion

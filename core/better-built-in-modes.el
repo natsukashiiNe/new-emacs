@@ -63,6 +63,17 @@
       ('operator 'doom-modeline-evil-operator-state)
       (_        'doom-modeline-evil-normal-state)))
 
+  (defun my/vterm--shell-cwd ()
+    "Return the vterm shell process's actual cwd via /proc, or nil."
+    (when-let* ((proc (get-buffer-process (current-buffer)))
+                (pid (process-id proc)))
+      (file-symlink-p (format "/proc/%d/cwd" pid))))
+
+  (defun my/vterm-sync-cwd ()
+    "Sync `default-directory' from the shell's actual cwd."
+    (when-let ((cwd (my/vterm--shell-cwd)))
+      (setq default-directory (file-name-as-directory cwd))))
+
   (defun my/vterm-set-modeline ()
     "Set a minimal modeline showing [evil-state] [pwd]."
     (setq-local mode-line-format
@@ -70,7 +81,9 @@
                   (:eval (propertize (concat " " (upcase (symbol-name evil-state)) " ")
                                      'face (my/vterm--evil-state-face)))
                   "  "
-                  default-directory)))
+                  (:eval (abbreviate-file-name default-directory))))
+    (add-hook 'post-command-hook #'my/vterm-sync-cwd nil t))
+
   ;; keymaps
   (with-eval-after-load 'evil
     (evil-define-key 'insert vterm-mode-map (kbd "C-h") #'vterm-send-backspace)))
@@ -107,7 +120,7 @@
           (clean . ("rm -rf build"))
           (test . ("ctest --preset conan-release")))))
 
-;; TODO move to compilation 
+;; TODO move to compilation
 (with-eval-after-load 'consult
   (require 'consult-compile nil t))
 
