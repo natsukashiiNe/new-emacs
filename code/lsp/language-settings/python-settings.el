@@ -1,4 +1,4 @@
-;;; python-lsp-settings.el --- Settings for python-ts-mode. -*- lexical-binding: t; -*-
+;;; python-settings.el --- Settings for python-ts-mode. -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Python language configuration: pyright LSP, tree-sitter mode,
@@ -18,6 +18,16 @@
   :mode "\\.py\\'"
   :config
   (setq python-indent-offset 4))
+
+;; --- Apheleia formatter ---
+;; ruff handles formatting + import sorting (replaces black + isort).
+;; For projects without ruff, use .dir-locals.el:
+;;   ((python-mode . ((apheleia-formatter . (isort black)))))
+(with-eval-after-load 'apheleia
+  (setf (alist-get 'ruff apheleia-formatters)
+        '("ruff" "format" "--stdin-filename" filepath "-"))
+  (setf (alist-get 'python-mode apheleia-mode-alist) 'ruff)
+  (setf (alist-get 'python-ts-mode apheleia-mode-alist) 'ruff))
 
 ;; --- LSP Server ---
 (use-package lsp-pyright
@@ -76,5 +86,5 @@
     "C-c h s" "skeletons"
     "C-c h i" "imports"))
 
-(provide 'python-lsp-settings)
-;;; python-lsp-settings.el ends here
+(provide 'python-settings)
+;;; python-settings.el ends here

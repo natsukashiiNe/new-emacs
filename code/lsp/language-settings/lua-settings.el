@@ -1,4 +1,4 @@
-;;; lua-lsp-settings.el --- Settings for lua-mode. -*- lexical-binding: t; -*-
+;;; lua-settings.el --- Settings for lua-mode. -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Lua language configuration: lua-language-server and lua-mode.
@@ -44,5 +44,5 @@ Useful for Neovim plugin development or Awesome WM configuration."
 ;; Hook setup
 (add-hook 'lua-mode-hook #'lsp-deferred)
 
-(provide 'lua-lsp-settings)
-;;; lua-lsp-settings.el ends here
+(provide 'lua-settings)
+;;; lua-settings.el ends here

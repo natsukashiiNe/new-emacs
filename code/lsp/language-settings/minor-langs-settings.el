@@ -90,5 +90,13 @@
   :ensure nil  ; built-in (Emacs 29.1+)
   :mode "Dockerfile\\'")
 
+;; --- JSON apheleia formatter ---
+;; jq pretty-prints JSON; note it does not preserve comments in JSONC files.
+(with-eval-after-load 'apheleia
+  (setf (alist-get 'jq apheleia-formatters)
+        '("jq" "."))
+  (add-to-list 'apheleia-mode-alist '(json-mode . jq))
+  (add-to-list 'apheleia-mode-alist '(json-ts-mode . jq)))
+
 (provide 'minor-langs-settings)
 ;;; minor-langs-settings.el ends here

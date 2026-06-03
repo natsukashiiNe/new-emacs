@@ -1,4 +1,4 @@
-;;; go-lsp-settings.el --- Settings for go-ts-mode. -*- lexical-binding: t; -*-
+;;; go-settings.el --- Settings for go-ts-mode. -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Go language configuration: gopls LSP and tree-sitter mode.
@@ -15,6 +15,12 @@
 (use-package go-ts-mode
   :ensure nil  ; built-in (Emacs 29+)
   :mode "\\.go\\'")
+
+;; --- Apheleia formatter ---
+;; gofmt is a built-in apheleia formatter; no formatter definition needed.
+(with-eval-after-load 'apheleia
+  (setf (alist-get 'go-mode apheleia-mode-alist) 'gofmt)
+  (setf (alist-get 'go-ts-mode apheleia-mode-alist) 'gofmt))
 
 ;; --- LSP Server Configuration ---
 (with-eval-after-load 'lsp-mode
@@ -35,5 +41,5 @@
 (add-hook 'go-ts-mode-hook #'lsp-deferred)
 (add-hook 'go-mode-hook #'lsp-deferred)
 
-(provide 'go-lsp-settings)
-;;; go-lsp-settings.el ends here
+(provide 'go-settings)
+;;; go-settings.el ends here

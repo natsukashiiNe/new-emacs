@@ -1,4 +1,4 @@
-;;; dotnet-lsp-settings.el --- Settings for csharp-ts-mode. -*- lexical-binding: t; -*-
+;;; dotnet-settings.el --- Settings for csharp-ts-mode. -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; C# / .NET language configuration: omnisharp LSP, sharper, csproj-mode.
@@ -17,6 +17,13 @@
   :defer t
   :mode "\\.cs\\'")
 
+;; --- Apheleia formatter ---
+(with-eval-after-load 'apheleia
+  (setf (alist-get 'csharpier apheleia-formatters)
+        '("csharpier" "format" "--write-stdout" "--stdin-path" filepath))
+  (setf (alist-get 'csharp-mode apheleia-mode-alist) 'csharpier)
+  (setf (alist-get 'csharp-ts-mode apheleia-mode-alist) 'csharpier))
+
 ;; --- LSP Server Configuration ---
 (with-eval-after-load 'lsp-csharp
   (setq lsp-csharp-omnisharp-enable nil))
@@ -34,5 +41,5 @@
   :ensure t
   :defer t)
 
-(provide 'dotnet-lsp-settings)
-;;; dotnet-lsp-settings.el ends here
+(provide 'dotnet-settings)
+;;; dotnet-settings.el ends here

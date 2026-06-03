@@ -1,4 +1,4 @@
-;;; cpp-lsp-settings.el --- Settings for c++-ts-mode. -*- lexical-binding: t; -*-
+;;; cpp-settings.el --- Settings for c++-ts-mode. -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; C/C++ language configuration: clangd LSP with Unreal Engine support,
@@ -34,6 +34,18 @@
          ("\\.cppm\\'" . c++-ts-mode))  ; C++20 modules
   :config
   (setq c-ts-mode-indent-offset 4))
+
+;; --- Apheleia formatter ---
+;; clang-format auto-discovers .clang-format files via -style=file.
+(with-eval-after-load 'apheleia
+  (setf (alist-get 'clang-format apheleia-formatters)
+        '("clang-format"
+          "-assume-filename" filepath
+          "-style=file"))
+  (setf (alist-get 'c-mode apheleia-mode-alist) 'clang-format)
+  (setf (alist-get 'c-ts-mode apheleia-mode-alist) 'clang-format)
+  (setf (alist-get 'c++-mode apheleia-mode-alist) 'clang-format)
+  (setf (alist-get 'c++-ts-mode apheleia-mode-alist) 'clang-format))
 
 ;; --- Configuration Variables ---
 (defcustom my/clangd-compile-commands-patterns '("." "build" "build/Release" "build/Debug")
@@ -138,5 +150,5 @@ since UE has its own include conventions."
 (add-hook 'c-mode-hook #'lsp-deferred)
 (add-hook 'c++-mode-hook #'lsp-deferred)
 
-(provide 'cpp-lsp-settings)
-;;; cpp-lsp-settings.el ends here
+(provide 'cpp-settings)
+;;; cpp-settings.el ends here

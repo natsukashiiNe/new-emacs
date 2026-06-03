@@ -2,7 +2,9 @@
 
 ;;; Commentary:
 ;; Core lsp-mode configuration with lsp-ui, formatting, and keybindings.
-;; Language-specific configurations are in lsp-servers.el
+;; Language-specific configurations live under code/lsp/language-settings/.
+;; Each language file owns its own apheleia formatter, indent-bars scope,
+;; tree-sitter mode, and lsp-mode tunables.
 
 ;;; Code:
 
@@ -93,6 +95,22 @@
   ;; Enable which-key integration
   (with-eval-after-load 'which-key
     (lsp-enable-which-key-integration t)))
+
+
+;; =============================================================================
+;; SYMBOLS-OUTLINE - tree-view of lsp symbols.
+;; =============================================================================
+
+(use-package symbols-outline
+  :ensure t
+  :custom
+  (symbols-outline-no-delete-other-window t)
+  (symbols-outline-no-other-window t)
+  (symbols-outline-use-nerd-icon-in-gui t)
+  (symbols-outline-use-nerd-icon-in-tui t)
+  (symbols-outline-window-height 10)
+  (symbols-outline-window-width 37))
+
 
 ;; =============================================================================
 ;; LSP-UI - Enhanced UI Components
@@ -192,44 +210,10 @@
   :ensure t
   :demand t
   :config
-  ;; Enable auto-formatting on save for all supported modes
-  (apheleia-global-mode +1)
-
-  ;; Configure formatters
-  (setf (alist-get 'ruff apheleia-formatters)
-        '("ruff" "format" "--stdin-filename" filepath "-"))
-
-  (setf (alist-get 'clang-format apheleia-formatters)
-        '("clang-format"
-          "-assume-filename" filepath
-          "-style=file"))  ; Uses .clang-format file discovery
-
-  ;; Add formatter mappings for major modes
-  ;; Python: ruff handles formatting + import sorting (replaces black + isort)
-  ;; For projects without ruff, use .dir-locals.el: ((python-mode . ((apheleia-formatter . (isort black)))))
-  (setf (alist-get 'python-mode apheleia-mode-alist) 'ruff)
-  (setf (alist-get 'python-ts-mode apheleia-mode-alist) 'ruff)
-
-  (setf (alist-get 'c-mode apheleia-mode-alist) 'clang-format)
-  (setf (alist-get 'c-ts-mode apheleia-mode-alist) 'clang-format)
-  (setf (alist-get 'c++-mode apheleia-mode-alist) 'clang-format)
-  (setf (alist-get 'c++-ts-mode apheleia-mode-alist) 'clang-format)
-
-  (setf (alist-get 'csharpier apheleia-formatters)
-	'("csharpier" "format" "--write-stdout" "--stdin-path" filepath))
-  (setf (alist-get 'csharp-mode apheleia-mode-alist) 'csharpier)
-  (setf (alist-get 'csharp-ts-mode apheleia-mode-alist) 'csharpier)
-
-  (setf (alist-get 'go-mode apheleia-mode-alist) 'gofmt)
-  (setf (alist-get 'go-ts-mode apheleia-mode-alist) 'gofmt)
-
-  (setf (alist-get 'rust-mode apheleia-mode-alist) 'rustfmt)
-  (setf (alist-get 'rust-ts-mode apheleia-mode-alist) 'rustfmt)
-
-  (setf (alist-get 'jq apheleia-formatters)
-	'("jq" "."))
-  (add-to-list 'apheleia-mode-alist '(json-mode . jq))
-  (add-to-list 'apheleia-mode-alist '(json-ts-mode . jq)))
+  ;; Enable auto-formatting on save for all supported modes.
+  ;; Per-language formatter definitions and mode mappings live in each
+  ;; language-settings file under code/lsp/language-settings/.
+  (apheleia-global-mode +1))
 
 ;; =============================================================================
 ;; CUSTOM MENU ENTRIES
@@ -265,13 +249,15 @@
 ;; LOAD LANGUAGE SERVER CONFIGURATIONS
 ;; =============================================================================
 
-(require 'cpp-lsp-settings)
-(require 'python-lsp-settings)
-(require 'rust-lsp-settings)
-(require 'go-lsp-settings)
-(require 'java-lsp-settings)
-(require 'lua-lsp-settings)
-(require 'dotnet-lsp-settings)
+(require 'cpp-settings)
+(require 'python-settings)
+(require 'rust-settings)
+(require 'go-settings)
+(require 'java-settings)
+(require 'lua-settings)
+(require 'dotnet-settings)
+(require 'clojure-settings)
+(require 'js-settings)
 (require 'minor-langs-settings)
 
 (provide 'lsp-setup)

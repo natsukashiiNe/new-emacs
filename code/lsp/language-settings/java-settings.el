@@ -1,4 +1,4 @@
-;;; java-lsp-settings.el --- Settings for java-ts-mode. -*- lexical-binding: t; -*-
+;;; java-settings.el --- Settings for java-ts-mode. -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Java language configuration: Eclipse JDT Language Server.
@@ -38,5 +38,5 @@
 (add-hook 'java-ts-mode-hook #'lsp-deferred)
 (add-hook 'java-mode-hook #'lsp-deferred)
 
-(provide 'java-lsp-settings)
-;;; java-lsp-settings.el ends here
+(provide 'java-settings)
+;;; java-settings.el ends here
