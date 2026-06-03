@@ -18,6 +18,8 @@
   :custom
   (agent-shell-anthropic-authentication
    (agent-shell-anthropic-make-authentication :login t))
+  (agent-shell-anthropic-claude-environment
+   '("CLAUDE_CODE_EXECUTABLE=/home/nane/.local/bin/claude"))
   (agent-shell-header-style 'text))
 
 
