@@ -26,44 +26,50 @@ FORMAT-STRING and ARGS are passed to `format'."
         (insert (format "[%s] %s\n" timestamp message))
         (append-to-file (point-min) (point-max) elastic-debug-log-file)))))
 
-(defvar elastic-vterm--frame nil
-  "The floating vterm frame used by 'elastic-vterm'.
-This frame is reused when toggling the terminal.")
+(defvar elastic-vterm--frames (make-hash-table :test 'eq :weakness 'key)
+  "Map of parent top-level frame -> its elastic-vterm child frame.
+Weak on keys so dead parent frames are GC'd automatically.")
 
-(defvar floating-frame--parent nil
-  "The parent frame whose geometry is used as reference for floating frames.
-Initialized lazily when first needed.")
+(defun elastic--toplevel-frame (&optional frame)
+  "Return the top-level ancestor of FRAME (or selected frame).
+Walks up `parent-frame' until a top-level frame is reached."
+  (let ((f (or frame (selected-frame))))
+    (while (frame-parameter f 'parent-frame)
+      (setq f (frame-parameter f 'parent-frame)))
+    f))
 
-(defvar floating-frame--parent-geometry nil
-  "A plist storing the current pixel geometry of `floating-frame--parent'.
-The keys are :width and :height.  Initialized lazily when first needed.")
+(defun elastic--current-parent ()
+  "Return the top-level frame that should host an elastic child right now."
+  (elastic--toplevel-frame (selected-frame)))
 
-(defun floating-frame--get-parent ()
-  "Get the appropriate parent frame for child frames.
-Returns the stored parent frame if it's still live, otherwise
-returns the currently selected frame and updates the stored reference."
-  (if (and (framep floating-frame--parent)
-           (frame-live-p floating-frame--parent))
-      floating-frame--parent
-    (setq floating-frame--parent (selected-frame))))
+(defun elastic--cleanup-on-delete (frame)
+  "Tear down elastic children attached to FRAME before FRAME is deleted.
+Hooked into `delete-frame-functions' so that closing a parent frame
+does not fail with `Attempt to delete a surrogate minibuffer frame'
+and does not leave orphaned child frames behind."
+  (let (to-remove)
+    (maphash
+     (lambda (parent child)
+       (when (or (eq parent frame)
+                 (and (frame-live-p child)
+                      (eq (frame-parameter child 'parent-frame) frame)))
+         (when (frame-live-p child)
+           (delete-frame child t))
+         (push parent to-remove)))
+     elastic-vterm--frames)
+    (dolist (p to-remove)
+      (remhash p elastic-vterm--frames))))
 
-(defun floating-frame--update-geometry (frame)
-  "Update the stored geometry for FRAME if it is the parent frame.
-This function is meant to be used in `after-change-frame-geometry-hook'."
-  (when (and floating-frame--parent (eq frame floating-frame--parent))
-    (setq floating-frame--parent-geometry
-          (list :width (frame-pixel-width frame)
-                :height (frame-pixel-height frame)))))
-
-(add-hook 'after-change-frame-geometry-hook #'floating-frame--update-geometry)
+(add-hook 'delete-frame-functions #'elastic--cleanup-on-delete)
 
 ;;;###autoload
 (defun elastic-vterm ()
-  "Launch a vterm in a new floating child frame.
+  "Launch a vterm in a new floating child frame for the current parent.
 The new frame's dimensions are computed as 70% of the parent frame's size,
 with a 15% offset from the parent's left and top edges.
 The vterm buffer has its mode-line and line numbers disabled.
-This function creates and stores the frame in `elastic-vterm--frame`."
+The child is stored in `elastic-vterm--frames' keyed by its top-level
+parent frame so each Emacs client/frame gets its own elastic vterm."
   (interactive)
   (elastic--debug-log "========================================")
   (elastic--debug-log "ELASTIC-VTERM INVOKED")
@@ -72,13 +78,15 @@ This function creates and stores the frame in `elastic-vterm--frame`."
   (elastic--debug-log "Emacs version: %s" emacs-version)
   (elastic--debug-log "System: %s" system-type)
   
-  ;; CRITICAL FIX: Destroy old frame if it exists to avoid geometry conflicts
-  (when (and elastic-vterm--frame (frame-live-p elastic-vterm--frame))
-    (elastic--debug-log "Destroying existing elastic-vterm--frame")
-    (delete-frame elastic-vterm--frame)
-    (setq elastic-vterm--frame nil))
-  
-  (let* ((parent (floating-frame--get-parent))
+  (let* ((parent (elastic--current-parent))
+         (existing (gethash parent elastic-vterm--frames)))
+    ;; Destroy old child for THIS parent if it exists, to avoid geometry conflicts.
+    (when (and existing (frame-live-p existing))
+      (elastic--debug-log "Destroying existing elastic child for parent %s" parent)
+      (delete-frame existing t))
+    (remhash parent elastic-vterm--frames))
+
+  (let* ((parent (elastic--current-parent))
          ;; Use native dimensions for more accurate pixel calculations
          (parent-native-width (frame-native-width parent))
          (parent-native-height (frame-native-height parent))
@@ -137,6 +145,10 @@ This function creates and stores the frame in `elastic-vterm--frame`."
                             (visibility . t)
                             (no-accept-focus . nil)
                             (undecorated . nil)
+                            ;; Own minibuffer so the parent isn't a surrogate
+                            ;; minibuffer frame -- otherwise `delete-frame' on
+                            ;; the parent errors while this child is alive.
+                            (minibuffer . t)
                             ;; REMOVED: (keep-ratio . t)
                             ;; This was causing Emacs to override our geometry!
                             (user-position . t)  ; Respect our position
@@ -147,27 +159,28 @@ This function creates and stores the frame in `elastic-vterm--frame`."
         (elastic--debug-log "--- FRAME PARAMETERS ---")
         (elastic--debug-log "%S" frame-params)
         
-        (setq elastic-vterm--frame (make-frame frame-params))
-        
-        ;; Log actual frame dimensions after creation
-        (elastic--debug-log "")
-        (elastic--debug-log "--- CREATED FRAME INFO ---")
-        (elastic--debug-log "Child frame: %s" elastic-vterm--frame)
-        (elastic--debug-log "Actual native dimensions: %dx%d"
-                            (frame-native-width elastic-vterm--frame)
-                            (frame-native-height elastic-vterm--frame))
-        (elastic--debug-log "Actual pixel dimensions: %dx%d"
-                            (frame-pixel-width elastic-vterm--frame)
-                            (frame-pixel-height elastic-vterm--frame))
-        (elastic--debug-log "Actual position: left=%s top=%s"
-                            (frame-parameter elastic-vterm--frame 'left)
-                            (frame-parameter elastic-vterm--frame 'top))
-        
-        ;; Calculate differences
-        (let ((actual-width (frame-pixel-width elastic-vterm--frame))
-              (actual-height (frame-pixel-height elastic-vterm--frame))
-              (expected-width (round child-width-pixels))
-              (expected-height (round child-height-pixels)))
+        (let ((child (make-frame frame-params)))
+          (puthash parent child elastic-vterm--frames)
+
+          ;; Log actual frame dimensions after creation
+          (elastic--debug-log "")
+          (elastic--debug-log "--- CREATED FRAME INFO ---")
+          (elastic--debug-log "Child frame: %s" child)
+          (elastic--debug-log "Actual native dimensions: %dx%d"
+                              (frame-native-width child)
+                              (frame-native-height child))
+          (elastic--debug-log "Actual pixel dimensions: %dx%d"
+                              (frame-pixel-width child)
+                              (frame-pixel-height child))
+          (elastic--debug-log "Actual position: left=%s top=%s"
+                              (frame-parameter child 'left)
+                              (frame-parameter child 'top))
+
+          ;; Calculate differences
+          (let ((actual-width (frame-pixel-width child))
+                (actual-height (frame-pixel-height child))
+                (expected-width (round child-width-pixels))
+                (expected-height (round child-height-pixels)))
           (elastic--debug-log "")
           (elastic--debug-log "--- COMPARISON ---")
           (elastic--debug-log "Width:  expected=%d actual=%d diff=%d (%.1f%%)"
@@ -181,42 +194,47 @@ This function creates and stores the frame in `elastic-vterm--frame`."
                     (> (abs (- actual-height expected-height)) 50))
             (elastic--debug-log "WARNING: Significant geometry mismatch detected!"))
           
-          (elastic--debug-log "========================================")
-          (elastic--debug-log ""))
-        
-        (select-frame-set-input-focus elastic-vterm--frame)
-        
-        ;; Launch vterm in the new frame if available.
-        (when (fboundp 'multi-vterm)
-          (let ((vterm-buffer (multi-vterm)))
-            (set-window-buffer (frame-root-window elastic-vterm--frame) vterm-buffer)
-            ;; Tag window for buffer routing
-            (set-window-parameter (frame-root-window elastic-vterm--frame)
-                                  'emux-slot "elastic-vterm")
-            ;; Disable the mode-line and line numbers in the vterm buffer.
-            (with-current-buffer vterm-buffer
-              (setq-local mode-line-format nil)
-              (when (boundp 'display-line-numbers)
-                (setq-local display-line-numbers nil))
-              (when (fboundp 'display-line-numbers-mode)
-                (display-line-numbers-mode -1))
-              ;; Disable the exit confirmation by clearing the process query flag.
-              (when-let ((proc (get-buffer-process (current-buffer))))
-                (set-process-query-on-exit-flag proc nil)))))))))
+            (elastic--debug-log "========================================")
+            (elastic--debug-log ""))
+
+          (select-frame-set-input-focus child)
+
+          ;; Launch vterm in the new frame if available.
+          (when (fboundp 'multi-vterm)
+            (let* ((proj (project-current))
+                   (default-directory (if proj
+                                          (project-root proj)
+                                        default-directory))
+                   (vterm-buffer (multi-vterm)))
+              (set-window-buffer (frame-root-window child) vterm-buffer)
+              ;; Tag window for buffer routing
+              (set-window-parameter (frame-root-window child)
+                                    'emux-slot "elastic-vterm")
+              (with-current-buffer vterm-buffer
+                (when (boundp 'display-line-numbers)
+                  (setq-local display-line-numbers nil))
+                (when (fboundp 'display-line-numbers-mode)
+                  (display-line-numbers-mode -1))
+                ;; Disable the exit confirmation by clearing the process query flag.
+                (when-let ((proc (get-buffer-process (current-buffer))))
+                  (set-process-query-on-exit-flag proc nil))))))))))
 
 ;;;###autoload
 (defun elastic-vterm-toggle ()
-  "Toggle the visibility of the elastic vterm frame.
-If the frame exists and is live, hide it if visible or show it if hidden.
-If it doesn't exist, create one using `elastic-vterm`."
+  "Toggle the visibility of the elastic vterm frame for the current parent.
+Each top-level parent frame has its own elastic child, looked up in
+`elastic-vterm--frames'.  If the child for the current parent exists
+and is live, hide it if visible or show it if hidden.  If it doesn't
+exist, create one using `elastic-vterm'."
   (interactive)
-  (if (and elastic-vterm--frame (frame-live-p elastic-vterm--frame))
-      (if (frame-visible-p elastic-vterm--frame)
-          (make-frame-invisible elastic-vterm--frame)
-        (make-frame-visible elastic-vterm--frame)
-	(other-frame 1)
-	)
-    (elastic-vterm)))
+  (let* ((parent (elastic--current-parent))
+         (child  (gethash parent elastic-vterm--frames)))
+    (if (and child (frame-live-p child))
+        (if (frame-visible-p child)
+            (make-frame-invisible child)
+          (make-frame-visible child)
+          (select-frame-set-input-focus child))
+      (elastic-vterm))))
 
 (provide 'elastic)
 ;;; elastic.el ends here
