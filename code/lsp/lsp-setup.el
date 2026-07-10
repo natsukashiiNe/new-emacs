@@ -36,7 +36,10 @@
   (lsp-completion-provider :none)
 
   ;; Session management
-  (lsp-session-file (expand-file-name "lsp-session-v1" "~/.local/emacs/"))
+  ;; nil = no session file. Prevents lsp from accumulating workspace folders
+  ;; from past sessions and sending them all to newly started servers.
+  ;; Root detection via project.el (test-project.el) makes the session unnecessary.
+  (lsp-session-file nil)
 
   ;; Keybindings
   (lsp-keymap-prefix "C-c j")
@@ -63,14 +66,18 @@
   ;; docs
   (lsp-eldoc-render-all nil)
   (lsp-eldoc-enable-hover t)
-  (lsp-signature-render-documentation t)
-  (lsp-signature-function 'lsp-signature-posframe)
+  ;; Signature popup (function, params, render-documentation, fit logic)
+  ;; lives in `lsp-signature-settings'.
 
   ;; Icons (nerd-icons for terminal compatibility)
   (lsp-icons-provider 'nerd-icons)
 
   ;; Project detection
   (lsp-auto-guess-root t)
+  ;; Kill server when last buffer closes — forces a fresh start with only
+  ;; the current project root instead of reusing a server that has accumulated
+  ;; every workspace folder from the session history.
+  (lsp-keep-workspace-alive nil)
 
   ;; Xref integration
   (xref-search-program 'ripgrep)
@@ -79,22 +86,21 @@
   ;; Set xref backend to use LSP
   (setq xref-backend-functions '(lsp--xref-backend))
 
-  ;; Render the signature help popup via posframe at the top of the frame
-  ;; instead of the default `lv' window at the bottom -- avoids overlap with
-  ;; corfu's child frame.
-  (setq lsp-signature-posframe-params
-	(list :poshandler #'posframe-poshandler-frame-top-center
-              :min-height 5
-              :height 13          ; max — posframe auto-fits up to this
-              :min-width 60
-              :width 80
-              :border-width 1
-              :border-color "gray50"
-              :internal-border-width 6))
-
   ;; Enable which-key integration
   (with-eval-after-load 'which-key
-    (lsp-enable-which-key-integration t)))
+    (lsp-enable-which-key-integration t))
+
+  ;; Reject home dir and bare catch-all dirs as project roots. When a file
+  ;; is opened outside a proper project and root detection falls back to ~/
+  ;; or ~/working-dir, that path gets stored in the session and sent to
+  ;; every future server of that type as a workspace folder.
+  ;; (defun my--lsp-reject-shallow-roots (root)
+  ;;   (let ((bad (mapcar #'expand-file-name
+  ;;                      '("~/" "~/working-dir/" "~/working-dir"))))
+  ;;     (unless (member root bad) root)))
+  ;; (advice-add 'lsp--suggest-project-root
+  ;;             :filter-return #'my--lsp-reject-shallow-roots)
+  )
 
 
 ;; =============================================================================
@@ -189,8 +195,8 @@
   (setf (alist-get 'right-fringe lsp-ui-doc-frame-parameters) 2)
 
   (set-face-attribute 'lsp-ui-doc-header nil
-                      :height 210        ; TODO: make dynamically deducted (lazy-eval)
-                      :weight 'bold)
+		      :height 210        ; TODO: make dynamically deducted (lazy-eval)
+		      :weight 'bold)
 
 
   ;; Keybindings for lsp-ui-peek
@@ -242,12 +248,20 @@
 (with-eval-after-load 'evil
   (add-hook 'lsp-mode-hook
             (lambda ()
-              (when (boundp 'evil-normal-state-map)
+	      (when (boundp 'evil-normal-state-map)
                 (evil-normalize-keymaps)))))
+
+;; =============================================================================
+;; SIGNATURE POPUP
+;; =============================================================================
+
+(require 'lsp-signature-settings)
 
 ;; =============================================================================
 ;; LOAD LANGUAGE SERVER CONFIGURATIONS
 ;; =============================================================================
+
+(require 'code-lang-deps)
 
 (require 'cpp-settings)
 (require 'python-settings)
@@ -257,7 +271,10 @@
 (require 'lua-settings)
 (require 'dotnet-settings)
 (require 'clojure-settings)
-(require 'js-settings)
+(require 'fennel-settings)
+(require 'js-ts-settings)
+(require 'html-css-settings)
+(require 'svelte-settings)
 (require 'minor-langs-settings)
 
 (provide 'lsp-setup)
