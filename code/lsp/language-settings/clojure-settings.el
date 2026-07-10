@@ -21,14 +21,6 @@
 ;;; Code:
 
 ;; =============================================================================
-;; INDENT BARS
-;; =============================================================================
-
-(with-eval-after-load 'indent-bars
-  (add-to-list 'indent-bars-treesit-scope
-               '(clojure list_lit map_lit vec_lit set_lit anon_fn_lit)))
-
-;; =============================================================================
 ;; TREE-SITTER GRAMMAR PIN
 ;; =============================================================================
 ;; clojure-ts-mode targets a specific commit of sogaiu/tree-sitter-clojure

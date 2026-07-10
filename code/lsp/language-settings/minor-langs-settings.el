@@ -6,18 +6,6 @@
 
 ;;; Code:
 
-;; --- Indent bars scope ---
-(with-eval-after-load 'indent-bars
-  (add-to-list 'indent-bars-treesit-scope
-               '(javascript function_declaration function class_declaration if_statement
-                            for_statement while_statement switch_statement try_statement))
-  (add-to-list 'indent-bars-treesit-scope
-               '(typescript function_declaration function class_declaration if_statement
-                            for_statement while_statement switch_statement try_statement))
-  (add-to-list 'indent-bars-treesit-scope
-               '(bash function_definition compound_statement if_statement
-                      for_statement while_statement do_group
-                      case_statement subshell)))
 
 ;; =============================================================================
 ;; BASH
@@ -90,13 +78,42 @@
   :ensure nil  ; built-in (Emacs 29.1+)
   :mode "Dockerfile\\'")
 
-;; --- JSON apheleia formatter ---
-;; jq pretty-prints JSON; note it does not preserve comments in JSONC files.
+;; .conf files (and zmk)
+(use-package devicetree-ts-mode
+  :ensure t
+  :mode (("\\.keymap\\'"  . devicetree-ts-mode)
+         ("\\.overlay\\'" . devicetree-ts-mode)
+         ("\\.dtsi\\'"    . devicetree-ts-mode)
+         ("\\.dts\\'"     . devicetree-ts-mode)))
+
+(add-to-list 'auto-mode-alist '("\\.conf\\'" . conf-mode))
+
+(with-eval-after-load 'treesit
+  (add-to-list 'treesit-language-source-alist
+               '(devicetree "https://github.com/joelspadin/tree-sitter-devicetree")))
+
+
+;; =============================================================================
+;; JSON / JSONC
+;; =============================================================================
+;; JSON is not a web-exclusive format, so it lives here rather than under
+;; web/.  prettier (not jq) is the formatter -- it preserves comments, so
+;; .jsonc and JSON-with-comments survive a format.  The parser is picked by
+;; extension via --stdin-filepath.
+
+(use-package json-ts-mode
+  :ensure nil  ; built-in
+  :mode (("\\.json\\'"  . json-ts-mode)
+         ("\\.jsonc\\'" . json-ts-mode)))
+
+;; vscode-json-language-server (vscode-langservers-extracted) -- schema
+;; validation + completion.  json-ts-mode already maps to the "json"
+;; language id in lsp-mode.
+(add-hook 'json-ts-mode-hook #'lsp-deferred)
+
 (with-eval-after-load 'apheleia
-  (setf (alist-get 'jq apheleia-formatters)
-        '("jq" "."))
-  (add-to-list 'apheleia-mode-alist '(json-mode . jq))
-  (add-to-list 'apheleia-mode-alist '(json-ts-mode . jq)))
+  (setf (alist-get 'json-mode    apheleia-mode-alist) 'prettier)
+  (setf (alist-get 'json-ts-mode apheleia-mode-alist) 'prettier))
 
 (provide 'minor-langs-settings)
 ;;; minor-langs-settings.el ends here

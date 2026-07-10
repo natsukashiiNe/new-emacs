@@ -5,12 +5,6 @@
 
 ;;; Code:
 
-;; --- Indent bars scope ---
-(with-eval-after-load 'indent-bars
-  (add-to-list 'indent-bars-treesit-scope
-               '(c-sharp class_declaration method_declaration if_statement for_statement
-                         while_statement switch_statement try_statement namespace_declaration)))
-
 ;; --- Tree-sitter mode ---
 (use-package csharp-ts-mode
   :ensure nil

@@ -5,12 +5,6 @@
 
 ;;; Code:
 
-;; --- Indent bars scope ---
-(with-eval-after-load 'indent-bars
-  (add-to-list 'indent-bars-treesit-scope
-               '(go function_declaration method_declaration func_literal if_statement
-                    for_statement switch_statement select_statement)))
-
 ;; --- Tree-sitter mode ---
 (use-package go-ts-mode
   :ensure nil  ; built-in (Emacs 29+)
