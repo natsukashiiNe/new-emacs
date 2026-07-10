@@ -12,7 +12,7 @@
   :ensure t
   :config
   (setq counsel-dash-docsets-path "~/.local/share/Zeal/Zeal/docsets")
-  (setq counsel-dash-common-docsets '("Boost" "C++")))
+  (setq counsel-dash-common-docsets '("C++")))
 
 
 (provide 'docs-setup)

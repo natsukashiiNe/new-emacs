@@ -23,9 +23,14 @@
   :config
   ;; Add yasnippet-snippets to the snippets dir
   ;; This keeps the default snippets available alongside the custom ones
-  (add-to-list 'yas-snippet-dirs 
-               (expand-file-name "yasnippet-snippets" 
+  (add-to-list 'yas-snippet-dirs
+               (expand-file-name "yasnippet-snippets"
                                  (file-name-directory (locate-library "yasnippet-snippets")))))
+
+(use-package consult-yasnippet
+  :ensure t
+  :after 'consult)
+
 
 ;; (with-eval-after-load '(yasnippet yasnippet-snippets consult)
 ;;   (keymap-set yas-minor-mode-map "C-c f F" 'yas-insert-snippet))

@@ -11,7 +11,8 @@
 (defconst exu-bg          "#0d0e1c")
 (defconst exu-accent      "#FF8020")
 (defconst exu-accent-weak "#FD994D")
-(defconst exu-accent-alt  "#ff7f9f")
+;;(defconst exu-accent-alt  "#ff7f9f")
+(defconst exu-accent-alt  "#e86671")
 (defconst exu-accent-alt2 "#FBD05C")
 (defconst exu-yellow      "#D7Af00")
 
@@ -131,10 +132,10 @@
 
  ;; `(indent-bars-ts-face   ((t  (:foreground "#141c1c" ))))
  ;; `(indent-bars-invisible-face   ((t  (:foreground "#141c1c" ))))
- 
+
  `(marginalia-documentation ((t  (:foreground ,exu-main-sup3 :slant ,exu-italic :weight normal))))
  `(marginalia-key           ((t  (:foreground ,exu-yellow    :slant ,exu-italic :weight normal))))
- 
+
  `(tab-bar ((t  (:foreground ,exu-accent :background ,exu-bg3 :box nil ))))
  `(tab-bar-tab ((t  (:foreground ,exu-accent :background ,exu-bg3 :box nil ))))
  `(tab-bar-tab-inactive ((t  (:foreground ,exu-grey2 :background ,exu-bg3 :box nil ))))
@@ -161,9 +162,11 @@
  ;; LSP faces
  ;; Errors, warnings, etc. can be minimal or softly highlighted
  `(symbol-overlay-default-face ((t :background ,exu-fg2 :foreground unspecified :weight bold
-				   :box (:line-width (2 . -2) :color ,exu-accent :style flat-button))))
+				   ;; :box (:line-width (2 . -2) :color ,exu-accent :style flat-button)
+				   :box nil
+				   )))
 
- 
+
  `(lsp-face-highlight-textual ((t
 				(:background ,exu-fg2
 					     :foreground unspecified
@@ -210,56 +213,54 @@
  ;; etc. as needed
  `(tree-sitter-hl-face:method.call ((t (:inherit font-lock-function-name-face))))
 
- 
+
  ;; --- FLYCHECK ----------------------------------------------------------------
- 
+
  `(success     ((t (:background ,exu-black        :foreground ,exu-main-sup3 :weight bold))))
- 
+
  `(error     ((t (:foreground ,exu-bg-cyan        :background ,exu-cyan-accent :extend t))))
  `(warning   ((t (:foreground ,exu-magenta-accent :background ,exu-bg-magenta :weight ,exu-bold :extend t))))
  `(info             ((t (:background ,exu-bg-sel     :underline nil ))))
 
  ;; diagnostics
- ;;`(flycheck-error            ((t (:background ,exu-bg-cyan    :underline nil ))))
- ;;`(flycheck-warning          ((t (:background ,exu-bg-magenta :underline nil :weight ,exu-bold))))
- ;;`(flycheck-info             ((t (:background ,exu-bg-sel     :underline nil ))))
- `(flycheck-error            ((t (:underline t ))))
- `(flycheck-warning          ((t (:underline t ))))
- `(flycheck-info             ((t (:underline t ))))
 
- ;; inline
- `(flycheck-inline-error     ((t (:foreground ,exu-cyan-accent    :background ,exu-bg-cyan :extend t))))
- `(flycheck-inline-warning   ((t (:foreground ,exu-magenta-accent :background ,exu-bg-magenta :weight ,exu-bold :extend t))))
- `(flycheck-inline-info      ((t (:foreground ,exu-slate-accent   :background ,exu-bg-slate :extend t ))))
+ `(flymake-error     ((t :underline (:color ,exu-cyan-accent :style wave :position -4))))
+ `(flymake-warning   ((t :underline (:color ,exu-magenta-accent :style wave :position -4))))
+ `(flymake-note      ((t :underline (:color ,exu-slate-accent :style wave :position -4))))
 
- ;; icons
- `(flycheck-fringe-error     ((t (:foreground ,exu-cyan-accent    :background ,exu-bg-cyan :extend t))))
- `(flycheck-fringe-warning   ((t (:foreground ,exu-magenta-accent :background ,exu-bg-magenta :weight ,exu-bold :extend t))))
- `(flycheck-fringe-info      ((t (:foreground ,exu-slate-accent   :background ,exu-bg-slate :extend t ))))
-
- `(flyover-error     ((t (:foreground ,exu-cyan-accent    :background ,exu-bg-cyan :extend t))))
- `(flyover-warning   ((t (:foreground ,exu-magenta-accent :background ,exu-bg-magenta  :extend t))))
- `(flyover-info      ((t (:foreground ,exu-slate-accent   :background ,exu-bg-slate :extend t ))))
-
- `(flycheck-overlay-marker             ((t (:foreground ,exu-cyan-accent :background ,exu-bg-orange))))
-
-
+ `(flymake-error-echo     ((t :foreground ,exu-cyan-accent
+			      :weight bold)))
+ `(flymake-warning-echo   ((t :foreground ,exu-magenta-accent
+			      :weight bold)))
+ `(flymake-note-echo      ((t :foreground ,exu-slate-accent
+			      :weight bold)))
 
  `(flymake-error-fringe     ((t (:foreground ,exu-cyan-accent    :background ,exu-bg-cyan :extend t))))
  `(flymake-warning-fringe   ((t (:foreground ,exu-magenta-accent :background ,exu-bg-magenta
 					     :weight ,exu-bold :extend t))))
  `(flymake-note-fringe      ((t (:foreground ,exu-slate-accent   :background ,exu-bg-slate :extend t ))))
 
-
- `(flymake-error-echo-at-eol   ((t :foreground ,exu-cyan-accent :background ,exu-bg-cyan
-				   :height 1.00
-				   :box (:line-width (1 . -1) :color ,exu-cyan-accent :style flat-button))))
- `(flymake-warning-echo-at-eol   ((t :foreground ,exu-magenta-accent :background ,exu-bg-magenta
-				     :height 1.00
-				     :box (:line-width (1 . -1) :color ,exu-magenta-accent :style flat-button))))
- `(flymake-note-echo-at-eol   ((t :foreground ,exu-slate-accent :background ,exu-bg-slate
-				  :height 1.00
-				  :box (:line-width (1 . -1) :color ,exu-slate-accent :style flat-button))))
+ `(flymake-error-echo-at-eol     ((t ;;:foreground "#9BB84B"
+				   ;;:foreground "#4AB9C9"
+				   :foreground "#4AB9C9"
+				   :height 0.90
+				   :slant italic
+				   :box (:line-width (1 . -1)
+						     ;;:color "#9BB84B"
+						     :color "#4AB9C9"
+						     :style flat-button))))
+ `(flymake-warning-echo-at-eol   ((t :foreground "#B77EC4"
+				     :height 0.90
+				     :slant italic
+  				     :box (:line-width (1 . -1)
+						       :color "#B77EC4"
+						       :style flat-button))))
+ `(flymake-note-echo-at-eol      ((t :foreground "#3F7CAA"
+				     :height 0.90
+				     :slant italic
+  				     :box (:line-width (1 . -1)
+						       :color "#3F7CAA"
+						       :style flat-button))))
 
  ;; --- GIT ----------------------------------------------------------------
  `(magit-diff-file-heading     ((t (:foreground ,exu-accent-weak :weight normal))))
@@ -290,7 +291,7 @@
  ;; `(doom-modeline-evil-normal-state ((t (:background ,exu-orange-light :foreground ,exu-bg-orange :weight bold))))
 
 
- 
+
  ;; --- Treemacs ----------------------------------------------------------------
  ;; `(treemacs-git-untracked-face    ((t (:foreground ,exu-strong  :weight normal))))
  ;; `(treemacs-git-modified-face     ((t (:foreground ,exu-strong  :weight normal))))
@@ -302,7 +303,7 @@
 
  ;; --- HELP --------------------------------------------------------------------
  ;; `(help-argument-name             ((t (:foreground ,exu-strong  :weight normal))))
- 
+
  `(help-key-binding   ((t  (:foreground ,exu-black  :background ,exu-main-sup1 :weight normal ))))
  `(help-argument-name ((t  (:foreground ,exu-accent :weight bold ))))
 
@@ -320,11 +321,13 @@
  `(shr-code ((t (:foreground ,exu-accent-weak))))
  `(shr-link ((t ( :box nil :underline t))))
 
+ ;; --- DOC ---------------------------------------------------------------------
+ `(Info-quoted ((t (:foreground ,exu-main-sup1))))
  ;; --- ORG ---------------------------------------------------------------------
  `(modus-themes-heading-1  (( t (:foreground ,exu-white :extend t :height 1.20 :weight extra-bold ))))
  `(modus-themes-heading-2  (( t (:foreground ,exu-accent-weak :extend t :height 1.15 :weight bold ))))
  `(modus-themes-heading-3  (( t (:foreground ,exu-main-sup1 :extend t :height 1.1 :weight bold ))))
- 
+
  `(org-verbatim ((t (:background ,exu-black :foreground ,exu-slate-accent))))
  ;;`(org-property-value ((t (:background ,exu-black :foreground ,exu-slate-accent))))
 
@@ -347,11 +350,11 @@ Example:
     \='((cursor . cursor-insert)
       (hl-line . hl-line-insert)
       (line-number-current-line . line-number-current-line-insert)))"
-  
+
   (dolist (state states)
     (let ((entry-hook (intern (format "evil-%s-state-entry-hook" state)))
           (exit-hook (intern (format "evil-%s-state-exit-hook" state))))
-      
+
       ;; Entry hook: Apply remappings
       (add-hook entry-hook
                 (lambda ()
@@ -365,7 +368,7 @@ Example:
                              (weight (face-attribute source-face :weight nil 'default))
                              (slant (face-attribute source-face :slant nil 'default))
                              (remap-spec nil))
-                        
+
                         ;; Build remap spec only for specified attributes
                         (unless (eq fg 'unspecified)
                           (push :foreground remap-spec)
@@ -379,19 +382,19 @@ Example:
                         (unless (eq slant 'unspecified)
                           (push :slant remap-spec)
                           (push slant remap-spec))
-                        
+
                         ;; Apply remap if we have any attributes
                         (when remap-spec
                           (push (apply #'face-remap-add-relative target-face (nreverse remap-spec))
                                 remaps))))
-                    
+
                     ;; Store remaps for this state
                     (push (cons state remaps) my-evil-face-remappings)
-                    
+
                     ;; Force refresh hl-line
                     (when (bound-and-true-p hl-line-mode)
                       (hl-line-highlight)))))
-      
+
       ;; Exit hook: Remove remappings
       (add-hook exit-hook
                 (lambda ()
@@ -400,7 +403,7 @@ Example:
                       (face-remap-remove-relative cookie))
                     (setq my-evil-face-remappings
                           (assq-delete-all state my-evil-face-remappings))
-                    
+
                     ;; Force refresh hl-line
                     (when (bound-and-true-p hl-line-mode)
                       (hl-line-highlight))))))))
@@ -412,7 +415,7 @@ Example:
    '((cursor . cursor-insert)
      (hl-line . hl-line-insert)
      (line-number-current-line . line-number-current-line-insert)))
-  
+
   ;; You could also add visual mode with different colors:
   ;; (my-evil-apply-face-remaps
   ;;  '(visual)

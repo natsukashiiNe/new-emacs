@@ -30,7 +30,7 @@ Each element in FILES is a plist with :name, :path, and optional :key."
   `(progn
      (defvar my/quick-open-files ',files
        "Quick-open files configuration.")
-     
+
      ;; Create individual functions for each file
      ,@(mapcar
         (lambda (file-spec)
@@ -43,7 +43,7 @@ Each element in FILES is a plist with :name, :path, and optional :key."
                (interactive)
                (find-file (expand-file-name ,path)))))
         files)
-     
+
      ;; Create the completion-enabled function
      (defun my/open-files (file-path)
        "Open a quick-access file with completion."
@@ -60,11 +60,11 @@ Each element in FILES is a plist with :name, :path, and optional :key."
  (:name "nvidia-drm"
         :key "n d"
         :path "/usr/share/X11/xorg.conf.d/10-nvidia-drm-outputclass.conf")
- 
+
  (:name "nvidia-conf"
         :key "n c"
         :path "/etc/modprobe.d/nvidia.conf")
- 
+
  ;; Add more *files as needed
  (:name "xorg-conf"
         :key "x"
@@ -99,13 +99,13 @@ MODE can be:
          (mode (or mode 'magit)))
     (unless (file-directory-p pr)
       (user-error "Not a directory: %s" pr))
-    
+
     ;; Switch to perspective first, so buffers/windows land there
     (persp-switch persp-name)
-    
+
     ;; Make sure Projectile knows about the project
     (projectile-add-known-project pr)
-    
+
     ;; Override the default action based on mode
     (let ((projectile-switch-project-action
            (pcase mode
@@ -273,7 +273,8 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
     ;; consult multi-files
     "j"       '(tab-switch   :which-key "[t]ab switch")
     "F"       '(my-consult-projectile-find-file   :which-key "[f]ind file")
-    "C-f"     '(consult-project-buffer :which-key "buffers")
+    "C-f"     '(consult-project-buffer :which-key "project buffers")
+    "M-f"     '(switch-to-buffer       :which-key "all buffers")
     "G"       '(consult-ripgrep        :which-key "r[g]")
     "S"       '(consult-lsp-symbols    :which-key "lsp [S]ymbols")
 
@@ -304,6 +305,8 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
     :non-normal-prefix "M-SPC")
 
   (my-leader
+    "SPC" '(universal-argument :which-key "C-u")
+
     ;; basics
     "i" '(next-buffer     :which-key "next buffer")
     "o" '(previous-buffer :which-key "prev buffer")
@@ -324,7 +327,7 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
     "C-j C-h D"   '(my/open-dotfiles :which-key "[D]otfiles (persp+magit)")
     "C-j C-h H"   '(my/open-herb :which-key "[H]erb (persp+magit)")
     "C-j C-h V"   '(my/open-vasiniyo :which-key "[V]asiniyo (persp+magit)")
-    
+
     ;; “SPC f” prefix for “search” or “files”
     "f"   '(:ignore t                :which-key "[+] search / files")
     "f f" '(projectile-find-file     :which-key "projectile-find-file")
@@ -358,6 +361,8 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
     "h E" '((lambda () (interactive) (my-keymaps/exec-with-prefix "elpaca- "))
             :which-key "[e]vil commands")
     ;; todo: fix
+    "h u" '((lambda () (interactive) (my-keymaps/exec-with-prefix "crux- "))
+            :which-key "describe")
     "h U" '((elpaca-update)
             :which-key "[e]vil commands")
     "h C" '((lambda () (interactive) (my-keymaps/exec-with-prefix "evilnc- "))
@@ -444,7 +449,7 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
 ;;     "j" #'flymake-goto-next-error
 ;;     "k" #'flymake-goto-prev-error)
 ;;   "Leader keymap for LSP")
-;; 
+;;
 ;; ;; Bind SPC j globally in evil normal state
 ;; (keymap-set evil-normal-state-map "SPC j" my-lsp-leader-map)
 
@@ -482,7 +487,7 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
 ;;   ;; (define-key minibuffer-local-ns-map (kbd "C-h") #'backward-kill-word)
 ;;   ;; (define-key minibuffer-local-isearch-map (kbd "C-h") #'backward-kill-word)
 ;;   )
-;; 
+;;
 ;; (evil-define-key 'insert evil-insert-state-map
 ;;   (kbd "C-h") #'evil-delete-backward-char)
 

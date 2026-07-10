@@ -10,6 +10,23 @@
   :config
   (isearch-mb-mode))
 
+(use-package flash
+  :ensure t
+  :commands (flash-jump flash-jump-continue
+			flash-treesitter)
+  :custom
+  (flash-multi-window nil)
+  :init
+  ;; Evil integration (simple setup)
+  (with-eval-after-load 'evil
+    (require 'flash-evil)
+    (flash-evil-setup t))  ; t = also set up f/t/F/T char motions
+  :config
+  ;; Search integration (labels during C-s, /, ?)
+  ;; (require 'flash-isearch)
+  ;; (flash-isearch-mode 1)
+  )
+
 (use-package helpful
   :ensure t
   :bind (("C-h f" . helpful-callable)
@@ -37,15 +54,45 @@
 (use-package vdiff
   :ensure t)
 
+;; basic tab-based folding.
+(use-package origami
+  :ensure t
+  :init
+  ;; origami's defface uses (face-attribute 'highlight :background) at load
+  ;; time, which returns `unspecified` before the theme is active, producing
+  ;; an invalid :box spec. Pre-defining the faces here makes defface a no-op.
+  (defface origami-fold-header-face
+    '((t :inherit highlight :box nil))
+    "Origami fold header.")
+  (defface origami-fold-replacement-face
+    '((t :inherit font-lock-comment-face))
+    "Origami fold replacement."))
+
 ;; =============================================================================
 ;; TERMINALS
 ;; =============================================================================
+
+;; ghostty-lib based terminal emulator.
+(use-package ghostel
+  :ensure t)
+
+(use-package evil-ghostel
+  :ensure (:url "https://github.com/dakra/ghostel"
+		:files ("extensions/evil-ghostel/evil-ghostel.el"))
+  :after (ghostel evil)
+  :hook (ghostel-mode . evil-ghostel-mode))
+
+;; (use-package ghostel-compile
+;; :hook (after-init . ghostel-compile-global-mode)
+
+;; (use-package ghostel-comint
+;; :hook (after-init . ghostel-comint-global-mode))
 
 (use-package vterm
   :ensure t
   :init
   (setq vterm-always-compile-module t)
-  (setenv "INSIDE_EMACS_VTERM" "1")
+  (setenv "INSIDE_EMACS_VTERM" "1") ;; used to select oh-my-posh prompt
   :hook
   (vterm-mode . (lambda () (display-line-numbers-mode -1)))
   (vterm-mode . (lambda () (hl-line-mode -1)))

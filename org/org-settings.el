@@ -154,9 +154,7 @@
 
 (use-package good-scroll
   :ensure t
-  :hook (org-mode . good-scroll-mode)
-  :config
-  (good-scroll-mode 1))
+  :hook (org-mode . good-scroll-mode))
 
 (with-eval-after-load 'org
   (require 'org-tempo))

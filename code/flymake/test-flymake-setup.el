@@ -7,6 +7,7 @@
 ;; == FLYMAKE BACKENDS ===========================================================
 
 ;; -- python: use ruff via lsp directly -----------------------------------------
+;; -- TODO: move to python dedicated file
 (with-eval-after-load 'lsp-mode
   (lsp-register-client
    (make-lsp-client

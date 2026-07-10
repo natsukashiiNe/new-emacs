@@ -24,5 +24,8 @@ does not interfere with other uses of `whitespace-mode'."
 
 (add-hook 'prog-mode-hook #'my-minor-prog-mode/show-whitespaces)
 
+(define-minor-mode my-minor-prog-mode/show-fill-line
+  "")
+
 (provide 'code-utilities-setup)
 ;;; code-utilities-setup.el ends here

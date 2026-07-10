@@ -15,7 +15,6 @@
     (orderless-matching-styles '(orderless-literal
                                  orderless-flex
                                  orderless-initialism))))
-
 (use-package corfu
   :ensure t
   :bind (:map corfu-map
@@ -33,6 +32,11 @@
   ;; Appearance
   (corfu-cycle t)
   (corfu-preselect 'prompt)
+  ;; Preview the selected candidate inline in the buffer.
+  ;; `t' shows it when you navigate to a candidate (C-j/C-k) but does NOT
+  ;; auto-commit it on further typing — use TAB to confirm explicitly.
+  ;; (`insert' would auto-commit the moment you type another char, which is jarring.)
+  (corfu-preview-current t)
   (corfu-count 10)
   (corfu-scroll-margin 5)
   (corfu-max-width 80)
@@ -50,6 +54,30 @@
   (keymap-unset corfu-map "M-n" t)
   (keymap-unset corfu-map "M-p" t)
 
+  ;; Corfu's built-in preview uses a `display' overlay on beg..end, which
+  ;; visually replaces the typed text with the full candidate — putting the
+  ;; cursor at the END of the candidate text and making it impossible to see
+  ;; where actual input ends.  This advice replaces it with an `after-string'
+  ;; overlay at point containing only the untyped SUFFIX, so the cursor always
+  ;; sits between what you typed and the ghost completion.
+  (defun my/corfu--suffix-ghost-preview (orig beg end)
+    (if (not (corfu--preview-current-p))
+        (funcall orig beg end)
+      (when corfu--preview-ov
+        (delete-overlay corfu--preview-ov)
+        (setq corfu--preview-ov nil))
+      (let* ((candidate (substring-no-properties (nth corfu--index corfu--candidates)))
+             (typed-len (- end beg))
+             (suffix (and (> (length candidate) typed-len)
+                          (substring candidate typed-len))))
+        (when (and suffix (not (string-empty-p suffix)))
+          (setq corfu--preview-ov (make-overlay end end nil))
+          (overlay-put corfu--preview-ov 'priority 1000)
+          (overlay-put corfu--preview-ov 'window (selected-window))
+          (overlay-put corfu--preview-ov 'after-string
+                       (propertize suffix 'face 'shadow))))))
+  (advice-add 'corfu--preview-current :around #'my/corfu--suffix-ghost-preview)
+
   ;; Use fuzzy orderless matching only in corfu completion buffers.
   ;; Also override lsp-capf category to use orderless instead of lsp-passthrough,
   ;; so corfu actually filters candidates from the LSP server.
@@ -62,14 +90,6 @@
 
   :hook (lsp-bridge-mode . (lambda ()
                              (corfu-mode -1))))
-
-;; I am on emacs 31 now.
-;; (use-package corfu-terminal
-;;   :ensure (:host codeberg :repo "akib/emacs-corfu-terminal")
-;;   :after corfu
-;;   :config
-;;   (unless (display-graphic-p)
-;;     (corfu-terminal-mode 1))
 
 ;;   ;; Disable corfu-terminal in lsp-bridge modes
 ;;   ;; ACM handles auto-complete
@@ -85,7 +105,11 @@
   ;; order of the sources matters
   (add-to-list 'completion-at-point-functions #'cape-file)       ; Files
   (add-to-list 'completion-at-point-functions #'cape-dabbrev)    ; Dynamic words
-  (add-to-list 'completion-at-point-functions #'cape-keyword))   ; Programming keywords
+  (add-to-list 'completion-at-point-functions #'cape-keyword)    ; Programming keywords
+  (dolist (hook '(org-mode-hook
+                  markdown-mode-hook
+                  git-commit-mode-hook))
+    (add-hook hook (l () (add-to-list 'completion-at-point-functions #'cape-dict)))))
 
 (use-package yasnippet-capf
   :ensure t
@@ -147,6 +171,10 @@
   :after corfu
   :config
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
+;; (with-eval-after-load 'corfu
+;;   (require 'corfu-expansion-preview)
+;;   (my-corfu/code-expansion-preview-mode 1))
 
 (provide 'autocomplete-settings)
 ;;; autocomplete-settings ends here

@@ -317,5 +317,128 @@ an org table. Separator rows (|---...) are ignored."
     (delete-region table-beg table-end)
     (insert output "\n")))
 
+;; ------------------------------------
+;; Insert From *Messages* Buffer
+;; ------------------------------------
+
+(defun my-edit--message-lines ()
+  "Return the non-empty lines of the *Messages* buffer.
+Lines are returned oldest-first (buffer order)."
+  (with-current-buffer (messages-buffer)
+    (split-string (buffer-substring-no-properties (point-min) (point-max))
+                  "\n" t)))
+
+(defun my-edit--insert-message-line (line)
+  "Insert LINE at point.
+Shared helper for the interactive message-insertion commands."
+  (when (and line (not (string-empty-p line)))
+    (insert line)))
+
+(defun my-edit/insert-last-message-line ()
+  "Insert the last line from the *Messages* buffer at point."
+  (interactive)
+  (let ((line (car (last (my-edit--message-lines)))))
+    (if line
+        (my-edit--insert-message-line line)
+      (user-error "No messages to insert"))))
+
+(defun my-edit/pick-insert-message-line ()
+  "Pick a line from the *Messages* buffer via completion and insert it.
+Candidates are presented newest-first."
+  (interactive)
+  (let ((lines (nreverse (my-edit--message-lines))))
+    (if (null lines)
+        (user-error "No messages to insert")
+      (my-edit--insert-message-line
+       (completing-read "Message line: " lines nil t)))))
+
+;; ------------------------------------
+;; Insert File Path
+;; ------------------------------------
+
+(defun my-edit--insert-file-path (&optional path)
+  "Read a file name and insert it at point.
+PATH pre-fills the prompt: a directory sets the starting directory,
+while a full file path also pre-fills the file-name part.  With no
+PATH, behaves like the usual `find-file' starting in `default-directory'."
+  (let* ((path (or path default-directory))
+         (dir (file-name-directory path))
+         (initial (file-name-nondirectory path)))
+    (insert (read-file-name "Insert file path: " dir nil nil
+                            (and (not (string-empty-p initial)) initial)))))
+
+(defmacro my-edit--make/insert-file-path (path &rest args)
+  "Define an interactive command that inserts a file path at point.
+PATH pre-fills the prompt (see `my-edit--insert-file-path').  ARGS is a
+plist; :name gives the command name (a string or symbol).
+
+Example:
+  (my-edit--make/insert-file-path
+   \"~/projects/\" :name \"my-edit/insert-project-path\")"
+  (let* ((name (plist-get args :name))
+         (fn (if (stringp name) (intern name) name)))
+    (unless fn
+      (error "my-edit--make/insert-file-path: missing :name"))
+    `(defun ,fn ()
+       ,(format "Insert a file path at point%s."
+                (if path (format ", pre-filled with %S" path) ""))
+       (interactive)
+       (my-edit--insert-file-path ,path))))
+
+;; Plain version: usual `find-file' behavior of the current directory.
+(my-edit--make/insert-file-path nil :name "my-edit/insert-file-path")
+(my-edit--make/insert-file-path "~/Pictures/screenshots/"
+				:name "my-edit/insert-screenshot-path")
+
+;; ------------------------------------
+;; Block Editing (Change inside brackets)
+;; ------------------------------------
+
+(require 'misc) ; zap-up-to-char
+
+(defun my-edit--change-inner-pair (open close)
+  "Delete content inside the nearest enclosing OPEN/CLOSE pair.
+Climbs up bracket levels until the right OPEN char is found."
+  (condition-case nil
+      (let (start end)
+        (save-excursion
+          (let (found)
+            (while (not found)
+              (up-list -1 t t)
+              (when (eq (char-after) open)
+                (setq found t start (point)))))
+          (forward-sexp)
+          (setq end (1- (point))))
+        (delete-region (1+ start) end)
+        (goto-char (1+ start)))
+    (error (user-error "No enclosing %c...%c found" open close))))
+
+(defun my-edit/change-inner-any-bracket ()
+  "Delete content inside the nearest enclosing bracket pair (any of ([{)."
+  (interactive)
+  (condition-case nil
+      (let* ((close-pos (save-excursion (up-list 1 t t) (point)))
+             (open-pos  (save-excursion (up-list -1 t t) (point))))
+        (delete-region (1+ open-pos) (1- close-pos))
+        (goto-char (1+ open-pos)))
+    (error (user-error "Not inside a bracket pair"))))
+
+(defun my-edit/change-inner-paren ()
+  "Delete content inside nearest ()."
+  (interactive) (my-edit--change-inner-pair ?\( ?\)))
+
+(defun my-edit/change-inner-bracket ()
+  "Delete content inside nearest []."
+  (interactive) (my-edit--change-inner-pair ?\[ ?\]))
+
+(defun my-edit/change-inner-curly ()
+  "Delete content inside nearest {}."
+  (interactive) (my-edit--change-inner-pair ?\{ ?\}))
+
+(defun my-edit/delete-to-char-backward (char)
+  "Delete from point back to (but not including) CHAR."
+  (interactive "cDelete back to char: ")
+  (zap-up-to-char -1 char))
+
 (provide 'custom-editing)
 ;;; custom-editing.el ends here

@@ -27,7 +27,7 @@
 
 (my-keymaps/define-submaps global-map
   (my-maps/compile-map    :prefix "C-c C"    :doc "My compilation map." :wk "[C]ompile")
-  (my-maps/build-map      :prefix "C-c C-b"    :doc "My build map."       :wk "[B]uild")
+  (my-maps/build-map      :prefix "C-c C-b"  :doc "My build map."       :wk "[B]uild")
   (my-maps/diff-map       :prefix "C-c M-d"  :doc "My dif map."         :wk "[D]iff"))
 
 (my-keymaps/add-submaps global-map
@@ -37,11 +37,19 @@
 (my-keymaps/define-submaps my-override-mode-map
   (my-maps/global-utility   :prefix "C-c o"   :doc "Global utility map."      :wk "Utility")
   (my-maps/quick-edit       :prefix "C-c C-s" :doc "Quick editing."           :wk "Quick-edit")
+  (my-maps/struct-edit      :prefix "C-c C-e" :doc "Structrual Editing."      :wk "Structural-edit")
+  (my-maps/block-edit       :prefix "C-c e"   :doc "Block/bracket editing."   :wk "Block-edit")
   (my-maps/quick-open       :prefix "M-g"     :doc "Quick access map."        :wk "Quick-locations")
-  (my-maps/buffer-actions   :prefix "C-c B" :doc "Actions for this buffer." :wk "[B]uffer actions")
+  (my-maps/buffer-actions   :prefix "C-c B"   :doc "Actions for this buffer." :wk "[B]uffer actions")
+  :evil-define 'normal
+  (my-maps/multi-projects-map :prefix "M-w"
+			      :doc "Map to navigate between projects"
+			      :wd "Multi projects actions")
   :populate
-  ("M-h"  #'isearch-backward  "isearch-backward")
-  ("M-l"  #'isearch-forward   "isearch-forward"))
+  ("M-h"      #'isearch-backward  "isearch-backward")
+  ("M-l"      #'isearch-forward   "isearch-forward")
+  ("C-x V"    #'set-variable      "set-variable")
+  ("C-x u"    #'undo              "undo"))
 
 (my-keymaps/define-submaps my-maps/global-utility
   (my-maps/agent-shell :prefix "a" :doc "Agent shell map."                  :wk "AI [a]gent")
@@ -52,7 +60,7 @@
   ("o" #'agent-shell-toggle))
 
 ;; == Global map ================================================================
-(evil-define-key '(insert visual) my-override-mode-map
+(evil-define-key '(insert visual) global-map
   (kbd "C-n") #'next-line
   (kbd "C-p") #'previous-line)
 
@@ -118,6 +126,11 @@
   (keymap-set my-interface-map "H p" #'my/toggle-posframe-minibuffer-hooks))
 
 
+(keymap-set minibuffer-local-map "C-l" #'vertico-insert)
+(keymap-set minibuffer-local-map "C-t" #'vertico-insert)
+(keymap-set minibuffer-local-map "C-o" (ow (vertico-exit)))
+(keymap-set minibuffer-local-map "C-x t" (ot (vertico-exit)))
+
 (keymap-set minibuffer-local-map "C-S-v" 'evil-paste-before)
 (keymap-set minibuffer-local-map "<escape>" 'abort-recursive-edit)
 (keymap-set minibuffer-local-map "C-c o"
@@ -141,9 +154,6 @@
 
 (keymap-set isearch-mode-map "C-c"
 	    (li (isearch-exit) (message "hello!" ) (avy-isearch)))
-
-(evil-define-key '(normal visual motion) prog-mode-map
-  (kbd "g c") #'comment-line)
 
 (with-eval-after-load 'symbol-overlay
   (evil-define-key 'normal 'symbol-overlay-mode-map
@@ -183,9 +193,13 @@
   :after 'visual-regexp
   ("r"   #'vr/query-replace          "query replace (rx)")
   :after 'custom-editing
+  ("i"   #'my-edit/increment-number-at-point-or-line "inc. number")
+  ("d"   #'my-edit/decrement-number-at-point-or-line "dec. number")
   ("h"   #'my-edit/copy-previous-word-toggle-case "copy prev word toggle")
   ("H"   #'my-edit/copy-previous-word             "copy prev word")
   ("C-h" #'my-edit/avy-copy-word-backward         "copy prev word avy")
+  ("C-m" #'my-edit/insert-last-message-line       "last msg. line")
+  ("M-m" #'my-edit/pick-insert-message-line       "pick msg. line")
   :after 'consult
   ("y"   #'consult-yank-replace      "yank replace")
   :after 'yasnippet
@@ -196,13 +210,41 @@
 
 (evil-define-key 'insert global-map (kbd "M-w") #'delete-all-space)
 
+
+;; == Structural INSERT MAP =====================================================
+(my-keymaps/populate my-maps/struct-edit
+  ("o" #'sp-wrap-round "wrap next r[o]und")
+  ("O" (li (let ((current-prefix-arg '(4))) (sp-wrap-round))) "wrap all r[o]und"))
+
+;; == Block edit MAP (C-c e) ====================================================
+(my-keymaps/populate my-maps/block-edit
+  :after 'custom-editing
+  ("b" #'my-edit/change-inner-any-bracket "change inner any bracket")
+  ;; j=( h=[ k={ per convention
+  ("j" #'my-edit/change-inner-paren       "change inner ()")
+  ("h" #'my-edit/change-inner-bracket     "change inner []")
+  ("k" #'my-edit/change-inner-curly       "change inner {}")
+  ;; delete-to-char: forward = zap-up-to-char (built-in), backward = wrapper
+  ("d" #'zap-up-to-char                             "delete → to char")
+  ("D" #'my-edit/delete-to-char-backward            "delete ← to char"))
+
 ;; == THIS BUFFERS ACTIONS =======================================================
 (my-keymaps/populate my-maps/buffer-actions
   ("K" #'kill-this-buffer  "[K]ill buffer ")
   ("r" #'recover-this-file "[r]ecover buffer ")
+  ("p" (li (message "%s" buffer-file-name))  "buffer file[p]ath")
 
   ("n"   #'evil-buffer-new "[n]ew buffer")
   ("d"   #'dired-jump "[d]ired here"))
+
+
+;; == Multi-project (session) actions ===========================================
+;; M-e in normal overwrites
+(my-keymaps/populate my-maps/multi-projects-map
+  ("M-w" #'switch-to-buffer)
+  :after 'devdocs
+  ("d" #'devdocs-lookup)
+  ("C-d" #'devdocs-peruse))
 
 ;; == Minuet ====================================================================
 
@@ -241,9 +283,10 @@
     (kbd "M-n") nil))
 
 
-
-
 ;; == Lisp Editing ==============================================================
+;; (dolist (map '(emacs-lisp-mode-map))
+;;   (keymap-set map "C-y" #'lispy-mark))
+
 (defvar-keymap my-lisp-edit-map
   :doc "Map to edit lisp expressions")
 (keymap-set global-map "C-c i" my-lisp-edit-map)
@@ -346,6 +389,11 @@
 
   (define-key lsp-signature-mode-map (kbd "M-n") #'lsp-signature-next)
   (define-key lsp-signature-mode-map (kbd "M-p") #'lsp-signature-previous))
+
+;; == CODE ======================================================================
+(with-eval-after-load 'treesit-jump
+  (evil-define-key 'normal prog-mode-map
+    (kbd "R") #'treesit-jump-select))
 
 ;; == ORG MODE ========================================================
 

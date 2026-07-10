@@ -49,10 +49,9 @@
 ;;       (kbd "M-j")   'puni-end-of-sexp
 ;;       (kbd "M-k")   'puni-beginning-of-sexp)))
 
-;; (use-package lispy
-;;   :ensure t
-;;   :hook ((emacs-lisp-mode . lispy-mode)
-;;          (lisp-mode . lispy-mode)))
+(use-package lispy
+  :ensure t
+  :demand t)
 
 (use-package lispyville
   :ensure t
@@ -91,8 +90,8 @@
     '((t :foreground "#d75f00" ))
     "Middle parenthesis in current scope."
     :group 'highlight-parentheses)
-  
-  
+
+
   :config
   ;; REVERSE ORDER: First = innermost, Last = outermost
   (setq highlight-parentheses-attributes
@@ -101,10 +100,10 @@
 	  (:inherit my/hl-paren-middle)       ; Level 3
 	  (:inherit my/hl-paren-middle)       ; Level 4
 	  (:inherit my/hl-paren-middle)))     ; TODO Level 5+ - OUTERMOST (farthest from point)
-  
+
   ;; Clear the colors list (use attributes instead)
   (setq highlight-parentheses-colors nil)
-  
+
   :hook ((emacs-lisp-mode . highlight-parentheses-mode)
 	 (lisp-mode . highlight-parentheses-mode)))
 

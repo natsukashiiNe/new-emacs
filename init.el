@@ -97,6 +97,7 @@ Also reports errors with file and line number."
 (add-to-list 'load-path (expand-file-name "code"            my-config-dir))
 (add-to-list 'load-path (expand-file-name "code/lsp"        my-config-dir))
 (add-to-list 'load-path (expand-file-name "code/lsp/language-settings/" my-config-dir))
+(add-to-list 'load-path (expand-file-name "code/lsp/language-settings/web/" my-config-dir))
 (add-to-list 'load-path (expand-file-name "code/flymake"    my-config-dir))
 (add-to-list 'load-path (expand-file-name "local"           my-config-dir))
 (add-to-list 'load-path (expand-file-name "custom"          my-config-dir))
@@ -135,6 +136,8 @@ Also reports errors with file and line number."
 
 ;; (load-config-file "core/treemacs-settings.el")
 
+(load-config-file "core/project/project-setup.el")   ;; project.el: .project-locals.el root marker + lsp root sync.
+(load-config-file "core/project/project-compile.el") ;; Declarative per-project compile commands.
 (load-config-file "code/lsp/lsp-setup.el")    ;; Core lsp-mode + lsp-ui + formatting.
 (load-config-file "code/docs-setup.el")       ;; Core lsp-mode + lsp-ui + formatting.
 (load-config-file "code/lisp-editing.el")     ;; TODO: actual lisp
@@ -150,7 +153,6 @@ Also reports errors with file and line number."
 
 ;; CUSTOM
 (load-config-file "custom/elgo.el")
-(load-config-file "custom/custom-compile.el")
 (load-config-file "custom/scripts-org.el")
 ;;(load-config-file "custom/packages/elastic.el")
 (load-config-file "custom/packages/old-elastic.el")

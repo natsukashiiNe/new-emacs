@@ -91,8 +91,27 @@
  ;; `(help-argument-name ((t  (:foreground ,exu-red :weight bold))))
 
  ;; TODO: light variant for button
- ;; `(button            ((t  (:foreground ,exu-blue :slant italic :weight normal :underline (:color ,exu-blue)))))
+ `(button            ((t  (:foreground ,exu-purple-dimmer :background ,exu-purple-bg
+				       :slant italic :weight bold :underline (:color ,exu-purple-dimmer)))))
  `(minibuffer-prompt ((t  (:foreground ,exu-bg :background ,exu-red :box nil))))
+
+ `(consult-key ((t  (:foreground ,exu-purple-dimmer
+				 :background ,exu-purple-bg
+				 :slant italic
+				 :weight bold
+				 :underline (:color ,exu-purple-dimmer)))))
+
+ `(help-key-binding ((t  (:foreground ,exu-purple-dimmer
+				      :background ,exu-purple-bg
+				      :slant italic
+				      :weight bold
+				      :underline (:color ,exu-purple-dimmer)))))
+
+ `(read-multiple-choice-face ((t  (:foreground ,exu-purple-dimmer
+					       :background ,exu-purple-bg
+					       :slant italic
+					       :weight bold
+					       :underline (:color ,exu-purple-dimmer)))))
  ;; TODO: light variant for borders
  `(border            ((t  (:foreground ,exu-red :background ,exu-bg :box nil))))
  `(internal-border   ((t  (:foreground ,exu-red))))
@@ -253,7 +272,8 @@
 
  ;; --- ORG ---------------------------------------------------------------------
  ;; TODO: light variant for org-verbatim
- ;; `(org-verbatim ((t (:background ,exu-bg :foreground ,exu-blue))))
+ `(org-verbatim ((t (:background ,exu-bg :foreground ,exu-blue))))
+ `(org-table    ((t (:background ,exu-bg :foreground ,exu-fg))))
 
  `(org-level-1 ((t (:foreground ,exu-bg :background ,exu-red :weight bold :extend t))))
  

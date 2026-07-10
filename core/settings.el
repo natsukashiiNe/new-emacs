@@ -134,7 +134,6 @@
   :config
   (rg-enable-menu))
 
-
 (use-package fd-dired
   :ensure t
   :config
@@ -186,13 +185,16 @@
   :defer t
   :after visual-regexp)
 
-
 ;; ----------------------------
 ;; QOL packages
 ;; ----------------------------
+
 (use-package winner
   :init
   (winner-mode t))
+
+(use-package crux
+  :ensure t)
 
 (use-package command-log-mode
   :ensure t)
@@ -282,6 +284,13 @@
 (use-package smartparens
   :ensure t
   :hook (prog-mode text-mode markdown-mode org-mode)
+  :custom
+  ;; Don't keep an overlay highlight on the just-inserted pair (the lingering
+  ;; "green" region) nor on wraps.  Besides the visual noise, these overlays add
+  ;; per-keystroke post-command bookkeeping, which is the input lag.
+  (sp-highlight-pair-overlay nil)
+  (sp-highlight-wrap-overlay nil)
+  (sp-highlight-wrap-tag-overlay nil)
   :config
   (require 'smartparens-config))
 
@@ -296,15 +305,10 @@
   (highlight-indent-guides-delay 0)
 
   :config
-  ;;  (set-face-foreground 'highlight-indent-guides-top-character-face "dimgray")
-  ;;  (set-face-foreground 'highlight-indent-guides-top-even-face        "dimgray")
-  ;;  (set-face-foreground 'highlight-indent-guides-top-odd-face "dimgray")
-
-  ;;  (set-face-foreground 'highlight-indent-guides-even-face "dimgray")
-  ;;  (set-face-foreground 'highlight-indent-guides-odd-face "dimgray")
-
-  (set-face-foreground 'highlight-indent-guides-stack-character-face "#D7AF00")
+  (set-face-foreground 'highlight-indent-guides-stack-character-face "#552611")
   (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
+  (set-face-foreground 'highlight-indent-guides-top-character-face "#B93E2A")
+  ;; (setq highlight-indent-guides-character "|")
 
 
   ;; (setq highlight-indent-guides-auto-stack-odd-face-perc       2)
@@ -314,10 +318,11 @@
 
 (use-package indent-bars
   :ensure t
-  :hook ((prog-mode . indent-bars-mode)
-         (lisp-mode . indent-bars-mode)
-         (emacs-lisp-mode . indent-bars-mode))
+  ;; :hook ((prog-mode . indent-bars-mode)
+  ;;        (lisp-mode . indent-bars-mode)
+  ;;        (emacs-lisp-mode . indent-bars-mode))
   :init
+  ;; TODO: this is probably not the way to do it.
   (defvar indent-bars-treesit-scope nil
     "Pre-declare so lang files can `add-to-list' before indent-bars-ts loads.")
   :custom
