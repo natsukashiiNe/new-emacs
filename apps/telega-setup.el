@@ -33,8 +33,18 @@
    (telega-chat-mode . (lambda () (display-line-numbers-mode -1)))
    (telega-chat-mode .
                      (lambda ()
-                       (setq-local company-minimum-prefix-length 0)))
-   ))
+                       (require 'telega-company nil t)
+                       (setq-local completion-at-point-functions
+                         (append
+                          (delq nil
+                                (mapcar (lambda (fn)
+                                          (when (fboundp fn)
+                                            (cape-company-to-capf fn)))
+                                        '(telega-company-botcmd
+                                          telega-company-username
+                                          telega-company-hashtag
+                                          telega-company-emoji)))
+                          completion-at-point-functions))))))
 
 ;;; Quick-access helpers
 
@@ -103,7 +113,7 @@ Use this to discover values for quick-access keymaps."
   ("b" (li (my/telega-react-custom "5269482361711525480")) "[B]anana")
   ;; Default ones
   ("l" (li (my/telega-react-emoji "👍")) "thumbs-up")
-  ("h" (li (my/telega-react-emoji "❤"))  "heart")
+  ("h" (li (my/telega-react-emoji "❤")) "heart")
   ("f" (li (my/telega-react-emoji "🔥")) "fire"))
 
 (with-eval-after-load 'evil
