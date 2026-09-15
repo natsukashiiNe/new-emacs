@@ -29,22 +29,25 @@
   ;; overrides
   ;; (advice-add 'telega-company-grab-emoji :override #'my-telega-company-grab-emoji)
   :hook
-  ((telega-root-mode . (lambda () (display-line-numbers-mode -1)))
+
+  (;; (telega-load-hook . (l (telega-mode-line-mode 1)))
+   (telega-root-mode . (lambda () (display-line-numbers-mode -1)))
    (telega-chat-mode . (lambda () (display-line-numbers-mode -1)))
    (telega-chat-mode .
                      (lambda ()
                        (require 'telega-company nil t)
                        (setq-local completion-at-point-functions
-                         (append
-                          (delq nil
-                                (mapcar (lambda (fn)
-                                          (when (fboundp fn)
-                                            (cape-company-to-capf fn)))
-                                        '(telega-company-botcmd
-                                          telega-company-username
-                                          telega-company-hashtag
-                                          telega-company-emoji)))
-                          completion-at-point-functions))))))
+				   (append
+				    (delq nil
+					  (mapcar (lambda (fn)
+						    (when (fboundp fn)
+						      (cape-capf-silent
+						       (cape-company-to-capf fn))))
+						  '(telega-company-botcmd
+						    telega-company-username
+						    telega-company-hashtag
+						    telega-company-emoji)))
+				    completion-at-point-functions))))))
 
 ;;; Quick-access helpers
 
@@ -91,7 +94,6 @@ Use this to discover values for quick-access keymaps."
                          (or emoji-id "N/A"))))))))
 
 ;;; Quick-access sticker keymap: C-c g <key>
-;; Use M-x my/telega-describe-pack to find sticker indices.
 (defvar-keymap my-maps/telega-quick-sticker
   :doc "Quick access to stickers")
 
