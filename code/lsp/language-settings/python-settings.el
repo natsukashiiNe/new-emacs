@@ -199,9 +199,7 @@ Python process is still in an unrelated directory."
         (apply oldfun args)
       (file-missing
        (let ((source-snakes
-              (expand-file-name
-               "slimy-python/snakes.txt"
-               "/home/nane/.emacs.d/elpaca/sources/swanky-python/")))
+              (f-join elpaca-sources-directory "swanky-python/slimy-python/snakes.txt")))
          (if (file-readable-p source-snakes)
              (thread-first
                (with-temp-buffer

@@ -15,13 +15,14 @@
   :ensure t
   :defer t
   :after acp
+  :commands (agent-shell-anthropic-start-claude-code
+	     agent-shell-openai-start-codex)
   :custom
   (agent-shell-anthropic-authentication
    (agent-shell-anthropic-make-authentication :login t))
   (agent-shell-anthropic-claude-environment
-   '("CLAUDE_CODE_EXECUTABLE=/home/nane/.local/bin/claude"))
+   (list (concat "CLAUDE_CODE_EXECUTABLE=" (expand-file-name "~/.local/bin/claude"))))
   (agent-shell-header-style 'text))
-
 
 (use-package agent-review
   :ensure (:type git :host github :repo "nineluj/agent-review")
