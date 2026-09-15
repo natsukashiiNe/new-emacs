@@ -9,9 +9,9 @@
 ;; Enable native compilation if available
 
 ;; Define a corfu-specific orderless style with flex matching.
-;; This keeps minibuffer (M-x, C-s, etc.) unaffected.
+;; This keeps minibuffer unaffected.
 (with-eval-after-load 'orderless
-  (orderless-define-completion-style my/orderless-corfu
+  (orderless-define-completion-style my-orderless/corfu-style
     (orderless-matching-styles '(orderless-literal
                                  orderless-flex
                                  orderless-initialism))))
@@ -36,7 +36,7 @@
   ;; `t' shows it when you navigate to a candidate (C-j/C-k) but does NOT
   ;; auto-commit it on further typing — use TAB to confirm explicitly.
   ;; (`insert' would auto-commit the moment you type another char, which is jarring.)
-  (corfu-preview-current t)
+  (corfu-preview-current 'insert)
   (corfu-count 10)
   (corfu-scroll-margin 5)
   (corfu-max-width 80)
@@ -83,10 +83,10 @@
   ;; so corfu actually filters candidates from the LSP server.
   (add-hook 'corfu-mode-hook
             (lambda ()
-              (setq-local completion-styles '(my/orderless-corfu basic))
+              (setq-local completion-styles '(my-orderless/corfu-style basic))
               (setq-local completion-category-overrides
-                          '((lsp-capf (styles my/orderless-corfu))
-                            (sly-completion (styles my/orderless-corfu))))))
+                          '((lsp-capf (styles my-orderless/corfu-style))
+                            (sly-completion (styles my-orderless/corfu-style))))))
 
   :hook (lsp-bridge-mode . (lambda ()
                              (corfu-mode -1))))
@@ -113,7 +113,7 @@
 
 (use-package yasnippet-capf
   :ensure t
-  :after cape
+  :commands (yasnippet-capf)
   :init
   (add-to-list 'completion-at-point-functions #'yasnippet-capf))
 
