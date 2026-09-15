@@ -318,8 +318,10 @@
  `(telega-msg-inline-forward ((t (:background ,exu-bg :slant italic))))
 
  ;; --- SHR ---------------------------------------------------------------------
- `(shr-code ((t (:foreground ,exu-accent-weak))))
- `(shr-link ((t ( :box nil :underline t))))
+ `(shr-code         ((t (:foreground ,exu-accent-weak))))
+ `(shr-link         ((t ( :box nil :underline t))))
+ `(shrface-verbatim ((t ( :foreground "#C58671" ))))
+ `(shrface-verbatim ((t (:foreground ,exu-main-sup1 :slant italic))))
 
  ;; --- DOC ---------------------------------------------------------------------
  `(Info-quoted ((t (:foreground ,exu-main-sup1))))
@@ -328,7 +330,10 @@
  `(modus-themes-heading-2  (( t (:foreground ,exu-accent-weak :extend t :height 1.15 :weight bold ))))
  `(modus-themes-heading-3  (( t (:foreground ,exu-main-sup1 :extend t :height 1.1 :weight bold ))))
 
- `(org-verbatim ((t (:background ,exu-black :foreground ,exu-slate-accent))))
+ `(org-verbatim     ((t (:background ,exu-black :foreground ,exu-slate-accent))))
+ `(org-link         ((t (:foreground "#C58671" :underline t))))
+ ;; `(org-verbatim     ((t (:foreground ,exu-main-sup1 :slant italic))))
+
  ;;`(org-property-value ((t (:background ,exu-black :foreground ,exu-slate-accent))))
 
 

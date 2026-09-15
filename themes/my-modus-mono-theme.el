@@ -78,6 +78,7 @@
  `(line-number  ((t  (:background ,exu-bg-dim2))))
  ;;  TODO: light variant for fringe
  `(fringe       ((t  (:background ,exu-bg-dim2))))
+ `(margin       ((t  (:background ,exu-bg-dim2))))
 
  ;; --- DEFAULT AND UI ----------------------------------------------------------
  ;; TODO: light variant for avy
