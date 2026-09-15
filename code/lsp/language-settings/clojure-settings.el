@@ -42,6 +42,7 @@
 
 (use-package clojure-ts-mode
   :ensure t
+  :defer t
   :mode (("\\.clj\\'"  . clojure-ts-mode)
          ("\\.cljs\\'" . clojure-ts-mode)
          ("\\.cljc\\'" . clojure-ts-mode)

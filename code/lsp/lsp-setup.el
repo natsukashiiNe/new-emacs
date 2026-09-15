@@ -29,6 +29,7 @@
 
 (use-package lsp-mode
   :ensure t
+  :defer t
   :commands (lsp lsp-deferred)
   :custom
   ;; Completion
@@ -109,6 +110,7 @@
 
 (use-package symbols-outline
   :ensure t
+  :defer t
   :custom
   (symbols-outline-no-delete-other-window t)
   (symbols-outline-no-other-window t)

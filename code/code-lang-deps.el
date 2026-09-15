@@ -8,6 +8,7 @@
 ;; parses as a pre-release (2 32 -4), failing slime-py's (slime "2.32") check.
 (use-package slime
   :ensure (:host github :repo "slime/slime" :tag "v2.32")
+  :defer t
   :config
   ;; SLIME is only used for Python (via slime-py). Remove its lisp-mode hook
   ;; to avoid conflicting with SLY, which handles all other Lisp modes.
@@ -19,33 +20,34 @@
 
 (use-package slime-breakpoints        ; sldb-show-frame-local, sldb-source-eval
   :ensure (:host github :repo "mmontone/slime-breakpoints")
-  :demand t)
+  :defer t)
 
 (use-package quicklisp-systems
   :ensure (:host github :repo "mmontone/quicklisp-systems")
-  :demand t)
+  :defer t)
 
 (use-package quicklisp-apropos
   :ensure (:host github :repo "mmontone/quicklisp-apropos")
-  :demand t)
+  :defer t)
 
 (use-package slime-critic
   :ensure (:host github :repo "mmontone/slime-critic")
-  :demand t)
+  :defer t)
 
 (use-package slime-help                ; also provides slime-info
   :ensure (:host github :repo "mmontone/slime-doc-contribs"
 		 :main "slime-help.el")
-  :demand t)
+  :defer t)
 
 (use-package system-browser            ; also provides system-browser-cl
   :ensure (:host github :repo "mmontone/lisp-system-browser"
 		 :main "system-browser.el")
-  :demand t)
+  :defer t)
 
 ;; https://github.com/mmontone/slime-star
 (use-package slime-star
   :ensure (:host github :repo "mmontone/slime-star")
+  :defer t
   :after (slime slime-breakpoints quicklisp-systems quicklisp-apropos
 		slime-critic slime-help system-browser))
 

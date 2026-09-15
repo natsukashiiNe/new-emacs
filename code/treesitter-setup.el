@@ -6,13 +6,14 @@
 ;;; Code:
 (use-package treesit
   :ensure nil  ; built-in
+  :defer t
   :custom
   (treesit-font-lock-level 4) ; maximum highlighting
-  (treesit-max-buffer-size (* 100 1024 1024))
-  )
+  (treesit-max-buffer-size (* 100 1024 1024)))
 
 (use-package treesit-auto
   :ensure (:host github :repo "renzmann/treesit-auto")
+  :defer t
   :custom
   (treesit-auto-install 'prompt)  ; or t for automatic
   :config
@@ -24,6 +25,7 @@
   (global-treesit-auto-mode))
 
 (use-package treesit-fold
+  :after treesit
   :ensure (:host github :repo "emacs-tree-sitter/treesit-fold")
   :hook (prog-mode . treesit-fold-mode)
   :bind (("C-c f t" . treesit-fold-toggle)
@@ -32,11 +34,14 @@
 
 (use-package treesit-fold-indicators
   :ensure (:host github :repo "emacs-tree-sitter/treesit-fold")
+  :after treesit
   :hook (treesit-fold-mode-hook . treesit-fold-indicators-mode))
 
 ;; TODO: make it respect evil-based "za"
 (use-package treesit-jump
-  :ensure (:host github :repo "dmille56/treesit-jump" :files ("*.el" "treesit-queries"))
+  :ensure (:host github :repo "dmille56/treesit-jump"
+		 :files ("*.el" "treesit-queries"))
+  :after treesit
   :config
   ;; Fix upstream bug: bash-ts-mode is mapped to "sh" instead of "bash"
   (setf (alist-get 'bash-ts-mode treesit-jump-major-mode-language-alist) "bash")
@@ -45,6 +50,7 @@
 
 (use-package combobulate
   :ensure (:host github :repo "mickeynp/combobulate")
+  :defer t
   :custom
   (combobulate-key-prefix "C-c l")
   :hook ((python-ts-mode . combobulate-mode)

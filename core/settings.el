@@ -37,7 +37,8 @@
   :demand t)
 
 (use-package catppuccin-theme
-  :ensure t)
+  :ensure t
+  :defer t)
 
 (use-package modus-themes
   :ensure t
@@ -134,6 +135,10 @@
   :config
   (rg-enable-menu))
 
+;; (use-package deadgrep
+;;   :ensure t
+;;   :defer t)
+
 (use-package fd-dired
   :ensure t
   :config
@@ -194,7 +199,8 @@
   (winner-mode t))
 
 (use-package crux
-  :ensure t)
+  :ensure t
+  :defer t)
 
 (use-package command-log-mode
   :ensure t)
@@ -318,9 +324,9 @@
 
 (use-package indent-bars
   :ensure t
-  ;; :hook ((prog-mode . indent-bars-mode)
-  ;;        (lisp-mode . indent-bars-mode)
-  ;;        (emacs-lisp-mode . indent-bars-mode))
+  :hook ((prog-mode . indent-bars-mode)
+         (lisp-mode . indent-bars-mode)
+         (emacs-lisp-mode . indent-bars-mode))
   :init
   ;; TODO: this is probably not the way to do it.
   (defvar indent-bars-treesit-scope nil

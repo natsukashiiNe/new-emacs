@@ -1,7 +1,7 @@
 ;;; org-settings.el --- Settings for org mode. -*- lexical-binding: t; -*-
 
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 
@@ -41,6 +41,7 @@
 
 (use-package org-superstar
   :ensure t
+  :defer t
   :hook (org-mode . org-superstar-mode)
   :config
   (setq org-superstar-headline-bullets-list '(" " "◉" "●" "󰧂" "󰘍")
@@ -95,6 +96,7 @@
 ;; Plantuml
 (use-package plantuml-mode
   :ensure t
+  :defer t
   :mode "\\.plantuml\\'"
   :config
   (setq plantuml-default-exec-mode 'jar)
@@ -154,6 +156,7 @@
 
 (use-package good-scroll
   :ensure t
+  :defer t
   :hook (org-mode . good-scroll-mode))
 
 (with-eval-after-load 'org

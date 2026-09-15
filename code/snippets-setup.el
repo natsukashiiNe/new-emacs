@@ -7,14 +7,10 @@
 
 (use-package yasnippet
   :ensure t
-  :demand t
+  :hook ((prog-mode text-mode) . yas-minor-mode)
   :init
-
-  (setq yas-snippet-dirs
-        (list (expand-file-name "code/snippets" my-config-dir)))
+  (setq yas-snippet-dirs (list (expand-file-name "code/snippets" my-config-dir)))
   :config
-  (yas-global-mode 1)
-  ;; Optional: reduce verbosity
   (setq yas-verbosity 1))
 
 (use-package yasnippet-snippets

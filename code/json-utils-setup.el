@@ -5,9 +5,9 @@
 
 ;;; Code:
 
-
 (use-package jq-mode
   :ensure (:host github :repo "ljos/jq-mode")
+  :defer t
   :mode ("\\.jq\\'" . jq-mode)
   :bind (:map json-ts-mode-map
               ("C-c C-j" . jq-interactively))
@@ -15,12 +15,10 @@
   (jq-interactive-default-prompt ".")
   (jq-interactive-font-lock-mode 'json-ts-mode))
 
-
 (use-package json-ts-mode
   :ensure nil  ; built-in
+  :defer t
   :mode "\\.json\\'")
-
-
 
 (provide 'json-utils-setup)
 ;;; json-utils-setup.el ends here

@@ -7,6 +7,7 @@
 
 (use-package helpful
   :ensure t
+  :demand t ;; TODO: timer? 
   :bind (("C-h f" . helpful-callable)
          ("C-h v" . helpful-variable)
          ("C-h k" . helpful-key)
@@ -16,6 +17,7 @@
 ;; Error (use-package): Failed to parse package casual: Wrong type argument: sequencep, t
 (use-package casual
   :ensure t
+  :demand t ;; TODO: Timer?
   :bind
   (:map dired-mode-map ("C-o" . casual-dired-tmenu))
   (:map calc-mode-map  ("C-o" . casual-calc-tmenu)))
@@ -58,6 +60,7 @@
 ;; Undo-tree with history in ~/.local/emacs/var/undo-tree-hist
 (use-package undo-tree
   :ensure t
+  :demand t
   :config
   (global-undo-tree-mode)
   (setq undo-tree-auto-save-history t)
@@ -66,18 +69,22 @@
 
 (use-package vdiff
   :ensure t
-  :init
-  (setq vterm-always-compile-module t))
+  :defer t
+  )
 
 (use-package vterm
   :ensure t
+  :defer t
   :hook
   (vterm-mode . (lambda () (display-line-numbers-mode -1)))
-  (vterm-mode . (lambda () (hl-line-mode -1))))
+  (vterm-mode . (lambda () (hl-line-mode -1)))
+  :init
+  (setq vterm-always-compile-module t))
 
 
 (use-package multi-vterm
   :ensure t
+  :defer t
   :after vterm)
 
 ;; =============================================================================
@@ -86,6 +93,7 @@
 
 (use-package fancy-compilation
   :ensure t
+  :defer t ;; TODO: timer? 
   :commands (fancy-compilation-mode)
   :init
   (with-eval-after-load 'compile
@@ -94,6 +102,7 @@
 ;; Multi-compilation configurations
 (use-package compile-multi
   :ensure t
+  :defer t
   :commands (compile-multi)
   :config
   (setq compile-multi-config

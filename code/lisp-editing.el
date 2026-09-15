@@ -16,7 +16,6 @@
 ;; Display Emacs Lisp evaluation results in overlays
 (use-package eros
   :ensure t
-  :defer t
   :config
   (setq eros-mode 1))
 
@@ -51,7 +50,7 @@
 
 (use-package lispy
   :ensure t
-  :demand t)
+  :defer t)
 
 (use-package lispyville
   :ensure t
@@ -59,6 +58,7 @@
 
 (use-package highlight-sexp
   :ensure (:host github :repo "daimrod/highlight-sexp")
+  :defer t
   :config
   ;; Use nil colors so the overlay uses `hl-sexp-face' directly instead of a
   ;; raw attribute plist.  A bare plist like (:background "#xxx") on the
@@ -79,6 +79,7 @@
 
 (use-package highlight-parentheses
   :ensure t
+  :defer t
   :init
   ;; TODO: Move to the theme
   (defface my/hl-paren-innermost
@@ -111,6 +112,7 @@
 
 (use-package sly
   :ensure t
+  :defer t
   :custom
   (inferior-lisp-program "sbcl")
   :config

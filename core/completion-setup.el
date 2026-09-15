@@ -24,6 +24,7 @@
 
 (use-package consult-ls-git
   :ensure t
+  :defer t
   :after consult
   :bind (("C-c g f" . consult-ls-git)))
 
@@ -37,6 +38,7 @@
 
 (use-package consult-lsp
   :ensure t
+  :defer t
   :after (consult lsp-mode)
   :bind (:map lsp-mode-map
               ("C-c l s" . consult-lsp-symbols)        ; Workspace symbols

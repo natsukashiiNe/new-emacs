@@ -22,10 +22,10 @@ does not interfere with other uses of `whitespace-mode'."
     (whitespace-mode -1)
     (kill-local-variable 'whitespace-style)))
 
-(add-hook 'prog-mode-hook #'my-minor-prog-mode/show-whitespaces)
+;; (add-hook 'prog-mode-hook #'my-minor-prog-mode/show-whitespaces)
 
 (define-minor-mode my-minor-prog-mode/show-fill-line
-  "")
+  ".")
 
 (provide 'code-utilities-setup)
 ;;; code-utilities-setup.el ends here

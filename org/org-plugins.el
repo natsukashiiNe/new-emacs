@@ -27,8 +27,8 @@
 
 (use-package org-edna
   :ensure t
-  :config
-  (org-edna-mode 1))
+  :defer t
+  :hook (org-mode . org-edna-mode))
 
 ;; TODO (require 'org-checklist)
 
@@ -41,12 +41,14 @@
   (add-to-list 'org-babel-load-languages '(napkin . t))) ;; Adjust path if using pipx
 
 (use-package org-drill
-  :ensure t)
+  :ensure t
+  :after org)
 
 (use-package org-remark
   :ensure t
+  :defer t
   :hook (org-mode . org-remark-mode)
-  :bind (:map org-mode-map 
+  :bind (:map org-mode-map
               ("C-c M d" . org-remark-mark-definition)
               ("C-c M f" . my/consult-definitions)
 	      ;; TODO: move to evil
@@ -109,6 +111,7 @@
 ;; Auto-toggles LaTeX fragment previews as cursor moves in/out
 (use-package org-fragtog
   :ensure t
+  :defer t
   :hook (org-mode . org-fragtog-mode))
 
 ;;LaTeX editing in src blocks
@@ -120,6 +123,7 @@
 
 (use-package cdlatex
   :ensure t
+  :defer t
   :hook (org-mode . org-cdlatex-mode)
   :config
   (setq cdlatex-math-symbol-prefix ?l)  

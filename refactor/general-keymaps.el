@@ -199,6 +199,7 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
 (use-package general
   :ensure t
   :after evil
+  :demand t
 
   :config
   ;; reapply evil-mode (needs to properly hook general)

@@ -27,7 +27,6 @@
 
 (use-package eww
   :ensure nil
-  :defer t
   :init
   (add-hook 'eww-after-render-hook #'shrface-mode)
   :config
@@ -41,7 +40,8 @@
 
 
 (use-package hnreader
-  :ensure t)
+  :ensure t
+  :defer t)
 
 (provide 'eww-browser-setup)
 ;;; eww-browser-setup.el ends here

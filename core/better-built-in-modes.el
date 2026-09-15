@@ -7,11 +7,17 @@
 
 (use-package isearch-mb
   :ensure t
+  :demand t ;; TODO: Timer?
   :config
   (isearch-mb-mode))
 
+(use-package anzu
+  :ensure t
+  :demand t) ;; TODO: Timer?
+
 (use-package flash
   :ensure t
+  :defer t ;; TODO: Timer?
   :commands (flash-jump flash-jump-continue
 			flash-treesitter)
   :custom
@@ -29,6 +35,7 @@
 
 (use-package helpful
   :ensure t
+  :defer t ;; TODO: Timer?
   :bind (("C-h f" . helpful-callable)
          ("C-h v" . helpful-variable)
          ("C-h k" . helpful-key)
@@ -38,13 +45,19 @@
 ;; Error (use-package): Failed to parse package casual: Wrong type argument: sequencep, t
 (use-package casual
   :ensure t
+  :defer t ;; TODO: timer?
   :bind
   (:map dired-mode-map ("C-o" . casual-dired-tmenu))
   (:map calc-mode-map  ("C-o" . casual-calc-tmenu)))
 
+(use-package yascroll
+  :ensure t
+  :defer t) ;; TODO: Timer?
+
 ;; Undo-tree with history in ~/.local/emacs/var/undo-tree-hist
 (use-package undo-tree
   :ensure t
+  :demand t
   :config
   (global-undo-tree-mode)
   (setq undo-tree-auto-save-history t)
@@ -52,11 +65,13 @@
         '(("." . "~/.local/emacs/var/undo-tree-hist/"))))
 
 (use-package vdiff
-  :ensure t)
+  :ensure t
+  :defer t)
 
 ;; basic tab-based folding.
 (use-package origami
   :ensure t
+  :defer t
   :init
   ;; origami's defface uses (face-attribute 'highlight :background) at load
   ;; time, which returns `unspecified` before the theme is active, producing
@@ -74,7 +89,8 @@
 
 ;; ghostty-lib based terminal emulator.
 (use-package ghostel
-  :ensure t)
+  :ensure t
+  :defer t);; TODO: Timer?
 
 (use-package evil-ghostel
   :ensure (:url "https://github.com/dakra/ghostel"
@@ -90,6 +106,7 @@
 
 (use-package vterm
   :ensure t
+  :defer t
   :init
   (setq vterm-always-compile-module t)
   (setenv "INSIDE_EMACS_VTERM" "1") ;; used to select oh-my-posh prompt
@@ -148,6 +165,7 @@
 
 (use-package fancy-compilation
   :ensure t
+  :defer t ;; TODO: Hook on compilation buffers / Timer?
   :commands (fancy-compilation-mode)
   :custom
   (fancy-compilation-quiet-prelude nil)
@@ -159,6 +177,7 @@
 ;; Multi-compilation configurations
 (use-package compile-multi
   :ensure t
+  :defer t ;; TODO: Hook on compilation buffers / Timer?
   :commands (compile-multi)
   :config
   (setq compile-multi-config

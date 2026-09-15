@@ -60,6 +60,9 @@
 (elpaca elpaca-use-package
   (elpaca-use-package-mode))
 
+;; Per-package load/config timing, viewable via `use-package-report'.
+(setq use-package-compute-statistics t)
+
 ;; ==================================
 ;; Config Directory Setup
 ;; ==================================
@@ -68,17 +71,27 @@
 (defvar my-config-dir "~/.config/emacs/"
   "Directory that contains all the .el config files.")
 
+(defvar my/config-load-times nil
+  "Alist of (FILE . SECONDS) load duration for each `load-config-file' call.
+Populated in load order; see `my/show-startup-profile' for a sorted report.")
+
 (defun load-config-file (file)
   "Load an Emacs Lisp FILE from `my-config-dir`.
-Also reports errors with file and line number."
-  (let ((path (expand-file-name file my-config-dir)))
+Also reports errors with file and line number, and records load
+duration into `my/config-load-times'."
+  (let ((path (expand-file-name file my-config-dir))
+        (start (current-time)))
     (if (file-exists-p path)
         (condition-case err
             (progn
               (message "🔄 Loading: %s" file)
 	      (load-file path)
+              (push (cons file (float-time (time-subtract (current-time) start)))
+                    my/config-load-times)
               (message "✅ Successfully loaded: %s" file))
           (error
+           (push (cons file (float-time (time-subtract (current-time) start)))
+                 my/config-load-times)
            (message "❌ ERROR in %s: %s" file (error-message-string err))
            (with-current-buffer "*Messages*"
              (goto-char (point-max))
@@ -166,6 +179,100 @@ Also reports errors with file and line number."
 (load-config-file "refactor/general-keymaps.el")
 
 (message "🎉 Emacs startup complete!")
+
+;; ==================================
+;; Startup Profiling
+;; ==================================
+;; Two complementary views:
+;; - `my/config-load-times' (per-file, populated by `load-config-file' above)
+;;   shows which top-level config files are slow to load.
+;; - `use-package-report' (per-package, via `use-package-compute-statistics'
+;;   set near the Elpaca bootstrap) shows which individual packages inside
+;;   those files spend time in :init/:config, and whether they were loaded
+;;   eagerly or deferred.
+;; Run `my/show-startup-profile' or `use-package-report' after startup.
+
+(defun my/show-startup-profile ()
+  "Show per-file config load times, slowest first, absolute and relative.
+Complements `use-package-report', which breaks costs down per package
+instead of per config file."
+  (interactive)
+  (let* ((sorted (sort (copy-sequence my/config-load-times)
+                       (lambda (a b) (> (cdr a) (cdr b)))))
+         (sum (apply #'+ (mapcar #'cdr my/config-load-times))))
+    (with-current-buffer (get-buffer-create "*Startup Profile*")
+      (erase-buffer)
+      (insert (format "Emacs init time (reported by emacs-init-time): %s\n"
+                      (emacs-init-time)))
+      (insert (format "Sum of measured load-config-file calls:        %.3fs\n" sum))
+      (insert (format "GC runs: %d   GC time: %.3fs\n\n" gcs-done gc-elapsed))
+      (insert (format "%-50s %10s %8s\n" "File" "Seconds" "% sum"))
+      (insert (make-string 71 ?-) "\n")
+      (dolist (entry sorted)
+        (insert (format "%-50s %10.4f %7.1f%%\n"
+                        (car entry) (cdr entry)
+                        (if (> sum 0) (* 100 (/ (cdr entry) sum)) 0))))
+      (goto-char (point-min))
+      (special-mode))
+    (display-buffer "*Startup Profile*")))
+
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (message "Startup profile: %s — M-x my/show-startup-profile (per-file) or M-x use-package-report (per-package)"
+                     (emacs-init-time))))
+
+;; ---- File logging, for batch/hyperfine benchmark runs -----------------------
+;; A throwaway `emacs --eval "(run-with-timer ...)"' process (as used by
+;; hyperfine) is killed before you can inspect its variables interactively.
+;; When EMACS_STARTUP_PROFILE_LOG is set, append the same per-file and
+;; per-package data to that file instead, one block per run. Unset by
+;; default so ordinary daily startups don't write to disk.
+(defvar my/startup-profile-log-file (getenv "EMACS_STARTUP_PROFILE_LOG")
+  "When non-nil, append each startup's profile to this file.
+Set via the EMACS_STARTUP_PROFILE_LOG environment variable rather than
+here, so a single benchmark invocation can opt in without editing this
+file.")
+
+(defun my/format-startup-profile ()
+  "Return the per-file and per-package startup profile as a string."
+  (with-temp-buffer
+    (insert (format "=== Startup profile %s (pid %d) ===\n"
+                    (format-time-string "%Y-%m-%dT%H:%M:%S")
+                    (emacs-pid)))
+    (insert (format "emacs-init-time: %s\n" (emacs-init-time)))
+    (insert (format "GC runs: %d   GC time: %.3fs\n\n" gcs-done gc-elapsed))
+    (let* ((sorted (sort (copy-sequence my/config-load-times)
+                         (lambda (a b) (> (cdr a) (cdr b)))))
+           (sum (apply #'+ (mapcar #'cdr my/config-load-times))))
+      (insert (format "-- Per-file (sum %.3fs) --\n" sum))
+      (dolist (entry sorted)
+        (insert (format "%-50s %10.4f %7.1f%%\n"
+                        (car entry) (cdr entry)
+                        (if (> sum 0) (* 100 (/ (cdr entry) sum)) 0)))))
+    (insert "\n")
+    (when (and (bound-and-true-p use-package-compute-statistics)
+               (> (hash-table-count use-package-statistics) 0))
+      (insert "-- Per-package (use-package) --\n")
+      (let (rows)
+        (maphash (lambda (pkg stats)
+                   (push (list (symbol-name pkg)
+                               (or (use-package-statistics-status stats) "?")
+                               (use-package-statistics-time stats))
+                         rows))
+                 use-package-statistics)
+        (setq rows (sort rows (lambda (a b) (> (nth 2 a) (nth 2 b)))))
+        (dolist (row rows)
+          (insert (format "%-35s %-12s %8.4f\n" (nth 0 row) (nth 1 row) (nth 2 row))))))
+    (insert "\n")
+    (buffer-string)))
+
+(defun my/log-startup-profile ()
+  "Append the startup profile to `my/startup-profile-log-file' if set."
+  (when my/startup-profile-log-file
+    (write-region (my/format-startup-profile) nil
+                  my/startup-profile-log-file 'append)))
+
+(add-hook 'emacs-startup-hook #'my/log-startup-profile)
 
 ;; ==-- TODO: TEMP mappings --================================================================
 (keymap-set global-map "C-x g"   'consult-ripgrep)

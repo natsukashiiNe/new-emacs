@@ -12,9 +12,9 @@
   :defer t)
 
 (use-package agent-shell
-  :after acp
   :ensure t
   :defer t
+  :after acp
   :custom
   (agent-shell-anthropic-authentication
    (agent-shell-anthropic-make-authentication :login t))
@@ -24,17 +24,16 @@
 
 
 (use-package agent-review
-  :after agent-shell
   :ensure (:type git :host github :repo "nineluj/agent-review")
-  :defer t)
+  :after agent-shell)
 
 (use-package agent-shell-sidebar
-  :after agent-shell
-  :ensure (:url "https://github.com/cmacrae/agent-shell-sidebar"))
+  :ensure (:url "https://github.com/cmacrae/agent-shell-sidebar")
+  :after agent-shell)
 
 (use-package agent-shell-manager
-  :after agent-shell
-  :ensure (:url "https://github.com/jethrokuan/agent-shell-manager"))
+  :ensure (:url "https://github.com/jethrokuan/agent-shell-manager")
+  :after agent-shell)
 
 (provide 'agent-shell-setup)
 ;;; agent-shell-setup.el ends here

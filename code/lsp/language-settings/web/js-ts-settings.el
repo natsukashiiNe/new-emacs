@@ -32,16 +32,19 @@
 
 (use-package typescript-ts-mode
   :ensure nil  ; built-in
+  :defer t
   :mode (("\\.ts\\'"  . typescript-ts-mode)
          ("\\.mts\\'" . typescript-ts-mode)
          ("\\.cts\\'" . typescript-ts-mode)))
 
 (use-package tsx-ts-mode
   :ensure nil  ; built-in (lives in typescript-ts-mode.el)
+  :defer t
   :mode "\\.tsx\\'")
 
 (use-package js-ts-mode
   :ensure nil  ; built-in (lives in js.el)
+  :defer t
   :mode (("\\.js\\'"  . js-ts-mode)
          ("\\.mjs\\'" . js-ts-mode)
          ("\\.cjs\\'" . js-ts-mode)

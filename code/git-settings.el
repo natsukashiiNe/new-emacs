@@ -6,6 +6,7 @@
 ;;; Code:
 (use-package magit
   :ensure t
+  :defer t
   :after (transient evil)
   :commands (magit-status magit-get-current-branch)
   :init
@@ -37,6 +38,7 @@
   :ensure (:url "https://github.com/pkryger/difftastic.el.git"
 		:rev :newest)
   :after magit
+  :defer t
   :config
   (difftastic-bindings-mode))
 
@@ -44,10 +46,9 @@
 ;; diff-hl indicator config
 ;; ==================================
 
-
 (use-package diff-hl
   :ensure t
-  :demand t
+  :defer t
   :init
   (defvar my-diff-hl-margin-symbols
     '((insert . "")
@@ -79,7 +80,7 @@
 
 (use-package blamer
   :ensure t
-  :defer 10
+  :defer t
   :custom
   (blamer-idle-time 0.3)
   (blamer-min-offset 0)

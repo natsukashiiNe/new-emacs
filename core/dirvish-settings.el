@@ -7,6 +7,7 @@
 
 (use-package dirvish
   :ensure t
+  :demand t
   :after nerd-icons
   :init
   (dirvish-override-dired-mode)
