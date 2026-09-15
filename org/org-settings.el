@@ -79,13 +79,13 @@
 (with-eval-after-load 'org
   (setf (alist-get 'dvisvgm org-preview-latex-process-alist)
         '(:programs ("xelatex" "dvisvgm")
-          :description "xdv > svg"
-          :message "you need to install the programs: xelatex and dvisvgm."
-          :image-input-type "xdv"
-          :image-output-type "svg"
-          :image-size-adjust (1.7 . 1.5)
-          :latex-compiler ("xelatex -no-pdf -interaction nonstopmode -output-directory %o %f")
-          :image-converter ("dvisvgm %f --no-fonts --exact-bbox --scale=%S --output=%O")))
+		    :description "xdv > svg"
+		    :message "you need to install the programs: xelatex and dvisvgm."
+		    :image-input-type "xdv"
+		    :image-output-type "svg"
+		    :image-size-adjust (1.7 . 1.5)
+		    :latex-compiler ("xelatex -no-pdf -interaction nonstopmode -output-directory %o %f")
+		    :image-converter ("dvisvgm %f --no-fonts --exact-bbox --scale=%S --output=%O")))
   (setq org-format-latex-options
         (plist-put org-format-latex-options :scale 2.0)))
 
