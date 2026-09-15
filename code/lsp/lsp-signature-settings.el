@@ -3,8 +3,9 @@
 ;;; Commentary:
 ;; Custom LSP signature popup with two states:
 ;;
-;;   * posframe at frame top, when at least `:max-height' + 2 screen lines
-;;     fit above point in the current window.
+;;   * posframe near the frame top (offset via `my-lsp-signature-y-offset-lines'
+;;     / `my-lsp-signature-x-offset-columns'), when at least `:max-height' + 2
+;;     screen lines fit above point in the current window.
 ;;   * fallback to lsp-mode's default `lv' renderer at the echo area, when
 ;;     the top posframe would obstruct the area being typed in.
 ;;
@@ -26,7 +27,6 @@
 ;; then everything below is bound.
 (declare-function posframe-show                         "posframe")
 (declare-function posframe-hide                         "posframe")
-(declare-function posframe-poshandler-frame-top-center  "posframe")
 (declare-function lv-delete-window                      "lv")
 (declare-function lsp-lv-message                        "lsp-mode")
 
@@ -38,16 +38,58 @@
 ;; PARAMETERS
 ;; =============================================================================
 
+(defcustom my-lsp-signature-x-offset-columns 0
+  "Horizontal offset of the signature popup from frame-center, in columns.
+Positive shifts the popup right, negative shifts it left.  Measured in
+character columns (scaled by the popup's own font width) rather than
+raw pixels, so it stays proportional across font sizes."
+  :type 'integer
+  :group 'lsp-mode)
+
+(defcustom my-lsp-signature-y-offset-lines 3
+  "Vertical offset of the signature popup from the frame top, in lines.
+Measured in screen lines (scaled by the popup's own font height) rather
+than raw pixels, so it stays proportional across font sizes.
+
+`my-lsp--signature-fits-on-top-p' factors this in when deciding whether
+the popup has room to render above point -- keep the two in sync."
+  :type 'integer
+  :group 'lsp-mode)
+
+(defcustom my-lsp-signature-border-color "gray50"
+  "Border color of the signature popup."
+  :type 'color
+  :group 'lsp-mode)
+
+(defcustom my-lsp-signature-border-width 5
+  "Border width (px) of the signature popup."
+  :type 'integer
+  :group 'lsp-mode)
+
+(defun my-lsp--signature-poshandler (info)
+  "Posframe poshandler placing the popup per the offset customs.
+Horizontally offset from frame-center by `my-lsp-signature-x-offset-columns',
+vertically offset from the frame top by `my-lsp-signature-y-offset-lines'.
+INFO is the plist posframe passes to poshandlers."
+  (cons (+ (/ (- (plist-get info :parent-frame-width)
+                 (plist-get info :posframe-width))
+              2)
+           (* my-lsp-signature-x-offset-columns (plist-get info :font-width)))
+        (* my-lsp-signature-y-offset-lines (plist-get info :font-height))))
+
 (defvar my-lsp--signature-posframe-params
-  (list :poshandler #'posframe-poshandler-frame-top-center
+  (list :poshandler #'my-lsp--signature-poshandler
         :min-height 1
         :max-height 13
         :min-width  60
         :max-width  80
-        :border-width 1
-        :border-color "gray50"
-        :internal-border-width 6)
-  "Posframe params used by the top-of-frame signature popup.")
+        :border-width my-lsp-signature-border-width
+        :border-color my-lsp-signature-border-color)
+  "Posframe params used by the top-of-frame signature popup.
+
+`:border-width' and `:border-color' mirror the `my-lsp-signature-border-*'
+customs at load time; edit those customs (and re-eval this defvar, or
+restart) rather than this list directly.")
 
 ;; =============================================================================
 ;; STATE
@@ -68,11 +110,12 @@ Keys: :str STR :window W :buffer B :renderer (posframe|lv).")
   "Return non-nil when the cursor sits far enough below the FRAME top for
 the popup to fit above it with two lines of headroom.
 
-The popup is anchored to the frame top, so the fit is computed against
-the frame -- not just the current window.  In a vertical split with
-point in the bottom window, there is still room above as long as the
-top of the cursor's line sits below `:max-height' + 2 lines from the
-frame top.
+The popup is anchored to the frame top (offset by
+`my-lsp-signature-y-offset-lines'), so the fit is computed against the
+frame -- not just the current window.  In a vertical split with point
+in the bottom window, there is still room above as long as the top of
+the cursor's line sits below the popup's top offset + `:max-height' +
+2 lines of headroom.
 
 Conservative on height: assumes the popup will render at full
 `:max-height'.  Returns nil if point's screen position is unknown
@@ -84,7 +127,8 @@ Conservative on height: assumes the popup will render at full
              (char-h         (frame-char-height))
              (cursor-y       (+ window-body-top y-px))
              (needed-px      (* char-h
-                                (+ (plist-get my-lsp--signature-posframe-params
+                                (+ my-lsp-signature-y-offset-lines
+                                   (plist-get my-lsp--signature-posframe-params
                                               :max-height)
                                    2))))
         (>= cursor-y needed-px)))))
