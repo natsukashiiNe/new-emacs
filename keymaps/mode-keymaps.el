@@ -28,7 +28,8 @@
 (my-keymaps/define-submaps global-map
   (my-maps/compile-map    :prefix "C-c C"    :doc "My compilation map." :wk "[C]ompile")
   (my-maps/build-map      :prefix "C-c C-b"  :doc "My build map."       :wk "[B]uild")
-  (my-maps/diff-map       :prefix "C-c M-d"  :doc "My dif map."         :wk "[D]iff"))
+  (my-maps/diff-map       :prefix "C-c M-d"  :doc "My dif map."         :wk "[D]iff")
+  (my-maps/prefix-map     :prefix "C-c M-o"  :doc "My prefix map."      :wk "[P]refix"))
 
 (my-keymaps/add-submaps global-map
   (lsp-mode-map :after 'lsp-mode :prefix "C-c l"
@@ -78,6 +79,13 @@
 
 (evil-define-key 'insert global-map (kbd "C-SPC") #'completion-at-point)
 
+;; == Prefix ====================================================================
+
+(my-keymaps/populate my-maps/prefix-map
+  ("t" #'other-tab-prefix    "other [t]ab")
+  ("f" #'other-frame-prefix  "other [f]rame")
+  ("w" #'other-window-prefix "other [w]indow"))
+
 ;; ---- Isearch -----------------------------------------------------------------
 (keymap-set global-map "M-l"     #'isearch-forward)
 (keymap-set global-map "M-h"     #'isearch-backward)
@@ -112,11 +120,15 @@
   "l" #'display-line-numbers-mode
   "L" #'hl-line-mode
   "m" #'hide-mode-line-mode
-  "f t" #'toggle-frame-tab-bar)
+  "f t" #'toggle-frame-tab-bar
+  "p" #'my/show-startup-profile
+  "P" #'use-package-report)
 (keymap-set global-map "C-x i" my-interface-map)
 (which-key-add-keymap-based-replacements my-interface-map
   "f" "frame settigns"
-  "H" "hook toggles")
+  "H" "hook toggles"
+  "p" "startup profile (files)"
+  "P" "startup profile (packages)")
 
 (with-eval-after-load 'flymake-diagnostics
   (keymap-set my-interface-map "H f" #'my/evil-toggle-enter-insert-flymake-hook)
@@ -169,8 +181,9 @@
 
 ;; == QUICK LOCATIONS ===========================================================
 
+(keymap-global-unset "M-g")
 (my-keymaps/populate my-maps/quick-open
-  ("C-s" (li (my/project-switch-projectile 'dired)) "project [s]witch")
+  ("C-s" (li (my-project/switch-projectile 'dired)) "project [s]witch")
   ("M-d" #'devdocs-lookup "[d]ocs lookup")
   ;; (C-d is ego locations)
   :after persp-mode
@@ -401,8 +414,16 @@
   (evil-define-key 'normal org-mode-map
     (kbd "C-j") #'org-next-visible-heading
     (kbd "C-k") #'org-previous-visible-heading
-    (kbd "C-i") #'org-cycle
-    ))
+    (kbd "C-i") #'org-cycle)
+
+  (with-eval-after-load 'general
+    (general-define-key
+     :states 'normal
+     :keymaps 'org-mode-map
+     :prefix "SPC w"
+     ""  '(:ignore t :which-key "org")
+     "o" '(org-link-preview :which-key "preview link"))))
+
 
 ;; !! TODO REFACOTR ==
 ;;(keymap-set evil-insert-state-map "C-h" 'evil-delete-backward-char)

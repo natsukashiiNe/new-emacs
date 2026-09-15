@@ -23,7 +23,7 @@
 ;; Populate entries are always lists starting with a string key, so they
 ;; never collide with this test."
 (defun my-keymaps--state-token-p (x)
-  "Non-nil if X denotes an evil-state spec.
+  "Non-nil if X denotes an 'evil-state' spec.
 That is a quoted form (symbol or list) or a bare non-keyword symbol."
   (or (and (consp x) (eq (car x) 'quote))
       (and x (symbolp x) (not (keywordp x)))))
