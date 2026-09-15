@@ -168,7 +168,20 @@
 
 ;; Pop-up consult window
 
+;; == some completing-read help packages
 
+;; (use-package affe
+;;   :ensure t
+;;   :config
+;;   (defun affe-orderless-regexp-compiler (input _type _ignorecase)
+;;     (setq input (cdr (orderless-compile input)))
+;;     (cons input (apply-partially #'orderless--highlight input t)))
+;;   (setq affe-regexp-compiler #'affe-orderless-regexp-compiler)
+;;   :bind
+;;   (:map global-map
+;; 	("C-x C-f" . #'affe-find)
+;; 	:map project-prefix-map
+;; 	("f" . #'affe-find)))
 
 (provide 'completion-setup)
 ;;; completion-setup.el ends here

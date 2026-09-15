@@ -111,13 +111,6 @@
               " " (mode 16 16 :left :elide)
               " " filename-and-process)))
 
-;; TODO: possible move in the modes themselves
-(defun display-line-numbers--turn-on ()
-  "Turn on line numbers, but not in excluded modes."
-  (unless (or (minibufferp)
-              (derived-mode-p 'devdocs-mode))
-    (display-line-numbers-mode 1)))
-
 (setq auto-save-default t
       auto-save-timeout 20     ;; Auto-save after 20 seconds idle
       auto-save-interval 200)  ;; Auto-save after 200 keystrokes

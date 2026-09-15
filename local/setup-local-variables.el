@@ -23,6 +23,7 @@
         (:key "s"     :label "[s]torage")
 	(:key "S"     :path  "/storage/"                  :wk "[S]torage")
 	(:key "s v"   :path  "/storage/vids"              :wk "[v]ids")
+	(:key "s o"   :path  "/storage/vids/obs"          :wk "[o]bs")
 	(:key "s SPC" :path  "/storage/"                  :wk "[S]torage")
 
 	(:key "e"       :label "Emacs")

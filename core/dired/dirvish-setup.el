@@ -26,6 +26,7 @@
 
   ;; == GENERAL DIRVISH SETTINGS ========================================
 
+  (setq dired-mouse-drag-files t)
   (setq dirvish-use-mode-line nil)
   (setq dirvish-use-header-line nil)
   (setq dirvish-attributes '(file-size nerd-icons))

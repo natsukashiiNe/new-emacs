@@ -29,8 +29,7 @@
 	       (fh (frame-pixel-height frame)))
     (set-frame-position frame
 			(+ mx (max 0 (/ (- mw fw) 2)))
-			(+ my (max 0 (/ (- mh fh) 2)))))
-  )
+			(+ my (max 0 (/ (- mh fh) 2))))))
 
 (provide 'minibuffer-utils)
 ;;; minibuffer-utils.el ends here
