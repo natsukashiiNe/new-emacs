@@ -101,7 +101,7 @@
  `(cursor  ((t  (:background ,exu-orange-accent))))
  `(hl-line ((t  (:background "#222244" :extend t))))
  `(line-number-current-line ((t (:foreground "#FFFFFF" :background "#870000" :slant normal :weight normal))))
- `(show-paren-match ((t  (:foreground ,exu-black :background ,exu-yellow :extend t))))
+ `(show-paren-match ((t  (:background ,exu-bg-slate :foreground ,exu-slate-accent :weight bold :underline t))))
 
  `(cursor-insert  ((t  (:background "#ff8020"))))
  `(hl-line-insert ((t  (:background ,exu-bg-red :extend t))))
@@ -112,7 +112,7 @@
  `(fringe       ((t  (:background ,exu-black))))
 
  ;; DEFAULT AND UI
- `(avy-lead-face       ((t  (:foreground ,exu-black :background ,exu-cyan-accent :weight normal))))
+ `(avy-lead-face         ((t  (:foreground ,exu-black :background ,exu-cyan-accent :weight normal))))
  `(avy-lead-face-0       ((t  (:foreground ,exu-black :background ,exu-cyan-accent :weight normal))))
  `(avy-lead-face-1       ((t  (:foreground ,exu-black :background ,exu-cyan-accent :weight normal))))
  `(avy-lead-face-2       ((t  (:foreground ,exu-black :background ,exu-cyan-accent :weight normal))))
@@ -261,6 +261,15 @@
   				     :box (:line-width (1 . -1)
 						       :color "#3F7CAA"
 						       :style flat-button))))
+
+ `(flycheck-error-list-highlight  ((t ;;:foreground "#9BB84B"
+				    ;;:foreground "#4AB9C9"
+				    :weight bold
+				    :extend t
+				    :box (:line-width (2 . 2)
+						      ;;:color "#9BB84B"
+						      :color ,exu-white
+						      :style flat-button))))
 
  ;; --- GIT ----------------------------------------------------------------
  `(magit-diff-file-heading     ((t (:foreground ,exu-accent-weak :weight normal))))

@@ -174,6 +174,7 @@ duration into `my/config-load-times'."
 (load-config-file "apps/telega-setup.el")
 (load-config-file "apps/agent-shell-setup.el")
 (load-config-file "apps/minuet-ai-setup.el")
+(load-config-file "apps/gptel-setup.el")
 
 ;; TODO: fix:
 (load-config-file "refactor/general-keymaps.el")

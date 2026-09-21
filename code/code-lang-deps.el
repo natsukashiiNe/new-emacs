@@ -12,7 +12,19 @@
   :config
   ;; SLIME is only used for Python (via slime-py). Remove its lisp-mode hook
   ;; to avoid conflicting with SLY, which handles all other Lisp modes.
-  (remove-hook 'lisp-mode-hook 'slime-lisp-mode-hook))
+  (remove-hook 'lisp-mode-hook 'slime-lisp-mode-hook)
+  (require 'slime-breakpoints)
+  (require 'quicklisp-systems)
+  (require 'quicklisp-apropos)
+  (require 'slime-critic)
+  (require 'slime-help)
+  (require 'system-browser)
+  (require 'slime-star)
+  ;; SLIME's completion-at-point does a *synchronous* swank RPC per call.
+  (dolist (hook '(slime-mode-hook slime-repl-mode-hook))
+    (add-hook hook (lambda ()
+                     (setq-local corfu-auto-delay 0.3)
+                     (setq-local corfu-auto-prefix 2)))))
 
 ;; slime-star uses git submodules that Elpaca does not initialize.
 ;; Each submodule is installed as a separate package so its .el files

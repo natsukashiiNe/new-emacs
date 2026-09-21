@@ -76,6 +76,8 @@
 ;; TODO: now held by general
 (keymap-set global-map "C-S-l"   #'eval-expression)
 (keymap-set global-map "C-c E"   #'eplaca-log)
+(with-eval-after-load 'magit
+  (keymap-set project-prefix-map "G" #'magit-project-status))
 
 (evil-define-key 'insert global-map (kbd "C-SPC") #'completion-at-point)
 

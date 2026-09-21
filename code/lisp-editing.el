@@ -83,12 +83,12 @@
   :init
   ;; TODO: Move to the theme
   (defface my/hl-paren-innermost
-    '((t :background "#5C4800" :foreground "#D7AF00"))
+    '((t :background "#5C4800" :foreground "#D7AF00" :weight bold))
     "Innermost parenthesis in current scope."
     :group 'highlight-parentheses)
 
   (defface my/hl-paren-middle
-    '((t :foreground "#d75f00" ))
+    '((t :foreground "#d75f00"  :weight bold))
     "Middle parenthesis in current scope."
     :group 'highlight-parentheses)
 

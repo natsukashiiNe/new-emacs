@@ -8,7 +8,7 @@
 
 (setq ego-ql-locations my-local--ego-ql-locations)
 (setq ego-ql-global-prefix     "C-c L")
-(setq ego-ql-minibuffer-prefix "C-c L")
+(setq ego-ql-minibuffer-prefix "M-o")
 (setq ego-ql-dired-prefix      "M-f")
 
 (ego-ql-setup)

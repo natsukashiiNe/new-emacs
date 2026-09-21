@@ -19,6 +19,12 @@
   :ensure t
   :after shr
   :config
+  (evil-define-key 'normal shrface-mode-map
+    "gl"  #'shrface-links-consult
+    "go"  #'shrface-headline-consult
+    "C-j" #'shrface-next-headline
+    "C-k" #'shrface-previous-headline)
+  
   (shrface-basic)
   (shrface-trial)
   (setq shrface-href-versatile t)  ; different faces per link type
