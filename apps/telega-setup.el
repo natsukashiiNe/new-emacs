@@ -9,15 +9,32 @@
 (use-package telega
   :ensure t
   :defer t
-  :init
-  ;; TODO does not work!
-  ;; (defun my-telega-company-grab-emoji ()
-  ;;   "Modified version that allows completion with just ':'."
-  ;;   (let ((cg (company-grab "\\(?:^\\|[[:space:]]\\)\\(:[^: _]*\\)" 1
-  ;;                           (- (point) telega-emoji-candidate-max-length))))
-  ;;     (when cg (cons cg 0))))  ; NOTE: Changed to 0 to allow zero-length prefix
-
-  ;; Override the original function
+  :custom
+  ;; Names for reaction emoji missing from `etc/emojis.alist', so they
+  ;; get a `:name:' annotation in the Add Reaction picker instead of
+  ;; showing up bare. Many of these are the unqualified (no VS16)
+  ;; codepoint used by Telegram's reaction list, whose qualified
+  ;; sibling already has a name under a different key.
+  (telega-emoji-custom-alist
+   '((":heart-reaction:"       . "❤")
+     (":smiling-face-with-hearts:" . "🥰")
+     (":exploding-head:"       . "🤯")
+     (":cursing-face:"         . "🤬")
+     (":star-struck:"          . "🤩")
+     (":vomiting-face:"        . "🤮")
+     (":dove:"                 . "🕊")
+     (":yawning-face:"         . "🥱")
+     (":heart-on-fire:"        . "❤‍🔥")
+     (":frankfurter:"          . "🌭")
+     (":raised-eyebrow:"       . "🤨")
+     (":man-technologist:"     . "👨‍💻")
+     (":writing:"              . "✍")
+     (":saluting-face:"        . "🫡")
+     (":snowman-plain:"        . "☃")
+     (":zany-face:"            . "🤪")
+     (":moai:"                 . "🗿")
+     (":man-shrugging:"        . "🤷‍♂")
+     (":woman-shrugging:"      . "🤷‍♀")))
   :config
   (setq telega-emoji-use-images nil)
   (set-fontset-font t 'emoji "Noto Color Emoji" nil 'prepend)
@@ -25,29 +42,13 @@
   ;; Suppress telega compilation warnings
   (with-eval-after-load 'comp
     (add-to-list 'native-comp-jit-compilation-deny-list "telega-.*\\.el$"))
-
-  ;; overrides
-  ;; (advice-add 'telega-company-grab-emoji :override #'my-telega-company-grab-emoji)
   :hook
-
-  (;; (telega-load-hook . (l (telega-mode-line-mode 1)))
-   (telega-root-mode . (lambda () (display-line-numbers-mode -1)))
+  ((telega-root-mode . (lambda () (display-line-numbers-mode -1)))
    (telega-chat-mode . (lambda () (display-line-numbers-mode -1)))
-   (telega-chat-mode .
-                     (lambda ()
-                       (require 'telega-company nil t)
-                       (setq-local completion-at-point-functions
-				   (append
-				    (delq nil
-					  (mapcar (lambda (fn)
-						    (when (fboundp fn)
-						      (cape-capf-silent
-						       (cape-company-to-capf fn))))
-						  '(telega-company-botcmd
-						    telega-company-username
-						    telega-company-hashtag
-						    telega-company-emoji)))
-				    completion-at-point-functions))))))
+   ;; Native CAPF backends (telega-completions.el) replace the old
+   ;; company->capf bridging; `t' appends them ahead of whatever
+   ;; completion-at-point-functions chat buffers already had.
+   (telega-chat-mode . (lambda () (telega-completions-setup-capf t)))))
 
 ;;; Quick-access helpers
 
@@ -73,6 +74,22 @@
        msg (list :@type "reactionTypeCustomEmoji"
                  :custom_emoji_id custom-emoji-id)
        nil t))))
+
+(defun my/telega-reactions-missing-annotation ()
+  "Report which emoji in `telega-emoji-reaction-list' have no name.
+These are the ones that show up bare (no `:name:') in the
+Add Reaction picker, since `telega-emoji-name' does a plain
+string match against `telega-emoji-alist' (etc/emojis.alist)."
+  (interactive)
+  (unless telega-emoji-reaction-list
+    (user-error "telega-emoji-reaction-list is empty; open a chat first"))
+  (let ((missing (seq-remove #'telega-emoji-name telega-emoji-reaction-list)))
+    (with-help-window "*Telega Missing Reaction Annotations*"
+      (princ (format "%d/%d reactions have no annotation:\n\n"
+                     (length missing) (length telega-emoji-reaction-list)))
+      (dolist (e missing)
+        (princ (format "%s  (U+%s)\n" e
+                       (mapconcat (lambda (c) (format "%X" c)) e " ")))))))
 
 (defun my/telega-describe-pack (pack-name)
   "Show stickers in PACK-NAME with their indices and custom emoji IDs.
