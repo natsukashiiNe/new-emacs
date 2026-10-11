@@ -534,16 +534,14 @@
  ;; ===========================================================================
 
  (flycheck-error
-  :underline nil :weight bold
-  :dark  (:background err-bg)
+  :weight bold
+  :dark  (:underline (:color err-fg  :style wave :position -4))
   :light (:background err-bg))
  (flycheck-warning
-  :underline nil
-  :dark  (:background warn-bg)
+  :dark  (:underline (:color warn-fg :style wave :position -4))
   :light (:background warn-bg))
  (flycheck-info
-  :underline nil
-  :dark  (:background info-bg)
+  :dark  (:underline (:color info-fg :style wave :position -4))
   :light (:background info-bg))
 
  (flycheck-inline-error   :inherit diagnostics/inline-error)

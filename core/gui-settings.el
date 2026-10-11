@@ -11,7 +11,8 @@
 
 ;; == FRAME SETTINGS ======================================================
 
-(load-theme 'my-modus-mono-dark t)
+(require 'exmodus-faces)
+(my-theme/load "exmodus" 'dark)
 (set-face-attribute 'default nil :font "GoMono Nerd Font-21")
 (set-face-attribute 'variable-pitch nil :font "GoMono Nerd Font-20")
 
