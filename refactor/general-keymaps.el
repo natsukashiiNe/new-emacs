@@ -221,11 +221,14 @@ Each element in PROJECTS is a plist with :name, :persp, :path, and optional :mod
    "C-S-l" 'evil-window-right
 
    ;; TODO: move to special mode - that would replace modeline to indicate
-   "C-M-h" 'shrink-window-horizontally
-   "C-M-l" 'enlarge-window-horizontally
-   "C-M-j" 'enlarge-window
-   "C-M-k" 'shrink-window
-
+   ;; `:predicate' excludes the minibuffer so `C-M-j/k' instead reach
+   ;; `my/vertico-count-increment/decrement' (core/completion-setup.el)
+   ;; and `C-M-h/l' reach vertico's own bindings there.
+   "C-M-h" '(shrink-window-horizontally :predicate (not (minibufferp)))
+   "C-M-l" '(enlarge-window-horizontally :predicate (not (minibufferp)))
+   "C-M-j" '(enlarge-window :predicate (not (minibufferp)))
+   "C-M-k" '(shrink-window :predicate (not (minibufferp)))
+   
    ;;"M-t" 'elastic-perspective-toggle)
    "M-t" 'elastic-vterm-toggle)
 

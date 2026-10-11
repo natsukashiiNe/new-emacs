@@ -6,12 +6,14 @@
 ;;; Code:
 
 (use-package posframe
-  :ensure t)
+  :ensure t
+  :demand t)
 
 (use-package vertico-posframe
   :ensure t
+  :demand t
   :init
-  (defvar my-vertico-posframe/floating-count 20
+  (defvar my-vertico-posframe/floating-count 25
     "Number of vertico candidate to show in posframe mode")
   (defvar my-vertico-posframe/normal-count 12
     "Number of vertico candidate to show in posframe mode")
@@ -66,8 +68,6 @@
      (right-fringe . 8)
      ))
   :config
-  (setq vertico-count my-vertico-posframe/floating-count)
-
   (defun my/disable-vertico-posframe ()
     "Disable vertico-posframe for certain commands."
     (when (memq this-command my-vertico-posframe/disable-commands)
@@ -80,25 +80,51 @@
       (vertico-posframe-mode 1)
       (setq vertico-count my-vertico-posframe/floating-count)))
 
-  (add-hook 'minibuffer-setup-hook #'my/disable-vertico-posframe)
-  (add-hook 'minibuffer-exit-hook #'my/enable-vertico-posframe)
+  (define-minor-mode my/vertico-posframe-auto-toggle-mode
+    "Automatically disable `vertico-posframe-mode' for certain commands.
 
-  (vertico-posframe-mode 1))
+When enabled, `vertico-posframe-mode' is turned on with
+`my-vertico-posframe/floating-count' candidates, and commands in
+`my-vertico-posframe/disable-commands' temporarily fall back to the
+plain minibuffer until it exits. Disabling this mode is a clean
+switch back to the plain minibuffer: it removes the hooks, turns
+`vertico-posframe-mode' off, and resets `vertico-count' to
+`my-vertico-posframe/normal-count' — the default you'd get without
+this package at all."
+    :global t
+    (if my/vertico-posframe-auto-toggle-mode
+        (progn
+          (add-hook 'minibuffer-setup-hook #'my/disable-vertico-posframe)
+          (add-hook 'minibuffer-exit-hook #'my/enable-vertico-posframe)
+          (vertico-posframe-mode 1)
+          (setq vertico-count my-vertico-posframe/floating-count))
+      (remove-hook 'minibuffer-setup-hook #'my/disable-vertico-posframe)
+      (remove-hook 'minibuffer-exit-hook #'my/enable-vertico-posframe)
+      (vertico-posframe-mode -1)
+      (setq vertico-count my-vertico-posframe/normal-count)))
+
+  (my/vertico-posframe-auto-toggle-mode 1))
 
 ;; TODO: make it toggle
 (keymap-set minibuffer-mode-map "C-c C" (li (vertico-posframe-mode 'toggle)))
 
-(defun my/toggle-posframe-minibuffer-hooks ()
-  "Toggle vertico-posframe auto-disable/enable on minibuffer entry/exit."
-  (interactive)
-  (if (memq #'my/disable-vertico-posframe minibuffer-setup-hook)
-      (progn
-        (remove-hook 'minibuffer-setup-hook #'my/disable-vertico-posframe)
-        (remove-hook 'minibuffer-exit-hook #'my/enable-vertico-posframe)
-        (message "Posframe minibuffer hooks disabled"))
-    (add-hook 'minibuffer-setup-hook #'my/disable-vertico-posframe)
-    (add-hook 'minibuffer-exit-hook #'my/enable-vertico-posframe)
-    (message "Posframe minibuffer hooks enabled")))
+(defun my/posframe-release-surrogate-minibuffer (&optional frame &rest _)
+  "Delete any posframe child frame still borrowing FRAME's minibuffer window.
+
+Posframe caches its popup frame and only refreshes its `parent-frame'
+parameter on reuse, never `minibuffer' (set once at creation to the
+then-current parent's minibuffer window). Under the daemon, the single
+cached popup frame is shared by every client frame, so it can end up
+parented to one frame while still registered as surrogate minibuffer
+frame of another, which makes `delete-frame' on that other frame fail
+with \"Attempt to delete a surrogate minibuffer frame\"."
+  (let ((frame (or frame (selected-frame))))
+    (dolist (f (frame-list))
+      (when (and (frame-parameter f 'posframe-buffer)
+                 (eq (window-frame (minibuffer-window f)) frame))
+        (posframe-delete-frame (car (frame-parameter f 'posframe-buffer)))))))
+
+(advice-add 'delete-frame :before #'my/posframe-release-surrogate-minibuffer)
 
 (provide 'posframe-settings)
 ;;; posframe-settings ends here
