@@ -42,10 +42,16 @@
   (my-maps/block-edit       :prefix "C-c e"   :doc "Block/bracket editing."   :wk "Block-edit")
   (my-maps/quick-open       :prefix "M-g"     :doc "Quick access map."        :wk "Quick-locations")
   (my-maps/buffer-actions   :prefix "C-c B"   :doc "Actions for this buffer." :wk "[B]uffer actions")
+
   :evil-define 'normal
   (my-maps/multi-projects-map :prefix "M-w"
 			      :doc "Map to navigate between projects"
 			      :wd "Multi projects actions")
+
+  :populate 'normal
+  ("SPC p"   project-prefix-map        "[p]roject")
+  ("SPC M-o" elgo-quick-projects-map   "[o]pen project")
+
   :populate
   ("M-h"      #'isearch-backward  "isearch-backward")
   ("M-l"      #'isearch-forward   "isearch-forward")
@@ -64,6 +70,9 @@
 (evil-define-key '(insert visual) global-map
   (kbd "C-n") #'next-line
   (kbd "C-p") #'previous-line)
+
+(evil-define-key '(insert) global-map
+  (kbd "C-y") #'yank)
 
 ;; == Emacs-(almost)-build-in keymaps  ==========================================
 
@@ -256,7 +265,7 @@
 ;; == Multi-project (session) actions ===========================================
 ;; M-e in normal overwrites
 (my-keymaps/populate my-maps/multi-projects-map
-  ("M-w" #'switch-to-buffer)
+  ("M-w" #'consult-buffer)
   :after 'devdocs
   ("d" #'devdocs-lookup)
   ("C-d" #'devdocs-peruse))
