@@ -22,6 +22,12 @@
 
 (set-frame-parameter nil 'alpha '(92 . 92))
 
+(setq scroll-margin 0
+      maximum-scroll-margin 0.5
+      scroll-conservatively 101
+      ;; C-v / M-v preserves relative pos.
+      scroll-preserve-screen-position t)
+
 ;; == Performance ===============================================================
 
 (setq-default bidi-paragraph-direction 'left-to-right)
@@ -116,7 +122,7 @@
       auto-save-interval 200)  ;; Auto-save after 200 keystrokes
 
 (use-package which-key
-  :ensure t
+  :ensure nil ;; built into Emacs 31; avoids racing Elpaca's own clone/activation
   :demand t
   :config
   (setq which-key-idle-delay 0.250)

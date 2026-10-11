@@ -17,6 +17,15 @@
 
 (setq package-enable-at-startup nil)
 
+;; Arch's Emacs build is reproducible and leaves `emacs-build-time' nil, and
+;; Elpaca's hardcoded release-date table (`elpaca--emacs-releases') doesn't
+;; yet know about this Emacs version — either one alone makes Elpaca unable
+;; to compute `elpaca-core-date' and warn on every startup. Pre-binding it
+;; here short-circuits that defvar (defvar only applies its init value to an
+;; unbound symbol), so the warning never fires. Remove once Elpaca ships a
+;; release-date entry for this Emacs version.
+(defvar elpaca-core-date (list (string-to-number (format-time-string "%Y%m%d"))))
+
 (defvar elpaca-installer-version 0.12)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
@@ -104,6 +113,7 @@ duration into `my/config-load-times'."
 ;; ==================================
 
 (add-to-list 'custom-theme-load-path (expand-file-name "themes" my-config-dir))
+(add-to-list 'load-path (expand-file-name "themes"          my-config-dir))
 (add-to-list 'load-path (expand-file-name "org"             my-config-dir))
 (add-to-list 'load-path (expand-file-name "core"            my-config-dir))
 (add-to-list 'load-path (expand-file-name "core/dired"      my-config-dir))
@@ -155,8 +165,9 @@ duration into `my/config-load-times'."
 (load-config-file "code/docs-setup.el")       ;; Core lsp-mode + lsp-ui + formatting.
 (load-config-file "code/lisp-editing.el")     ;; TODO: actual lisp
 (load-config-file "code/git-settings.el")     ;; Core lsp-mode + lsp-ui + formatting.
-;; (load-config-file "code/flycheck-setup.el")   ;; OLD: Diagnostics display (flycheck + flyover).
-(load-config-file "code/flymake/test-flymake-setup.el")   ;; FLYMAKE built-in.
+(load-config-file "code/fringe-symbols-settings.el")   ;; Shared fringe-bitmap registry (flycheck + flymake).
+(load-config-file "code/flycheck-setup.el")   ;; Diagnostics display
+;; (load-config-file "code/flymake/test-flymake-setup.el")   ;; FLYMAKE built-in.
 (load-config-file "code/snippets-setup.el")   ;; code/snippets stores snippet files.
 (load-config-file "code/treesitter-setup.el")
 (load-config-file "code/code-utilities-setup.el")

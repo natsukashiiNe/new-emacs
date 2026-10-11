@@ -98,6 +98,14 @@
   :after (ghostel evil)
   :hook (ghostel-mode . evil-ghostel-mode))
 
+(use-package consult-ghostel
+  :ensure (:url "https://github.com/dakra/ghostel"
+		:files ("extensions/consult-ghostel/consult-ghostel.el"))
+  :after (ghostel consult)
+  ::hook (after-init . consult-ghostel-mode))
+
+
+
 ;; (use-package ghostel-compile
 ;; :hook (after-init . ghostel-compile-global-mode)
 
