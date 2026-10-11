@@ -63,11 +63,21 @@ as `telega-image-mode'."
     (user-error "%s not found on PATH" my/image-clipboard-program))
   (pcase-let* ((`(,file . ,cleanup) (my/image--current-file))
                (mime (my/image--mime-type file))
+               ;; xclip's default "-silent" mode double-forks and exits its
+               ;; original process to hold the selection in the background.
+               ;; Emacs spawns subprocesses via posix_spawn with
+               ;; POSIX_SPAWN_SETSID, so that forked child stays in the same
+               ;; new session/pgroup as the process Emacs is tracking; when
+               ;; Emacs reaps the exited parent, the kernel HUPs the whole
+               ;; group and kills the child that was supposed to persist and
+               ;; serve the clipboard. "-quiet" keeps xclip in the
+               ;; foreground so it never orphans that second process.
                (proc (make-process
                       :name "image-xclip"
                       :buffer nil
                       :noquery t
                       :command (list my/image-clipboard-program
+                                     "-quiet"
                                      "-selection" "clipboard"
                                      "-t" mime
                                      "-i" file)
@@ -90,6 +100,7 @@ as `telega-image-mode'."
                    :buffer nil
                    :noquery t
                    :command (list my/image-clipboard-program
+                                  "-quiet"
                                   "-selection" "clipboard"
                                   "-i"))))
         (process-send-string proc file)
