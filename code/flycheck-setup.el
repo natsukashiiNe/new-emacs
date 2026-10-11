@@ -14,71 +14,95 @@
 ;; FLYCHECK - Core Diagnostic Framework
 ;; =============================================================================
 (require 'lsp-utils-setup)
+(require 'fringe-symbols-settings)
 
 (use-package flycheck
   :ensure t
-  :init
-  ;; (global-flycheck-mode 1)
   :hook
-  (prog-mode . flycheck-mode)
-  :custom
-  (flycheck-indication-mode 'left-fringe)
+  (lsp-mode . flycheck-mode)
+  :init
+  (defvar my/flycheck-idle-change-delay-insert 5
+    "`flycheck-idle-change-delay' to use while in evil insert state.")
+
+  (defvar-local my/flycheck--idle-change-delay-orig nil
+    "Buffer-local `flycheck-idle-change-delay' saved before entering insert state.
+Non-nil only while the raised value from
+`my/flycheck-raise-idle-delay-on-insert' is in effect.")
+
+  (defun my/flycheck-raise-idle-delay-on-insert ()
+    "Raise `flycheck-idle-change-delay' to `my/flycheck-idle-change-delay-insert'
+for the duration of insert state.  Stashes the current buffer-local value so
+it can be restored by `my/flycheck-restore-idle-delay-on-insert-exit'."
+    (when (bound-and-true-p flycheck-mode)
+      (setq-local my/flycheck--idle-change-delay-orig flycheck-idle-change-delay)
+      (setq-local flycheck-idle-change-delay my/flycheck-idle-change-delay-insert)))
+
+  (defun my/flycheck-restore-idle-delay-on-insert-exit ()
+    "Restore `flycheck-idle-change-delay' saved on insert-state entry."
+    (when (and (bound-and-true-p flycheck-mode)
+               my/flycheck--idle-change-delay-orig)
+      (setq-local flycheck-idle-change-delay my/flycheck--idle-change-delay-orig)
+      (setq-local my/flycheck--idle-change-delay-orig nil)))
   :config
-  ;; Timing settings
-  (setq flycheck-idle-change-delay 0.1
-        flycheck-display-errors-delay 0.1
-        flycheck-check-syntax-automatically '(save mode-enabled idle-change)
-        flycheck-checker-error-threshold nil)
+
+  ;; == Check buffers ===========================================================
+  (setq flycheck-check-syntax-automatically '(idle-change idle-buffer-switch
+							  save mode-enabled new-line)
+	flycheck-idle-change-delay 1.75
+	flycheck-idle-buffer-switch-delay 2
+	flycheck-display-errors-delay 1)
+
+  (with-eval-after-load 'evil
+    (add-hook 'evil-insert-state-entry-hook #'my/flycheck-raise-idle-delay-on-insert)
+    (add-hook 'evil-insert-state-exit-hook #'my/flycheck-restore-idle-delay-on-insert-exit))
   
-  ;; Display settings (will be overridden by flycheck-inline)
-  (setq flycheck-display-errors-function nil)
+  ;; == See errors in buffers ===================================================
+  (setq flycheck-checker-error-threshold 2000)
+  (setq flycheck-highlighting-mode 'symbols ;; how to guess errors region
+	flycheck-highlighting-style         ;; how to hi when checker repors region
+	'(conditional 2	level-face (delimiters "" "")))
 
-  (define-fringe-bitmap 'my-flycheck-fringe-indicator
-    (vector
-     #b0000011111100000)
-    nil 16 '(top t))
+  (add-hook 'flycheck-mode-hook #'flycheck-annotate-mode)
+  (setq flycheck-annotate-current-line-style 'below
+	flycheck-annotate-other-lines-style  'sideline
+	;; `t' (not an explicit level list) so the filter also passes LSP
+	;; diagnostics that carry a tag (e.g. pyright's "unused" hints):
+	;; those get dynamically-generated levels like
+	;; `lsp-flycheck-info-unnecessary' (see
+	;; `lsp-diagnostics--flycheck-level'), which never `memq' into an
+	;; explicit '(error warning info) list.
+	flycheck-annotate-levels t
+	flycheck-annotate-current-line-levels t
+	flycheck-annotate-other-lines-levels '(error)
+	flycheck-annotate-suppress-echo t
+	flycheck-annotate-background nil
+	flycheck-annotate-fix-marker "[fix]" ;; TODO: flycheck-annotate-fix face
+	)
 
+  (setq flycheck-indication-mode 'auto)
+  ;; TODO: fixable fringe && margin:
+  ;; flycheck-fixable-indicator &&  flycheck-fixable-margin-str
   (flycheck-define-error-level 'error
     :severity 100
     :compilation-level 2
     :overlay-category 'flycheck-error-overlay
-    :fringe-bitmap 'my-flycheck-fringe-indicator
-    :fringe-face 'flycheck-fringe-error
+    :fringe-bitmap (my-fringe/bitmap 'diagnostics-error)
+    :fringe-face (my-fringe/face 'diagnostics-error)
     :error-list-face 'flycheck-error-list-error)
-
   (flycheck-define-error-level 'warning
     :severity 10
     :compilation-level 1
     :overlay-category 'flycheck-warning-overlay
-    :fringe-bitmap 'my-flycheck-fringe-indicator
-    :fringe-face 'flycheck-fringe-warning
+    :fringe-bitmap (my-fringe/bitmap 'diagnostics-warning)
+    :fringe-face (my-fringe/face 'diagnostics-warning)
     :error-list-face 'flycheck-error-list-warning)
-
   (flycheck-define-error-level 'info
     :severity 0
     :compilation-level 0
     :overlay-category 'flycheck-info-overlay
-    :fringe-bitmap 'my-flycheck-fringe-indicator
-    :fringe-face 'flycheck-fringe-info
+    :fringe-bitmap (my-fringe/bitmap 'diagnostics-info)
+    :fringe-face (my-fringe/face 'diagnostics-info)
     :error-list-face 'flycheck-error-list-info))
-
-;; ==== Using flymake to complement flycheck ====================================
-(defvar my-diagnostics/flymake-presents
-  '((default . (:indicator-type fringes
-				:fringe-indicator-position left-fringe
-				:mode-line-format (" " flymake-mode-line-title
-						   flymake-mode-line-exception
-						   flymake--mode-line-counters)
-				:show-eol t
-				:suppress-underlines nil
-				:suppress-flymake-proc nil))
-
-    (complement-flycheck . (:indicator-type nil
-					    :fringe-indicator-position nil
-					    :mode-line-format nil
-					    :show-eol t
-					    :suppress-underlines t
-					    :suppress-flymake-proc t))))
 
 
 ;; LSP integration - use flycheck as diagnostics provider
@@ -100,139 +124,6 @@
 		      :background nil
 		      :inherit 'default
 		      :extend t))
-
-;; =============================================================================
-;; FLYCHECK-INLINE - Inline Error Display
-;; =============================================================================
-
-(use-package flycheck-inline
-  :ensure t
-  :after flycheck
-  :hook (flycheck-mode . flycheck-inline-mode)
-  :config
-  ;; Configure inline display with quick-peek
-  (setq flycheck-inline-display-function
-	(lambda (msg pos err)
-	  (let* ((ov (quick-peek-overlay-ensure-at pos))
-		 (contents (quick-peek-overlay-contents ov)))
-	    (setf (quick-peek-overlay-contents ov)
-		  (concat contents (when contents "\n") msg))
-	    (quick-peek-update ov)))
-	
-	flycheck-inline-clear-function #'quick-peek-hide))
-
-;; =============================================================================
-;; FLYOVER - End-of-Line Diagnostic Display
-;; =============================================================================
-
-(use-package flyover
-  :ensure t
-  :after flycheck
-  :hook (flycheck-mode . flyover-mode)
-  :custom
-  (flyover-checkers '(flycheck))
-  (flyover-levels '(error warning info))
-
-  ;; Appearance
-  (flyover-info-icon " ")
-  (flyover-warning-icon " ")
-  (flyover-error-icon " ")
-
-  (flyover-border-style 'slant)
-  (flyover-border-match-icon t)
-
-  ;; Colors
-  (flyover-use-theme-colors t)
-  ;; Tinting: 'lighter, 'darker, or nil
-  (flyover-text-tint 'lighter)
-  (flyover-icon-tint 'lighter)
-  (flyover-icon-background-tint 'lighter)
-  (flyover-text-tint-percent 0)
-  (flyover-icon-tint-percent 0)
-  (flyover-icon-background-tint-percent 50)
-
-  ;; Display settings
-  (flyover-virtual-line-type nil)
-  (flyover-show-at-eol t)
-  (flyover-hide-dung-completion t)
-  (flyover-display-mode 'hide-at-exact-position)
-
-  ;; Sources settings
-  (flyover-hide-checker-name t)
-  (flyover-show-virtual-line nil)
-
-  (flyover-line-position-offset 1)
-
-  ;; Message wrapping
-  (flyover-wrap-messages t)
-  (flyover-max-line-length 80)
-
-  ;; Performance
-  (flyover-debounce-interval 0.2)
-  (flyover-cursor-debounce-interval 0.3)
-
-  ;; Completion integration
-  
-  :config
-  ;; Flyover's internal logic sometimes overrides face settings,
-  ;; (defun my/flyover-use-custom-faces (level)
-  ;;   "Get colors from flyover-* faces instead of base LEVEL (e/w/i) faces."
-  ;;   (let* ((face (pcase level
-  ;;                  ((or 'error "error") 'flyover-error)
-  ;;                  ((or 'warning "warning") 'flyover-warning)
-  ;;                  ((or 'info "info") 'flyover-info)
-  ;;                  (_ 'flyover-warning)))
-  ;;          (fg (face-attribute face :foreground nil t))
-  ;;          (bg (face-attribute face :background nil t))
-  ;;          (final-bg (if (eq bg 'unspecified)
-  ;; 			 (flyover--create-background-from-foreground fg
-  ;; 								     flyover-background-lightness)
-  ;;                      bg)))
-  ;;     (cons fg final-bg)))
-  ;; (advice-add 'flyover--get-face-colors :override #'my/flyover-use-custom-faces)
-  )
-
-;; =============================================================================
-;; EVIL INTEGRATION - Disable Inline Diagnostics in Insert State
-;; =============================================================================
-
-;; Track diagnostic mode state before entering insert state
-(defvar-local my/flycheck-inline-was-active nil
-  "Track if flycheck-inline was active before entering insert state.")
-
-(defvar-local my/flyover-was-active nil
-  "Track if flyover was active before entering insert state.")
-
-(defun my/disable-inline-errors-in-insert ()
-  "Disable flycheck-inline and flyover in insert state.
-Stores their previous state for restoration on exit."
-  (when (bound-and-true-p flycheck-mode)
-    ;; Store current state
-    (setq my/flycheck-inline-was-active (bound-and-true-p flycheck-inline-mode))
-    (setq my/flyover-was-active (bound-and-true-p flyover-mode))
-    
-    ;; Disable if active
-    (when my/flycheck-inline-was-active
-      (flycheck-inline-mode -1))
-    (when my/flyover-was-active
-      (flyover-mode -1))))
-
-(defun my/enable-inline-errors-on-exit ()
-  "Re-enable flycheck-inline and flyover when exiting insert state.
-Only re-enables if they were previously active."
-  (when (bound-and-true-p flycheck-mode)
-    ;; Restore previous state
-    (when (and my/flycheck-inline-was-active
-	       (not (bound-and-true-p flycheck-inline-mode)))
-      (flycheck-inline-mode 1))
-    (when (and my/flyover-was-active
-	       (not (bound-and-true-p flyover-mode)))
-      (flyover-mode 1))))
-
-;; Hook into Evil state changes
-(with-eval-after-load 'evil
-  (add-hook 'evil-insert-state-entry-hook #'my/disable-inline-errors-in-insert)
-  (add-hook 'evil-insert-state-exit-hook #'my/enable-inline-errors-on-exit))
 
 ;; =============================================================================
 ;; ADDITIONAL FLYCHECK CHECKERS
