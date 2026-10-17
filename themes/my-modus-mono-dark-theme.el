@@ -102,6 +102,9 @@
  `(hl-line ((t  (:background "#222244" :extend t))))
  `(line-number-current-line ((t (:foreground "#FFFFFF" :background "#870000" :slant normal :weight normal))))
  `(show-paren-match ((t  (:background ,exu-bg-slate :foreground ,exu-slate-accent :weight bold :underline t))))
+ `(hl-sexp-face          ((t (:background "#1c1c1c"))))
+ `(my/hl-paren-innermost ((t (:background "#5C4800" :foreground ,exu-yellow :weight bold))))
+ `(my/hl-paren-middle    ((t (:foreground ,exu-accent :weight bold))))
 
  `(cursor-insert  ((t  (:background "#ff8020"))))
  `(hl-line-insert ((t  (:background ,exu-bg-red :extend t))))

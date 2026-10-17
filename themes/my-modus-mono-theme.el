@@ -135,8 +135,8 @@
 					  :box (:line-width (-1 . 1) :color ,exu-black :style flat-button)))))
 
  ;; --- FONT-LOCK ---------------------------------------------------------------
- `(font-lock-function-name-face ((t  (:foreground ,exu-fg :slant ,exu-italic))))
- `(font-lock-function-call-face ((t  (:foreground ,exu-fg :slant ,exu-italic))))
+ `(font-lock-function-name-face ((t  (:foreground ,exu-fg :slant normal))))
+ `(font-lock-function-call-face ((t  (:foreground ,exu-fg :slant normal))))
  `(font-lock-builtin-face       ((t  (:foreground ,exu-blue :slant ,exu-italic))))
  `(font-lock-type-face          ((t  (:foreground ,exu-fg :weight ,exu-bold))))
  `(font-lock-variable-name-face ((t  (:foreground ,exu-fg))))
@@ -156,7 +156,7 @@
  ;; --- LSP FACES ---------------------------------------------------------------
  ;; TODO: light variant for symbol-overlay
  `(symbol-overlay-default-face ((t :background "#f6c3cf" :foreground unspecified :weight normal
-				   :box (:line-width (2 . -2) :color ,exu-black :style flat-button))))
+				   :box nil)))
 
  ;; TODO: light variant for lsp highlight (read/textual/write with visible bg)
  ;; `(lsp-face-highlight-textual ((t (:background ,exu-bg-dim1 :foreground unspecified :weight bold))))
@@ -232,7 +232,7 @@
 
  ;; --- DIRED -------------------------------------------------------------------
  ;; TODO: light variant for dirvish/dired
- ;; `(dirvish-hl-line   ((t (:foreground ,exu-bg :background ,exu-red :weight normal))))
+ `(dirvish-hl-line   ((t (:foreground ,exu-bg :background ,exu-red :weight normal))))
  `(dired-directory   ((t (:foreground ,exu-black :weight bold))))
  ;; `(dired-   ((t (:foreground ,exu-black :weight bold))))
  ;; `(dirvish-file-size ((t (:foreground ,exu-grey :weight normal))))
@@ -277,6 +277,7 @@
  `(org-table    ((t (:background ,exu-bg :foreground ,exu-fg))))
 
  `(org-level-1 ((t (:foreground ,exu-bg :background ,exu-red :weight bold :extend t))))
+ `(org-level-2 ((t (:foreground "#9B1B1B" :weight bold :extend t :underline nil))))
  
  `(org-indent ((t (:foreground ,exu-comment))))
  `(org-hide ((t (:foreground ,exu-comment))))
