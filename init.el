@@ -149,6 +149,7 @@ duration into `my/config-load-times'."
 (load-config-file "core/dired/dirvish-setup.el")
 (load-config-file "core/posframe-setup.el")
 (load-config-file "core/completion-setup.el")
+(load-config-file "custom/custom-consult/consult-buffer-by-mode.el")
 (load-config-file "core/session-settings.el")
 (load-config-file "core/autocomplete-settings.el")
 (load-config-file "core/better-built-in-modes.el")

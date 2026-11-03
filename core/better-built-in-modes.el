@@ -90,7 +90,29 @@
 ;; ghostty-lib based terminal emulator.
 (use-package ghostel
   :ensure t
-  :defer t);; TODO: Timer?
+  :defer t ;; TODO: Timer?
+  :config
+  (require 'consult-buffer-by-mode)
+
+  (defun my-ghostel--send-command (buffer command)
+    "Submit COMMAND as a shell command line in ghostel BUFFER.
+Pastes COMMAND and presses return, mirroring how a user would type and
+submit it.  Signals a `user-error' when BUFFER is busy running a command."
+    (with-current-buffer buffer
+      (when ghostel--command-running
+        (user-error "%s is busy running a command" (buffer-name buffer)))
+      (ghostel-paste-string command)
+      (ghostel-send-key "return")))
+
+  (defun my-ghostel/cd-pwd-here ()
+    "Send `cd' to this buffer's directory and `pwd' to an existing ghostel buffer.
+Picks the target buffer via `my-consult/buffer-by-mode', then replaces the
+current buffer with it."
+    (interactive)
+    (let ((dir default-directory)
+          (buffer (my-consult/buffer-by-mode 'ghostel-mode "Ghostel buffer: ")))
+      (my-ghostel--send-command buffer (format "cd %s && pwd" (shell-quote-argument dir)))
+      (switch-to-buffer buffer))))
 
 (use-package evil-ghostel
   :ensure (:url "https://github.com/dakra/ghostel"
@@ -102,7 +124,7 @@
   :ensure (:url "https://github.com/dakra/ghostel"
 		:files ("extensions/consult-ghostel/consult-ghostel.el"))
   :after (ghostel consult)
-  ::hook (after-init . consult-ghostel-mode))
+  :hook (after-init . consult-ghostel-mode))
 
 
 
